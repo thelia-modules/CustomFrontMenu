@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>{intl l='Update'}</h3>
+</div>
+{form name="customfrontmenu_update-item"}
+    <form method="POST" action="{url path="/admin/customfrontmenu/item/update" item_id=$ID}">
+        {form_hidden_fields}
+        <div class="modal-body">
+            {render_form_field field="text" value=$TEXT_LINK}
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove"></span>{intl l='Cancel'}</button>
+            <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-check"></span> {intl l='Update'}</button>
+        </div>
+
+    </form>
+{/form}

@@ -1,0 +1,107 @@
+{$menu_id = $smarty.get.menu_id}
+{$edit_language_id = $smarty.get.edit_language_id}
+
+<div class="general-block-decorator col-md-12">
+    <div class="row form-group">
+        <div class="col-md-3">
+            {form name="customfrontmenu_select-menu"}
+                <form action="{url path='/admin/CustomFrontMenu/menu/select'}" method="post">
+
+                    {form_hidden_fields form=$form}
+
+                    {form_field field='select_menu'}
+                        <select name="{$name}" class="form-control" onchange="this.form.submit()">
+                            {foreach $choices as $choice}
+                                <option value="{$choice->value}"
+                                        {if $menu_id == $choice->value}selected="selected"{/if}>{$choice->label}</option>
+                            {/foreach}
+                        </select>
+                    {/form_field}
+
+                </form>
+            {/form}
+        </div>
+        <div class="pull-right">
+            {include file='renderer/buttons.html' btn_group=false buttons=[
+                [
+                    'type' => 'create',
+                    'class' => 'action-btn',
+                    'title' => {intl l='Add a new menu' d='customfrontmenu.bo.default'},
+                    'href' => '#menu_creation_dialog',
+                    'data' => [
+                        'toggle' => 'modal'
+                    ]
+                ]
+            ]}
+            {if $menu_id && $menu_id != 0}
+                {include file='renderer/buttons.html' btn_group=false buttons=[
+                    [
+                        'type' => 'delete',
+                        'class' => 'action-btn',
+                        'title' => {intl l='Delete menu' d='customfrontmenu.bo.default'},
+                        'href' => '#menu_delete_dialog',
+                        'data' => [
+                            'toggle' => 'modal'
+                        ]
+                    ]
+                ]}
+            {/if}
+        </div>
+    </div>
+
+    {if $menu_id && $menu_id != 0}
+        <div class="row col-md-12">
+            <div class="col-md-3">
+                {include file= "customFrontMenu/includes/add_items.html"}
+            </div>
+            <div class="col-md-9">
+                {include
+                    file = "includes/inner-form-toolbar.html"
+                    hide_submit_buttons = true
+                }
+                {include file= "customFrontMenu/includes/update_menu.html"}
+            </div>
+        </div>
+    {/if}
+</div>
+
+
+{form name="customfrontmenu_add-menu"}
+    {capture "menu_creation_dialog"}
+
+        {form_hidden_fields form=$form}
+
+        {render_form_field field="menu_name"}
+    {/capture}
+
+    {include
+        file = "includes/generic-create-dialog.html"
+
+        dialog_id    = "menu_creation_dialog"
+        dialog_title = {intl l="Create a new menu" d="customfrontmenu.bo.default"}
+        dialog_body  = {$smarty.capture.menu_creation_dialog nofilter}
+
+        dialog_ok_label     = {intl l="Create this menu" d="customfrontmenu.bo.default"}
+
+        form_action        = {url path='/admin/CustomFrontMenu/menu/create'}
+        form_enctype       = {form_enctype}
+        form_error_message = $form_error_message
+    }
+{/form}
+
+{capture "menu_delete_dialog"}
+    <input type="hidden" name="variable_id" id="variable_delete_id" value="" />
+
+    {hook name="variable.delete-form" location="variable_delete_form" }
+
+{/capture}
+
+{include
+file = "includes/generic-confirm-dialog.html"
+
+dialog_id       = "menu_delete_dialog"
+dialog_title    = {intl l="Delete this menu"}
+dialog_message  = {intl l="Do you really want to delete this menu ?"}
+
+form_action         = {url path='/admin/customfrontmenu/menu/delete' menu_id=$menu_id}
+}

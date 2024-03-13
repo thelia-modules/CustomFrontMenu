@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <!--
+
+    if a /admin/module/customfrontmenu/ route is provided, a "Configuration" button will be displayed
+    for the module in the module list. Clicking this button will invoke this route.
+
+    <route id="my_route_id" path="/admin/module/customfrontmenu">
+        <default key="_controller">CustomFrontMenu\Full\Class\Name\Of\YourConfigurationController::methodName</default>
+    </route>
+
+    <route id="my_route_id" path="/admin/module/customfrontmenu/route-name">
+        <default key="_controller">CustomFrontMenu\Full\Class\Name\Of\YourAdminController::methodName</default>
+    </route>
+
+    <route id="my_route_id" path="/my/route/name">
+        <default key="_controller">CustomFrontMenu\Full\Class\Name\Of\YourOtherController::methodName</default>
+    </route>
+
+    ...add as many routes as required.
+
+    <route>
+    ...
+    </route>
+    -->
+    <route id="customfrontmenu.create-menu" path="/admin/CustomFrontMenu/menu/create">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::createAction</default>
+    </route>
+
+    <route id="customfrontmenu.select-menu" path="/admin/CustomFrontMenu/menu/select">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::selectAction</default>
+    </route>
+
+    <route id="customfrontmenu.delete-menu" path="/admin/customfrontmenu/menu/delete">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::deleteAction</default>
+    </route>
+
+    <route id="customfrontmenu.add-item" path="/admin/customfrontmenu/addItem">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::addItemAction</default>
+    </route>
+
+    <route id="customfrontmenu.update-item" path="/admin/customfrontmenu/item/update">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::updateItemAction</default>
+    </route>
+
+    <route id="customfrontmenu.update-position" path="/admin/customfrontmenu/item/update/position">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::updatePositionAction</default>
+    </route>
+
+    <route id="customfrontmenu.update-parent" path="/admin/customfrontmenu/item/update/parent">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::updateParentAction</default>
+    </route>
+
+    <route id="customfrontmenu.delete-item" path="/admin/customfrontmenu/item/delete">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::deleteItemAction</default>
+    </route>
+
+    <route id="customfrontmenu.get_menu" path="/admin/customfrontmenu/get/menu/{menu_name}">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::getMenuJsonAction</default>
+    </route>
+
+</routes>

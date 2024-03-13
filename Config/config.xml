@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="custom_front_menu_items" class="CustomFrontMenu\Loop\CustomFrontMenuItemsLoop" />
+    </loops>
+
+    <forms>
+        <form name="customfrontmenu_add-item" class="CustomFrontMenu\Form\AddItemForm" />
+        <form name="customfrontmenu_select-menu" class="CustomFrontMenu\Form\SelectMenuForm" />
+        <form name="customfrontmenu_add-menu" class="CustomFrontMenu\Form\AddMenuForm" />
+        <form name="customfrontmenu_update-item" class="CustomFrontMenu\Form\UpdateItemForm" />
+    </forms>
+
+    <commands>
+        <!--
+        <command class="CustomFrontMenu\Command\MySuperCommand" />
+        -->
+    </commands>
+
+    <!--
+    <services>
+
+    </services>
+    -->
+
+
+    <hooks>
+        <hook id="customfrontmenu.hook" class="CustomFrontMenu\Hook\HookManager">
+            <tag name="hook.event_listener" event="main.in-top-menu-items" type="back" method="onMainTopMenu" />
+            <tag name="hook.event_listener" event="module.config-js" type="back" method="insertionJS" />
+            <tag name="hook.event_listener" event="module.configuration" type="back" templates="render:customFrontMenu/module_configuration.html" />
+        </hook>
+    </hooks>
+
+
+    <!--
+    <exports>
+
+    </exports>
+    -->
+
+    <!--
+    <imports>
+
+    </imports>
+    -->
+</config>

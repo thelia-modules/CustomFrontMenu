@@ -1,0 +1,108 @@
+<div class="row">
+    <div class="col-md-12 title title-without-tabs">
+        {intl l='Menu' d='customfrontmenu.bo.default'}
+    </div>
+</div>
+{loop name="custom_front_menu_items_update" type="custom_front_menu_items" menu_id=$menu_id in_order=true lang_id=$edit_language_id}
+    {$item_id = $ID}
+    {$parent_id = $PARENT}
+    {$pagination = $DEPTH * 50}
+    <div class="col-md-12 ">
+        <div class="col-md-8 menu-item" style="margin-left: {$pagination}px">
+
+            <div class="col-md-3 item-title">
+                <div class="item-title">
+                    {$TEXT_LINK}
+                </div>
+                {if $TYPE !== "url"}
+                    <div class="item-subtitle">
+                        {$TYPE} : {$TYPE_NAME}
+                    </div>
+                {/if}
+            </div>
+
+            <div class="col-md-4">
+                <form action="{url path="/admin/customfrontmenu/item/update/parent" item_id=$ID}" method="post">
+
+                    <label for="parent{$ID}">{intl l='Parent' d='customfrontmenu.bo.default'}</label>
+
+                    <select name="parent{$ID}" id="parent{$ID}" class="form-control" onchange="this.form.submit()">
+                        <option value="0">{intl l="No parent" d='customfrontmenu.bo.default'}</option>
+                        {loop name="get_possible_parent_loop" type="custom_front_menu_items" possible_parent=$item_id}
+                            <option value="{$ID}" {if $ID == $parent_id}selected="selected"{/if}>{$TEXT_LINK}</option>
+                        {/loop}
+                    </select>
+
+                </form>
+            </div>
+
+            <div class="col-md-2">
+                <form action="{url path="/admin/customfrontmenu/item/update/position" item_id=$item_id}" method="post">
+                    <label for="position{$ID}">{intl l='Position' d='customfrontmenu.bo.default'}</label>
+                    <input type="number" name="position{$ID}" id="position{$ID}" class="form-control" value="{$POSITION}" onchange="this.form.submit()">
+                </form>
+            </div>
+
+            <div class="pull-right update-button col-md-2">
+                {include file='renderer/buttons.html' btn_group=false buttons=[
+                    [
+                        'type' => 'edit',
+                        'class' => 'action-btn',
+                        'title' => {intl l='Update item'},
+                        'href' => "#item_update_dialog{$ID}",
+                        'data' => [
+                            'toggle' => 'modal'
+                        ]
+                    ],
+                    [
+                        'type' => 'delete',
+                        'class' => 'action-btn',
+                        'title' => {intl l='Update item'},
+                        'href' => "#item_delete_dialog{$ID}",
+                        'data' => [
+                            'id' => $id,
+                            'toggle' => 'modal'
+                        ]
+                    ]
+                ]}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="item_update_dialog{$ID}" tabindex="-1">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                {include file= "customFrontMenu/includes/update_item_modal.html"}
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="item_delete_dialog{$ID}" tabindex="-1">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>{intl l='Delete link' d="customfrontmenu.bo.default"}</h3>
+                </div>
+
+                <form method="POST" action="{url path="/admin/customfrontmenu/item/delete" item_id=$ID}">
+                    <div class="modal-body">
+                        {intl l="Do you really want to delete this link ?" d='customfrontmenu.bo.default'}
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove"></span>{intl l='Cancel'}</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-check"></span> {intl l='Delete'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{/loop}

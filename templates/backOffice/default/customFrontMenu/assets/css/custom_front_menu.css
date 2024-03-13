@@ -1,0 +1,19 @@
+.menu-item{
+    border: lightgrey solid 1px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    padding: 5px;
+}
+.item-title{
+    transform: translateY(15%);
+    font-size: 16px;
+}
+
+.item-subtitle{
+    font-size: 12px;
+    color: #bdbdbd;
+}
+
+.update-button{
+    transform: translateY(40%);
+}

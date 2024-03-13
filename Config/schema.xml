@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../core/vendor/thelia/propel/resources/xsd/database.xsd" >
+
+    <table name="custom_front_menu_items" namespace="CustomFrontMenu\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="text_link" size="255" type="VARCHAR" />
+        <column name="type" type="VARCHAR" />
+        <column name="type_id" type="INTEGER" />
+        <column name="url" type="VARCHAR" />
+        <column name="locale" type="VARCHAR" />
+        <column name="parent" type="INTEGER" />
+        <column name="depth" type="INTEGER" />
+        <column name="position" type="INTEGER" />
+        <column name="menu" type="INTEGER" />
+
+    </table>
+
+    <table name="custom_front_menu" namespace="CustomFrontMenu\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="menu_name" required="true" size="255" type="VARCHAR" />
+        <unique name="name_REF">
+            <unique-column name="menu_name"/>
+        </unique>
+    </table>
+
+</database>

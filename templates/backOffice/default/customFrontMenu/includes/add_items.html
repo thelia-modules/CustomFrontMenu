@@ -1,0 +1,61 @@
+
+<div class="row">
+    <div class="col-md-12 title title-without-tabs">
+        {intl l='Add a new item to menu' d='customfrontmenu.bo.default'}
+    </div>
+</div>
+<div class="row">
+    {form name="customfrontmenu_add-item"}
+        <form action="{url path="/admin/customfrontmenu/addItem" menu_id=$menu_id lang_id=$edit_language_id}" method="post" >
+
+            {form_hidden_fields}
+
+            {if $form_error}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-danger">{$form_error_message}</div>
+                    </div>
+                </div>
+            {/if}
+
+            {render_form_field field="parent"}
+
+            {render_form_field field="type"}
+
+            <div class="hidden" id="url_page">
+                {render_form_field field="url"}
+            </div>
+
+            <div class="form-group" id="category_page">
+                {form_field field="categories"}
+                    <label for="{$name}">{$label}</label>
+                    <select name="{$name}" class="form-control">
+                        {loop name="get_categories_loop" type="category-tree" category="0" visible="*" product="0" return_url=true}
+                            <option value={$ID}>{option_offset l=$LEVEL+1 label={$TITLE}}</option>
+                        {/loop}
+                    </select>
+                {/form_field}
+            </div>
+
+            <div class="hidden form-group" id="product_page">
+                {render_form_field field="products"}
+            </div>
+
+            <div class="hidden form-group" id="content_page">
+                {render_form_field field="contents"}
+            </div>
+
+            <div class="hidden form-group" id="folder_page">
+                {render_form_field field="folders"}
+            </div>
+
+            <div class="hidden form-group" id="brand_page">
+                {render_form_field field="brands"}
+            </div>
+
+            {render_form_field field="text"}
+
+            <input type="submit" class="btn btn-success" value="{intl l='Add' d='customfrontmenu.bo.default'}">
+        </form>
+    {/form}
+</div>
