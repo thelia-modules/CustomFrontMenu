@@ -396,13 +396,15 @@ function drop(ev) {
         var dropIndicator = document.querySelector('.drop-indicator')
         dropIndicator.style.display = 'none'
 
-        var rect = ev.target.getBoundingClientRect()
+        var rect = ev.target.closest("div.item").getBoundingClientRect()
         var mouseY = ev.clientY - rect.top;
+        var mouseX = ev.clientX - rect.left;
 
         const insertionBefore = mouseY < rect.height / 2
+        const insertAsChild = mouseX > rect.width / 6
 
         // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
-        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore)
+        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
         if (problems == 0){
             console.log("success")
@@ -426,7 +428,7 @@ function drop(ev) {
 }
 
 
-function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
+function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insertAsChild) {
     if (draggedItemId === positionToInsert) {
         return 3
     }
@@ -454,6 +456,37 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
                 updateDepth(popedChild, popedChild.depth)
             }
         }
+        if (insertAsChild){
+            if (isParentOf(positionToInsert, draggedItemId)){
+                let [root, parentOfDragged] = findParentOf(draggedItemId, MENU_LIST)
+                if (root === 0){
+                    parentOfDragged = MENU_LIST
+                }
+                if (!parentOfDragged){
+                    return 1
+                }
+
+                return 2
+            }
+            let newParent = findMenuInList(positionToInsert, MENU_LIST)
+            if (newParent === null){
+                return 1
+            }
+
+            const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
+            console.log(draggedItem)
+
+            if (newParent.childrens == null){
+                newParent.childrens = [draggedItem]
+            }
+            else {
+                newParent.childrens.push(draggedItem)
+            }
+            draggedItem.depth = newParent.depth + 1
+            updateDepth(draggedItem, draggedItem.depth)
+            return 0
+        }
+            
         let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
 
         let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
@@ -472,7 +505,6 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
         updateDepth(menuToMove, menuToMove.depth)
         return 0
     }
-
     return null
 }
 
@@ -561,21 +593,27 @@ function allowDrop(ev) {
     ev.preventDefault();
 
     // recup position souris par rapport à elem cible
-    var rect = ev.target.getBoundingClientRect();
+    var rect = ev.target.closest("div.item").getBoundingClientRect();
     var mouseY = ev.clientY - rect.top;
-    // recup elem cible
+    var mouseX = ev.clientX - rect.left;
+
     try{
         var targetItem = ev.target.closest(".item").parentElement;
         // affiche barre au-dessus ou en dessous de l'élément cible
         var dropIndicator = document.querySelector('.drop-indicator');
 
-        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
-            dropIndicator.style.top = (targetItem.offsetTop - 4) + 'px'; // positionne la barre au-dessus de l'élément cible
-        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
-            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
-        }
         dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positionne la barre à gauche de l'élément cible
         dropIndicator.style.width = targetItem.offsetWidth + 'px'; // ajuste largeur barre à celle de l'elem cible
+
+        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
+            dropIndicator.style.top = targetItem.offsetTop + 'px'; // positionne la barre au-dessus de l'élément cible
+        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
+            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
+            if (mouseX > rect.width / 6) { // si la souris est à droite de l'elem cible
+                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
+                dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
+            }
+        }
 
         dropIndicator.style.display = 'block';
     }
@@ -657,6 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.onload = function() {
     MENU_LIST = getMenuList()
+    console.log(MENU_LIST)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
 }
