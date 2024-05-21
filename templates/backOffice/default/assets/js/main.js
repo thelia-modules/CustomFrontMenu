@@ -66,11 +66,11 @@ function setEditFields(id) {
 }
 
 function addCustomMenuItem(form, id="0") {
-    let [menuItemName, menuItemUrl] = getFormItems(form)
-    let element = findMenuInList(id, MENU_LIST)
-    let depthToAdd = 0
+    let [menuItemName, menuItemUrl] = getFormItems(form);
+    let element = findMenuInList(id, MENU_LIST);
+    let depthToAdd = 0;
     if (element !== null) {
-        depthToAdd = element.depth + 1
+        depthToAdd = element.depth + 1;
     }
     let newItem = {
         id: getNextId(),
@@ -78,14 +78,14 @@ function addCustomMenuItem(form, id="0") {
         url: menuItemUrl,
         depth: depthToAdd,
         childrens: []
-    }
-    let newMenu = generateMenuRecursive(newItem)
+    };
+    let newMenu = generateMenuRecursive(newItem);
     if (element === null) {
-        document.getElementById('menu-item-list').innerHTML += newMenu
-        MENU_LIST.push(newItem)
+        document.getElementById('menu-item-list').innerHTML += newMenu;
+        MENU_LIST.push(newItem);
     } else {
-        let childNodes = document.getElementById(id).parentNode.childNodes
-        let ulElement = null
+        let childNodes = document.getElementById(id).parentNode.childNodes;
+        let ulElement = null;
         for (let i = 0; i < childNodes.length; i++) {
             if (childNodes[i].nodeType === Node.ELEMENT_NODE && childNodes[i].classList.contains('menu-item')) {
                 ulElement = childNodes[i];
@@ -93,13 +93,26 @@ function addCustomMenuItem(form, id="0") {
             }
         }
         if (ulElement) {
-            ulElement.innerHTML += newMenu
-            MENU_LIST = addInList(id, newItem, MENU_LIST)
+            ulElement.innerHTML += newMenu;
+            MENU_LIST = addInList(id, newItem, MENU_LIST);
+
+            // Ajout de l'icône de sous-menu si elle n'existe pas déjà
+            let parentElement = document.getElementById(id).parentNode;
+            let titleContainer = parentElement.querySelector('.title-container');
+            if (titleContainer && !titleContainer.querySelector('.tree-icon')) {
+                let titleSpan = titleContainer.querySelector('[data-id="titleSpan"]');
+                if (titleSpan) {
+                    titleSpan.insertAdjacentHTML('afterend', '<span> <i class="fas fa-caret-down tree-icon"></i></span>');
+                }
+            }
         }
     }
-    deleteFormField(form)
-    generatePreviewMenus()
+    deleteFormField(form);
+    generatePreviewMenus();
+    updateArrowStyles();
 }
+
+
 
 function deleteFormField(formId) {
     let form = document.getElementById(formId)
@@ -208,8 +221,8 @@ function generateMenuRecursive(menuItem){
                 </a>
             </div>
             <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="fas fa-chevron-up menu-collapse"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="fas fa-chevron-down menu-collapse"></i></a>
+                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down"></i></a>
             </span>
         </div>
         <ul class="menu-item" style="`+ ((childrens) ? "display: block;" : "display: none;") +`">
@@ -217,6 +230,7 @@ function generateMenuRecursive(menuItem){
         </ul>
     </li>`
 
+    updateArrowStyles();
     return newMenu;
 }
 
@@ -228,6 +242,7 @@ function moveMenuUp(id) {
 
     MENU_LIST = moveMenuUpInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 
@@ -239,6 +254,7 @@ function moveMenuDown(id) {
 
     MENU_LIST = moveMenuDownInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 function findMenuInList(id, list) {
@@ -309,6 +325,7 @@ function generateMenu(list) {
     for (const menuItem of list){
         menu.innerHTML += generateMenuRecursive(menuItem)
     }
+    updateArrowStyles();
 }
 
 function getNextId() {
@@ -347,24 +364,28 @@ function getAllIdOf(list) {
 
 function toggleTopLevelVisibility() {
     const button = document.getElementById('toggle-all-childrens');
-    const isVisible = button.textContent === 'Hide all childrens';
+    const isVisible = button.textContent === 'Hide all children';
 
     MENU_LIST.forEach(item => {
         if (item.depth === 0) {
             const itemId = item.id.toString();
             const listItem = document.getElementById(itemId);
-            const childrenUl = listItem.nextElementSibling;
-            if (childrenUl && childrenUl.tagName === 'UL') {
-                childrenUl.style.display = isVisible ? 'none' : 'block';
-                const treeIcon = listItem.querySelector('.tree-icon');
-                treeIcon.classList.toggle('fa-caret-down', !isVisible);
-                treeIcon.classList.toggle('fa-caret-up', isVisible);
+            if (listItem) {
+                const childrenUl = listItem.parentElement.querySelector('ul');
+                if (childrenUl && childrenUl.tagName === 'UL') {
+                    childrenUl.style.display = isVisible ? 'none' : 'block';
+                    const treeIcon = listItem.querySelector('.tree-icon');
+                    if (treeIcon) {
+                        treeIcon.classList.toggle('fa-caret-down', !isVisible);
+                        treeIcon.classList.toggle('fa-caret-up', isVisible);
+                    }
+                }
             }
         }
     });
-
-    button.textContent = isVisible ? 'Show all childrens' : 'Hide all childrens';
+    button.textContent = isVisible ? 'Show all children' : 'Hide all children';
 }
+
 
 function toggleChildren(span, event) {
     if (event.target.closest('.priority-over-drop-and-down')) {
@@ -415,13 +436,15 @@ function drop(ev) {
         var dropIndicator = document.querySelector('.drop-indicator')
         dropIndicator.style.display = 'none'
 
-        var rect = ev.target.getBoundingClientRect()
+        var rect = ev.target.closest("div.item").getBoundingClientRect()
         var mouseY = ev.clientY - rect.top;
+        var mouseX = ev.clientX - rect.left;
 
         const insertionBefore = mouseY < rect.height / 2
+        const insertAsChild = mouseX > rect.width / 6
 
         // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
-        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore)
+        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
         if (problems == 0){
             console.log("success")
@@ -445,7 +468,7 @@ function drop(ev) {
 }
 
 
-function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
+function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insertAsChild) {
     if (draggedItemId === positionToInsert) {
         return 3
     }
@@ -461,41 +484,55 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
             }
 
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
-            console.log(draggedItem.childrens.length)
             while (draggedItem.childrens.length > 0){
                 let popedChild = draggedItem.childrens.pop()
                 if (root == 0){
-                    MENU_LIST.push(popedChild)
+                    MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 else {
-                    parentOfDragged.childrens.push(popedChild)
+                    parentOfDragged.childrens.splice(parentOfDragged.childrens.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 popedChild.depth = (root === 0) ? 0 : parentOfDragged.depth + 1
                 updateDepth(popedChild, popedChild.depth)
             }
-            return 2
         }
-        else {
-            let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
-
-            let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
-            if (menuToMove == null){
+        if (insertAsChild){
+            let newParent = findMenuInList(positionToInsert, MENU_LIST)
+            if (newParent === null){
                 return 1
             }
-            if (root === 0){
-                insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
-                menuToMove.depth = 0
+
+            const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
+
+            if (newParent.childrens == null){
+                newParent.childrens = [draggedItem]
             }
             else {
-                insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
-                menuToMove.depth = parent.depth + 1
+                newParent.childrens.push(draggedItem)
             }
-
-            updateDepth(menuToMove, menuToMove.depth)
+            draggedItem.depth = newParent.depth + 1
+            updateDepth(draggedItem, draggedItem.depth)
+            return 0
         }
+            
+        let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
+
+        let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
+        if (menuToMove == null){
+            return 1
+        }
+        if (root === 0){
+            insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
+            menuToMove.depth = 0
+        }
+        else {
+            insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
+            menuToMove.depth = parent.depth + 1
+        }
+
+        updateDepth(menuToMove, menuToMove.depth)
         return 0
     }
-
     return null
 }
 
@@ -584,21 +621,27 @@ function allowDrop(ev) {
     ev.preventDefault();
 
     // recup position souris par rapport à elem cible
-    var rect = ev.target.getBoundingClientRect();
+    var rect = ev.target.closest("div.item").getBoundingClientRect();
     var mouseY = ev.clientY - rect.top;
-    // recup elem cible
+    var mouseX = ev.clientX - rect.left;
+
     try{
         var targetItem = ev.target.closest(".item").parentElement;
         // affiche barre au-dessus ou en dessous de l'élément cible
         var dropIndicator = document.querySelector('.drop-indicator');
 
-        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
-            dropIndicator.style.top = (targetItem.offsetTop - 4) + 'px'; // positionne la barre au-dessus de l'élément cible
-        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
-            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
-        }
         dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positionne la barre à gauche de l'élément cible
         dropIndicator.style.width = targetItem.offsetWidth + 'px'; // ajuste largeur barre à celle de l'elem cible
+
+        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
+            dropIndicator.style.top = targetItem.offsetTop + 'px'; // positionne la barre au-dessus de l'élément cible
+        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
+            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
+            if (mouseX > rect.width / 6) { // si la souris est à droite de l'elem cible
+                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
+                dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
+            }
+        }
 
         dropIndicator.style.display = 'block';
     }
@@ -702,3 +745,30 @@ window.addEventListener('beforeunload', function(event) {
         //event.preventDefault();
     }
 }, { capture: true });
+
+
+function updateArrowStyles() {
+    const ulItems = document.querySelectorAll('.menu-item');
+
+    ulItems.forEach((ul) => {
+        const liItems = ul.querySelectorAll(':scope > li');
+        liItems.forEach((li, index) => {
+            const upArrow = li.querySelector('.leftArrow i');
+            const downArrow = li.querySelector('.rightArrow i');
+
+            if (upArrow) {
+                upArrow.classList.remove('end-arrow');
+            }
+            if (downArrow) {
+                downArrow.classList.remove('end-arrow');
+            }
+
+            if (index === 0 && upArrow) {
+                upArrow.classList.add('end-arrow');
+            }
+            if (index === liItems.length - 1 && downArrow) {
+                downArrow.classList.add('end-arrow');
+            }
+        });
+    });
+}
