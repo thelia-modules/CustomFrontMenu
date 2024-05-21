@@ -65,11 +65,11 @@ function setEditFields(id) {
 }
 
 function addCustomMenuItem(form, id="0") {
-    let [menuItemName, menuItemUrl] = getFormItems(form)
-    let element = findMenuInList(id, MENU_LIST)
-    let depthToAdd = 0
+    let [menuItemName, menuItemUrl] = getFormItems(form);
+    let element = findMenuInList(id, MENU_LIST);
+    let depthToAdd = 0;
     if (element !== null) {
-        depthToAdd = element.depth + 1
+        depthToAdd = element.depth + 1;
     }
     let newItem = {
         id: getNextId(),
@@ -77,14 +77,14 @@ function addCustomMenuItem(form, id="0") {
         url: menuItemUrl,
         depth: depthToAdd,
         childrens: []
-    }
-    let newMenu = generateMenuRecursive(newItem)
+    };
+    let newMenu = generateMenuRecursive(newItem);
     if (element === null) {
-        document.getElementById('menu-item-list').innerHTML += newMenu
-        MENU_LIST.push(newItem)
+        document.getElementById('menu-item-list').innerHTML += newMenu;
+        MENU_LIST.push(newItem);
     } else {
-        let childNodes = document.getElementById(id).parentNode.childNodes
-        let ulElement = null
+        let childNodes = document.getElementById(id).parentNode.childNodes;
+        let ulElement = null;
         for (let i = 0; i < childNodes.length; i++) {
             if (childNodes[i].nodeType === Node.ELEMENT_NODE && childNodes[i].classList.contains('menu-item')) {
                 ulElement = childNodes[i];
@@ -92,13 +92,25 @@ function addCustomMenuItem(form, id="0") {
             }
         }
         if (ulElement) {
-            ulElement.innerHTML += newMenu
-            MENU_LIST = addInList(id, newItem, MENU_LIST)
+            ulElement.innerHTML += newMenu;
+            MENU_LIST = addInList(id, newItem, MENU_LIST);
+
+            // Ajout de l'icône de sous-menu si elle n'existe pas déjà
+            let parentElement = document.getElementById(id).parentNode;
+            let titleContainer = parentElement.querySelector('.title-container');
+            if (titleContainer && !titleContainer.querySelector('.tree-icon')) {
+                let titleSpan = titleContainer.querySelector('[data-id="titleSpan"]');
+                if (titleSpan) {
+                    titleSpan.insertAdjacentHTML('afterend', '<span> <i class="fas fa-caret-down tree-icon"></i></span>');
+                }
+            }
         }
     }
-    deleteFormField(form)
-    generatePreviewMenus()
+    deleteFormField(form);
+    generatePreviewMenus();
 }
+
+
 
 function deleteFormField(formId) {
     let form = document.getElementById(formId)
@@ -334,18 +346,22 @@ function toggleTopLevelVisibility() {
         if (item.depth === 0) {
             const itemId = item.id.toString();
             const listItem = document.getElementById(itemId);
-            const childrenUl = listItem.nextElementSibling;
-            if (childrenUl && childrenUl.tagName === 'UL') {
-                childrenUl.style.display = isVisible ? 'none' : 'block';
-                const treeIcon = listItem.querySelector('.tree-icon');
-                treeIcon.classList.toggle('fa-caret-down', !isVisible);
-                treeIcon.classList.toggle('fa-caret-up', isVisible);
+            if (listItem) {
+                const childrenUl = listItem.parentElement.querySelector('ul');
+                if (childrenUl && childrenUl.tagName === 'UL') {
+                    childrenUl.style.display = isVisible ? 'none' : 'block';
+                    const treeIcon = listItem.querySelector('.tree-icon');
+                    if (treeIcon) {
+                        treeIcon.classList.toggle('fa-caret-down', !isVisible);
+                        treeIcon.classList.toggle('fa-caret-up', isVisible);
+                    }
+                }
             }
         }
     });
-
     button.textContent = isVisible ? 'Show all childrens' : 'Hide all childrens';
 }
+
 
 function toggleChildren(span, event) {
     if (event.target.closest('.priority-over-drop-and-down')) {
