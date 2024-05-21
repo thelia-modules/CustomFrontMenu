@@ -442,38 +442,34 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
             }
 
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
-            console.log(draggedItem.childrens.length)
             while (draggedItem.childrens.length > 0){
                 let popedChild = draggedItem.childrens.pop()
                 if (root == 0){
-                    MENU_LIST.push(popedChild)
+                    MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 else {
-                    parentOfDragged.childrens.push(popedChild)
+                    parentOfDragged.childrens.splice(parentOfDragged.childrens.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 popedChild.depth = (root === 0) ? 0 : parentOfDragged.depth + 1
                 updateDepth(popedChild, popedChild.depth)
             }
-            return 2
+        }
+        let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
+
+        let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
+        if (menuToMove == null){
+            return 1
+        }
+        if (root === 0){
+            insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
+            menuToMove.depth = 0
         }
         else {
-            let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
-
-            let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
-            if (menuToMove == null){
-                return 1
-            }
-            if (root === 0){
-                insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
-                menuToMove.depth = 0
-            }
-            else {
-                insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
-                menuToMove.depth = parent.depth + 1
-            }
-
-            updateDepth(menuToMove, menuToMove.depth)
+            insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
+            menuToMove.depth = parent.depth + 1
         }
+
+        updateDepth(menuToMove, menuToMove.depth)
         return 0
     }
 
