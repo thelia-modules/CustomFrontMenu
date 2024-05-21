@@ -130,11 +130,17 @@ class MenuController extends BaseAdminController
         $data = [];
 
         try {
-            $root = CustomFrontMenuItemQuery::create()->findRoot();
+            if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+                $root = new CustomFrontMenuItem();
+                $root->makeRoot();
+                $root->save();
+            } else {
+                $root = CustomFrontMenuItemQuery::create()->findRoot();
+            }
 
             $this->loadTableBrowser($data, $root);
         } catch (\Exception $e2) {
-            $this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
+            //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
 
         }
 
