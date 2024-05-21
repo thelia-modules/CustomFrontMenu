@@ -108,6 +108,7 @@ function addCustomMenuItem(form, id="0") {
     }
     deleteFormField(form);
     generatePreviewMenus();
+    updateArrowStyles();
 }
 
 
@@ -211,8 +212,8 @@ function generateMenuRecursive(menuItem){
                 </a>
             </div>
             <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="fas fa-chevron-up menu-collapse"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="fas fa-chevron-down menu-collapse"></i></a>
+                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down"></i></a>
             </span>
         </div>
         <ul class="menu-item" style="`+ ((childrens) ? "display: block;" : "display: none;") +`">
@@ -220,6 +221,7 @@ function generateMenuRecursive(menuItem){
         </ul>
     </li>`
 
+    updateArrowStyles();
     return newMenu;
 }
 
@@ -231,6 +233,7 @@ function moveMenuUp(id) {
 
     MENU_LIST = moveMenuUpInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 
@@ -242,6 +245,7 @@ function moveMenuDown(id) {
 
     MENU_LIST = moveMenuDownInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 function findMenuInList(id, list) {
@@ -302,6 +306,7 @@ function generateMenu(list) {
     for (const menuItem of list){
         menu.innerHTML += generateMenuRecursive(menuItem)
     }
+    updateArrowStyles();
 }
 
 function getNextId() {
@@ -340,7 +345,7 @@ function getAllIdOf(list) {
 
 function toggleTopLevelVisibility() {
     const button = document.getElementById('toggle-all-childrens');
-    const isVisible = button.textContent === 'Hide all childrens';
+    const isVisible = button.textContent === 'Hide all children';
 
     MENU_LIST.forEach(item => {
         if (item.depth === 0) {
@@ -359,7 +364,7 @@ function toggleTopLevelVisibility() {
             }
         }
     });
-    button.textContent = isVisible ? 'Show all childrens' : 'Hide all childrens';
+    button.textContent = isVisible ? 'Show all children' : 'Hide all children';
 }
 
 
@@ -689,3 +694,30 @@ window.addEventListener('beforeunload', function(event) {
         event.preventDefault();
     }
 }, { capture: true });
+
+
+function updateArrowStyles() {
+    const ulItems = document.querySelectorAll('.menu-item');
+
+    ulItems.forEach((ul) => {
+        const liItems = ul.querySelectorAll(':scope > li');
+        liItems.forEach((li, index) => {
+            const upArrow = li.querySelector('.leftArrow i');
+            const downArrow = li.querySelector('.rightArrow i');
+
+            if (upArrow) {
+                upArrow.classList.remove('end-arrow');
+            }
+            if (downArrow) {
+                downArrow.classList.remove('end-arrow');
+            }
+
+            if (index === 0 && upArrow) {
+                upArrow.classList.add('end-arrow');
+            }
+            if (index === liItems.length - 1 && downArrow) {
+                downArrow.classList.add('end-arrow');
+            }
+        });
+    });
+}
