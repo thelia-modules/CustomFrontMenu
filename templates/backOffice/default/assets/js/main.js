@@ -634,6 +634,7 @@ function generatePreviewMenuRecursive(menuItem){
 // ------------------------------ End Preview ------------------------------
 
 function saveData() {
+    allowUnload = true
     const menuListJSON = JSON.stringify(MENU_LIST);
     document.getElementById('menuData').value = menuListJSON;
     document.getElementById('savedData').submit();
@@ -680,3 +681,11 @@ window.onload = function() {
     generateMenu(MENU_LIST)
     generatePreviewMenus()
 }
+
+let allowUnload = false;
+
+window.addEventListener('beforeunload', function(event) {
+    if (!allowUnload) {
+        event.preventDefault();
+    }
+}, { capture: true });
