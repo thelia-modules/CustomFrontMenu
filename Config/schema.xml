@@ -3,15 +3,19 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="../../../../vendor/thelia-modules/propel/resources/xsd/database.xsd" >
 
-    <table name="custom_front_menu" namespace="CustomFrontMenu\Model">
+    <table name="custom_front_menu_item" namespace="CustomFrontMenu\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <behavior name="nested_set" />
     </table>
 
-    <table name="custom_front_menu_child" namespace="CustomFrontMenu\Model">
+    <table name="custom_front_menu_content" namespace="CustomFrontMenu\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
-        <column name="menu_id" required="true" type="INTEGER"/>
-        <foreign-key foreignTable="custom_front_menu">
-            <reference local="menu_id" foreign="id"/>
+        <column name="title" required="true" size="55" type="VARCHAR"/>
+        <column name="url" size="100" type="VARCHAR"/>
+
+        <column name="menu_item" required="true" type="INTEGER"/>
+        <foreign-key foreignTable="custom_front_menu_item">
+            <reference local="menu_item" foreign="id"/>
         </foreign-key>
     </table>
 

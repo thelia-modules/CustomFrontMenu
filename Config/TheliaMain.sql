@@ -4,32 +4,37 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ---------------------------------------------------------------------
--- custom_front_menu_child
+-- custom_front_menu_item
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `custom_front_menu_child`;
+DROP TABLE IF EXISTS `custom_front_menu_item`;
 
-CREATE TABLE `custom_front_menu_child`
+CREATE TABLE `custom_front_menu_item`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `menu_id` INTEGER NOT NULL,
-    PRIMARY KEY (`id`),
-    INDEX `custom_front_menu_child_fi_100111` (`menu_id`),
-    CONSTRAINT `custom_front_menu_child_fk_100111`
-        FOREIGN KEY (`menu_id`)
-        REFERENCES `custom_front_menu` (`id`)
+    `tree_left` INTEGER,
+    `tree_right` INTEGER,
+    `tree_level` INTEGER,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- custom_front_menu
+-- custom_front_menu_content
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `custom_front_menu`;
+DROP TABLE IF EXISTS `custom_front_menu_content`;
 
-CREATE TABLE `custom_front_menu`
+CREATE TABLE `custom_front_menu_content`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY (`id`)
+    `title` VARCHAR(55) NOT NULL,
+    `url` VARCHAR(100),
+    `menu_item` INTEGER NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `custom_front_menu_content_fi_d26e96` (`menu_item`),
+    CONSTRAINT `custom_front_menu_content_fk_d26e96`
+        FOREIGN KEY (`menu_item`)
+        REFERENCES `custom_front_menu_item` (`id`)
 ) ENGINE=InnoDB;
 
 # This restores the fkey checks, after having unset them earlier

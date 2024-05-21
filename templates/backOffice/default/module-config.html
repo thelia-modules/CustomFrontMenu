@@ -21,6 +21,13 @@
             </div>
         {/foreach}
     {/if}
+    {if isset($smarty.session["_symfony_flashes"]["fail"])}
+        {foreach $smarty.session["_symfony_flashes"]["fail"] as $message}
+            <div id='alert-flash' class="alert alert-danger">
+                {$message}
+            </div>
+        {/foreach}
+    {/if}
 
     <div id="preview-menu">
         <h3>Preview menu</h3>

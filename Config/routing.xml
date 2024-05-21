@@ -28,6 +28,10 @@
     </route>
     -->
 
+    <route id="customfrontmenu.admin.responseform" path="/admin/module/CustomFrontMenu/save" methods="post">
+        <default key="_controller">CustomFrontMenu\Controller\MenuController::saveMenuItems</default>
+    </route>
+
     <route id="customfrontmenu.get_menu" path="/admin/customfrontmenu/get/menu/{menu_name}">
         <default key="_controller">CustomFrontMenu\Controller\MenuController::getMenuJsonAction</default>
     </route>
