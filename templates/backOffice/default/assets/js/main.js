@@ -457,24 +457,12 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
             }
         }
         if (insertAsChild){
-            if (isParentOf(positionToInsert, draggedItemId)){
-                let [root, parentOfDragged] = findParentOf(draggedItemId, MENU_LIST)
-                if (root === 0){
-                    parentOfDragged = MENU_LIST
-                }
-                if (!parentOfDragged){
-                    return 1
-                }
-
-                return 2
-            }
             let newParent = findMenuInList(positionToInsert, MENU_LIST)
             if (newParent === null){
                 return 1
             }
 
             const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
-            console.log(draggedItem)
 
             if (newParent.childrens == null){
                 newParent.childrens = [draggedItem]
@@ -695,7 +683,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.onload = function() {
     MENU_LIST = getMenuList()
-    console.log(MENU_LIST)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
 }
