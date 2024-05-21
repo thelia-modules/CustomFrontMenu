@@ -61,7 +61,6 @@
 li {
     list-style: none;
     align-items: center;
-
 }
 
 ul.menu-item:last-child {
@@ -99,8 +98,8 @@ ul.menu-item:last-child {
 }
 
 .arrows{
-    font-size: 180%;
-    width: 60px;
+    font-size: 120%;
+    width: 50px;
 }
 
 .zero-depth {
@@ -111,8 +110,8 @@ ul.menu-item:last-child {
     background-color: #f9f9f9;
 }
 
-.no-sibling-arrow {
-    color: red;
+.end-arrow {
+    color: #ccc;
 }
 
 /* ------------------------------ End item ------------------------------ */
