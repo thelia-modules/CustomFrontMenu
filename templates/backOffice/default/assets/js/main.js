@@ -1,4 +1,5 @@
 var MENU_LIST
+var MENU_NAMES
 let CURRENT_ID = null
 
 function getCurrentId() {
@@ -112,6 +113,14 @@ function getMenuList(){
         .find((row) => row.startsWith("menuItems="))
         ?.split("=")[1]);
     return JSON.parse(jsonMenuList);
+}
+
+function getMenuNames(){
+    const jsonMenuNames = decodeURIComponent(document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("menuNames="))
+        ?.split("=")[1]);
+    return JSON.parse(jsonMenuNames);
 }
 
 function deleteMenuItem(id) {
@@ -282,6 +291,16 @@ function moveMenuDownInList(id, list) {
         }
     }
     return list
+}
+
+function generateSelect(list) {
+    let menu = document.getElementById('selectMenuName')
+    menu.innerHTML = ""
+    for (const menuName of list){
+        let option = document.createElement('option');
+        option.text = menuName;
+        menu.appendChild(option);
+    }
 }
 
 function generateMenu(list) {
@@ -624,6 +643,14 @@ function saveData() {
     document.getElementById('savedData').submit();
 }
 
+function addMenu() {
+    document.getElementById('addMenuForm').submit();
+}
+
+function deleteMenu() {
+    document.getElementById('deleteForm').submit();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Function to remove flash messages from the DOM
     function removeFlashMessages() {
@@ -661,7 +688,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.onload = function() {
+    MENU_NAMES = getMenuNames()
     MENU_LIST = getMenuList()
+    generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
 }
@@ -670,6 +699,6 @@ let allowUnload = false;
 
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
-        event.preventDefault();
+        //event.preventDefault();
     }
 }, { capture: true });

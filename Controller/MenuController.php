@@ -42,14 +42,7 @@ class MenuController extends BaseAdminController
             CustomFrontMenuContentQuery::create()->deleteAll();
             CustomFrontMenuItemQuery::create()->deleteAll();
 
-            if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
-                $root = new CustomFrontMenuItem();
-                $root->makeRoot();
-                $root->save();
-            } else {
-                $root = CustomFrontMenuItemQuery::create()->findRoot();
-            }
-
+            $root = $this->getRoot();
 
             $this->saveTableBrowser($dataArray, $root);
 
@@ -112,6 +105,66 @@ class MenuController extends BaseAdminController
         }
     }
 
+     /**
+     * Load the different menu names
+     * @throws PropelException
+     */
+    public function loadSelectMenu() : array
+    {
+        $root = $this->getRoot();
+        $descendants = $root->getChildren();
+        foreach ($descendants as $descendant) {
+            $content = CustomFrontMenuContentQuery::create()->findByMenuItem($descendant->getId());
+            $dataArray[] = $content->getColumnValues('title')[0];
+        }
+        return $dataArray;
+    }
+
+    /**
+     * 
+     * @Route("/admin/module/CustomFrontMenu/add", name="admin.addmenu", methods={"POST"})
+     */
+    public function addMenu(Request $request) : RedirectResponse
+    {
+        $this->getSession()->getFlashBag()->add('fail', 'Not implemented yet');
+        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        $menuName = $request->get('menuName');
+        $root = $this->getRoot();
+        $item = new CustomFrontMenuItem();
+        $item->insertAsLastChildOf($root);
+        $item->save();
+        $content = new CustomFrontMenuContent();
+        $content->setTitle($menuName);
+        $content->setMenuItem($item->getId());
+        $content->save();
+    }
+
+    /**
+     * 
+     * @Route("/admin/module/CustomFrontMenu/delete", name="admin.deletemenu", methods={"POST"})
+     */
+    public function deleteMenu(Request $request) : RedirectResponse
+    {
+        $this->getSession()->getFlashBag()->add('fail', 'Not implemented yet');
+        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+    }
+
+    /**
+     * Return the menu root from the database.
+     * If this root doesn't exist, it's created.
+     */
+    private function getRoot() : CustomFrontMenuItem
+    {
+        if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+            $root = new CustomFrontMenuItem();
+            $root->makeRoot();
+            $root->save();
+        } else {
+            $root = CustomFrontMenuItemQuery::create()->findRoot();
+        }
+        return $root;
+    }
+
     /**
      * Clear all flashes
      * @Route("/admin/module/CustomFrontMenu/clearFlashes", name="admin.clearflashes", methods={"GET"})
@@ -130,13 +183,7 @@ class MenuController extends BaseAdminController
         $data = [];
 
         try {
-            if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
-                $root = new CustomFrontMenuItem();
-                $root->makeRoot();
-                $root->save();
-            } else {
-                $root = CustomFrontMenuItemQuery::create()->findRoot();
-            }
+            $root = $this->getRoot();
 
             $this->loadTableBrowser($data, $root);
         } catch (\Exception $e2) {
@@ -144,8 +191,17 @@ class MenuController extends BaseAdminController
 
         }
 
-        $dataToLoad = json_encode($data);
+        try {
+            $menuNames = $this->loadSelectMenu();
+        } catch (\Exception $e3) {
+            //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
 
+        }
+
+        $namesToLoad = json_encode($menuNames);
+        setcookie('menuNames', $namesToLoad);
+
+        $dataToLoad = json_encode($data);
         setcookie('menuItems', $dataToLoad);
     }
 }

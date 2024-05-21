@@ -1,19 +1,17 @@
 
 <div class="general-block-decorator">
     <div class="top">
-        <select class="btn selectMenu">
-            <option>--Menu to modify--</option>
-            <option>menu 1</option>
-            <option>menu 2</option>
-            <option>menu 3</option>
-        </select>
-        <button id="toggle-all-childrens" class="btn" onclick="toggleTopLevelVisibility()">Hide all childrens</button>
-        <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
-            Add a new parent
-            <i class="glyphicon glyphicon-plus-sign"></i>
-        </button>
-    </div>
+        <select id="selectMenuName" class="btn selectMenu">
 
+        </select>
+        <button data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
+        <button data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
+    </div>
+    <button id="toggle-all-childrens" class="btn" onclick="toggleTopLevelVisibility()">Hide all childrens</button>
+    <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
+        Add a new parent
+        <i class="glyphicon glyphicon-plus-sign"></i>
+    </button>
     {if isset($smarty.session["_symfony_flashes"]["success"])}
         {foreach $smarty.session["_symfony_flashes"]["success"] as $message}
             <div id='alert-flash' class="alert alert-success">
@@ -172,6 +170,54 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="allowUnload = true ; location.reload()"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add a menu -->
+<div class="modal fade" id="ConfirmAddMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add a new menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Add a new menu</p>
+                <form id="addMenuForm" action="{url path="/admin/module/CustomFrontMenu/add"}" method="POST">
+                    <label for="menuName">Menu name</label>
+                    <input type="text" id="menuName" name="menuName"><br><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()">Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete the current menu -->
+<div class="modal fade" id="ConfirmDeleteMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Delete Menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Delete this menu ?</p>
+                <form id="deleteForm" action="{url path="/admin/module/CustomFrontMenu/delete"}" method="POST">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
