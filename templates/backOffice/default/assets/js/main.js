@@ -412,13 +412,15 @@ function drop(ev) {
         var dropIndicator = document.querySelector('.drop-indicator')
         dropIndicator.style.display = 'none'
 
-        var rect = ev.target.getBoundingClientRect()
+        var rect = ev.target.closest("div.item").getBoundingClientRect()
         var mouseY = ev.clientY - rect.top;
+        var mouseX = ev.clientX - rect.left;
 
         const insertionBefore = mouseY < rect.height / 2
+        const insertAsChild = mouseX > rect.width / 6
 
         // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
-        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore)
+        const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
         if (problems == 0){
             console.log("success")
@@ -442,7 +444,7 @@ function drop(ev) {
 }
 
 
-function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
+function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insertAsChild) {
     if (draggedItemId === positionToInsert) {
         return 3
     }
@@ -458,41 +460,55 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore) {
             }
 
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
-            console.log(draggedItem.childrens.length)
             while (draggedItem.childrens.length > 0){
                 let popedChild = draggedItem.childrens.pop()
                 if (root == 0){
-                    MENU_LIST.push(popedChild)
+                    MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 else {
-                    parentOfDragged.childrens.push(popedChild)
+                    parentOfDragged.childrens.splice(parentOfDragged.childrens.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 popedChild.depth = (root === 0) ? 0 : parentOfDragged.depth + 1
                 updateDepth(popedChild, popedChild.depth)
             }
-            return 2
         }
-        else {
-            let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
-
-            let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
-            if (menuToMove == null){
+        if (insertAsChild){
+            let newParent = findMenuInList(positionToInsert, MENU_LIST)
+            if (newParent === null){
                 return 1
             }
-            if (root === 0){
-                insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
-                menuToMove.depth = 0
+
+            const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
+
+            if (newParent.childrens == null){
+                newParent.childrens = [draggedItem]
             }
             else {
-                insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
-                menuToMove.depth = parent.depth + 1
+                newParent.childrens.push(draggedItem)
             }
-
-            updateDepth(menuToMove, menuToMove.depth)
+            draggedItem.depth = newParent.depth + 1
+            updateDepth(draggedItem, draggedItem.depth)
+            return 0
         }
+            
+        let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
+
+        let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
+        if (menuToMove == null){
+            return 1
+        }
+        if (root === 0){
+            insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
+            menuToMove.depth = 0
+        }
+        else {
+            insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
+            menuToMove.depth = parent.depth + 1
+        }
+
+        updateDepth(menuToMove, menuToMove.depth)
         return 0
     }
-
     return null
 }
 
@@ -581,21 +597,27 @@ function allowDrop(ev) {
     ev.preventDefault();
 
     // recup position souris par rapport à elem cible
-    var rect = ev.target.getBoundingClientRect();
+    var rect = ev.target.closest("div.item").getBoundingClientRect();
     var mouseY = ev.clientY - rect.top;
-    // recup elem cible
+    var mouseX = ev.clientX - rect.left;
+
     try{
         var targetItem = ev.target.closest(".item").parentElement;
         // affiche barre au-dessus ou en dessous de l'élément cible
         var dropIndicator = document.querySelector('.drop-indicator');
 
-        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
-            dropIndicator.style.top = (targetItem.offsetTop - 4) + 'px'; // positionne la barre au-dessus de l'élément cible
-        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
-            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
-        }
         dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positionne la barre à gauche de l'élément cible
         dropIndicator.style.width = targetItem.offsetWidth + 'px'; // ajuste largeur barre à celle de l'elem cible
+
+        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
+            dropIndicator.style.top = targetItem.offsetTop + 'px'; // positionne la barre au-dessus de l'élément cible
+        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
+            dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
+            if (mouseX > rect.width / 6) { // si la souris est à droite de l'elem cible
+                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
+                dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
+            }
+        }
 
         dropIndicator.style.display = 'block';
     }
