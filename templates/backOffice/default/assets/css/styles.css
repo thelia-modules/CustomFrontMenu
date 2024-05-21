@@ -110,6 +110,11 @@ ul.menu-item:last-child {
 .even-depth{
     background-color: #f9f9f9;
 }
+
+.no-sibling-arrow {
+    color: red;
+}
+
 /* ------------------------------ End item ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */

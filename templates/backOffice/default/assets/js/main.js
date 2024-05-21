@@ -108,6 +108,7 @@ function addCustomMenuItem(form, id="0") {
     }
     deleteFormField(form);
     generatePreviewMenus();
+    updateArrowStyles();
 }
 
 
@@ -220,6 +221,7 @@ function generateMenuRecursive(menuItem){
         </ul>
     </li>`
 
+    updateArrowStyles();
     return newMenu;
 }
 
@@ -231,6 +233,7 @@ function moveMenuUp(id) {
 
     MENU_LIST = moveMenuUpInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 
@@ -242,6 +245,7 @@ function moveMenuDown(id) {
 
     MENU_LIST = moveMenuDownInList(id, MENU_LIST)
     generatePreviewMenus()
+    updateArrowStyles();
 }
 
 function findMenuInList(id, list) {
@@ -302,6 +306,7 @@ function generateMenu(list) {
     for (const menuItem of list){
         menu.innerHTML += generateMenuRecursive(menuItem)
     }
+    updateArrowStyles();
 }
 
 function getNextId() {
@@ -679,4 +684,24 @@ window.onload = function() {
     MENU_LIST = getMenuList()
     generateMenu(MENU_LIST)
     generatePreviewMenus()
+}
+
+function updateArrowStyles() {
+    const items = document.querySelectorAll('.menu-item > li');
+    items.forEach((item, index) => {
+        const upArrow = item.querySelector('.leftArrow i');
+        const downArrow = item.querySelector('.rightArrow i');
+
+        // Remove previous styles
+        upArrow.classList.remove('no-sibling-arrow');
+        downArrow.classList.remove('no-sibling-arrow');
+
+        // Add styles based on position
+        if (index === 0) {
+            upArrow.classList.add('no-sibling-arrow');
+        }
+        if (index === items.length - 1) {
+            downArrow.classList.add('no-sibling-arrow');
+        }
+    });
 }
