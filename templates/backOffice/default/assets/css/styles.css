@@ -1,0 +1,195 @@
+/* ------------------------------ Begin style of module config ------------------------------ */
+
+.top {
+    margin-bottom: 3%;
+    justify-content: space-between;
+}
+
+.top .btn {
+    margin-left: auto;
+}
+
+.top #toggle-all-childrens{
+    margin-left: 1%;
+    transition: all 0.3s;
+}
+
+.top #toggle-all-childrens:hover{
+    background-color: #ccc;
+}
+
+.selectMenu, #toggle-all-childrens{
+    border-radius: 10px;
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.add-parent-btn{
+    float: right;
+    border-radius: 10px;
+}
+
+.menu{
+    margin: 0 5% 0 5%;
+    padding-left: 0;
+    flex-direction: column;
+}
+
+.bottom {
+    width: 100%;
+    text-align: right;
+    margin-top: 3%;
+}
+
+.bottom button{
+    border-radius: 10px;
+}
+
+/* ------------------------------ End style of module config ------------------------------ */
+
+/* ------------------------------ Begin style of menu item ------------------------------ */
+
+.item {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 5px 10px 5px 10px;
+    border-bottom: 1px solid #ccc;
+    align-items: center;
+}
+
+li {
+    list-style: none;
+    align-items: center;
+
+}
+
+ul.menu-item:last-child {
+    border-bottom: none;
+}
+
+#menu-item-list{
+    padding-left: 0;
+}
+
+.btn-group {
+    margin: 0 30px 0 3%;
+}
+
+.title-container{
+    flex: 1;
+    cursor: pointer;
+}
+
+.drag-and-drop-icon {
+    font-size: 150%;
+    margin-right: 3%;
+    cursor:move;  /*grab, move, row-resize*/
+}
+
+.leftArrow {
+    float: left;
+    cursor: pointer;
+}
+
+.rightArrow {
+    float: right;
+    cursor: pointer;
+
+}
+
+.arrows{
+    font-size: 180%;
+    width: 60px;
+}
+
+.zero-depth {
+    background-color: #f2f2f2;
+}
+
+.even-depth{
+    background-color: #f9f9f9;
+}
+/* ------------------------------ End item ------------------------------ */
+
+/* ------------------------------ Begin drop down ------------------------------ */
+
+.drop-indicator {
+    position: absolute;
+    height: 4px;
+    background-color: black;
+    opacity: 50%;
+}
+/* ------------------------------ End drop down ------------------------------ */
+
+/* ------------------------------ Begin preview ------------------------------ */
+
+#preview-menu {
+    width: 100%;
+    margin: 3% 0;
+    border: rgba(200, 0, 0, 0.2) 1px solid;
+
+    h3 {
+        margin: 1%;
+    }
+
+    #menus {
+        display: flex;
+        flex-direction: row;
+        background-color: #f5f5f5;
+        padding: 0 2%;
+    }
+    
+    .parent {
+        display: none;
+        position: absolute;
+        background-color: #f5f5f5;
+        width: fit-content;
+        left: 0;
+        z-index: 1;
+        box-shadow: 5px 5px 5px grey;
+    }
+    
+    .deep {
+        display: none;
+        position: absolute;
+        background-color: #f5f5f5;
+        top: 0;
+        z-index: 1;
+        left: 100%;
+    }
+    
+    li {
+        position: relative;
+        padding: 10px 15px;
+    }
+    
+    li:hover>.parent {
+        display: block;
+    }
+    
+    li:hover>.deep {
+        display: block;
+    }
+
+    li:hover {
+        background-color: #f49a17;
+    }
+
+    li:hover>a {
+        color: #fff;
+    }
+    
+    a {
+        text-decoration: none;
+        color: #7a7a7a;
+        white-space:nowrap;
+        font-family: 'Open Sans',sans-serif;
+    }
+    
+    ul {
+        padding: 0;
+    }
+    /* ------------------------------ End preview ------------------------------ */
+
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="TheliaMain"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../../vendor/thelia-modules/propel/resources/xsd/database.xsd" >
+
+    <table name="custom_front_menu" namespace="CustomFrontMenu\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+    </table>
+
+    <table name="custom_front_menu_child" namespace="CustomFrontMenu\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="menu_id" required="true" type="INTEGER"/>
+        <foreign-key foreignTable="custom_front_menu">
+            <reference local="menu_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+</database>

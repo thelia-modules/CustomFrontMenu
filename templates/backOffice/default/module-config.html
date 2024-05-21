@@ -1,0 +1,150 @@
+
+<div class="general-block-decorator">
+    <div class="top">
+        <select class="btn selectMenu">
+            <option>--Menu to modify--</option>
+            <option>menu 1</option>
+            <option>menu 2</option>
+            <option>menu 3</option>
+        </select>
+        <button id="toggle-all-childrens" class="btn" onclick="toggleTopLevelVisibility()">Hide all childrens</button>
+        <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
+            Add a new parent
+            <i class="glyphicon glyphicon-plus-sign"></i>
+        </button>
+    </div>
+
+    {if isset($smarty.session["_symfony_flashes"]["success"])}
+        {foreach $smarty.session["_symfony_flashes"]["success"] as $message}
+            <div id='alert-flash' class="alert alert-success">
+                {$message}
+            </div>
+        {/foreach}
+    {/if}
+
+    <div id="preview-menu">
+        <h3>Preview menu</h3>
+
+        <ul id="menus">
+
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="menu">
+            <ul class="menu-item depth-0" id="menu-item-list"></ul>
+        </div>
+        <div class="drop-indicator" style="display: none;"></div>
+        <form id="savedData" action="{url path="/admin/module/CustomFrontMenu/save"}" method="POST" style="display:none;">
+            <input type="hidden" name="menuData" id="menuData">
+        </form>
+    </div>
+
+    <div id="save-div" class="bottom">
+        <button class="btn btn-success btn-responsive" id="save-menu" onclick="saveData()">Save</button>
+        <button class="btn btn-danger btn-responsive" id="discard-change-menu" onclick="location.reload()">Discard changes</button>
+    </div>
+</div>
+
+<!-- Modal -->
+<!-- Add and edit Parent Modal -->
+<div class="modal fade" id="AddAndEditMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add/Edit menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Add a new menu item</p>
+                <form id="newParentForm">
+                    <label for="menuItemName">Menu name</label>
+                    <input type="text" id="menuItemName" name="menuItemName"><br><br>
+                    <label for="menuItemUrl">Target URL</label>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Menu Item Modal -->
+<div class="modal fade" id="EditMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Edit a menu item</p>
+                <form id="editMenuItemForm">
+                    <label for="menuItemName">Menu name</label>
+                    <input type="text" id="menuItemName" name="menuItemName"><br><br>
+                    <label for="menuItemUrl">Target URL</label>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span> Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add and edit Menu Item Modal -->
+<div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add/Edit menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Add a new menu item</p>
+                <form id="addMenuItemForm">
+                    <label for="menuItemName">Menu name</label>
+                    <input type="text" id="menuItemName" name="menuItemName"><br><br>
+                    <label for="menuItemUrl">Target URL</label>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span>  Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Menu Item Modal -->
+<div class="modal fade" id="DeleteMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Delete menu</h4>
+            </div>
+            <div class="modal-body">
+                <p>Delete this menu item ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenuItem(getCurrentId())"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
