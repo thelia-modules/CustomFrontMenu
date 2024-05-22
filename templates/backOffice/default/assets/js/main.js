@@ -1,5 +1,6 @@
 var MENU_LIST
 var MENU_NAMES
+let CURRENT_SELECTED_MENU_ID
 let CURRENT_ID = null
 
 function getCurrentId() {
@@ -68,7 +69,7 @@ function setEditFields(id) {
 function addCustomMenuItem(form, id="0") {
     let [menuItemName, menuItemUrl] = getFormItems(form);
     let element = findMenuInList(id, MENU_LIST);
-    let depthToAdd = 0;
+    let depthToAdd = 1;
     if (element !== null) {
         depthToAdd = element.depth + 1;
     }
@@ -134,6 +135,17 @@ function getMenuNames(){
         .find((row) => row.startsWith("menuNames="))
         ?.split("=")[1]);
     return JSON.parse(jsonMenuNames);
+}
+
+function getCurrentMenuId(){
+    const jsonMenuId = decodeURIComponent(document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("currentMenuId="))
+        ?.split("=")[1]);
+    if (jsonMenuId) {
+        return jsonMenuId
+    }
+    return JSON.parse(jsonMenuId);
 }
 
 function deleteMenuItem(id) {
@@ -314,7 +326,8 @@ function generateSelect(list) {
     menu.innerHTML = ""
     for (const menuName of list){
         let option = document.createElement('option');
-        option.text = menuName;
+        option.text = menuName.title;
+        option.id = menuName.id;
         menu.appendChild(option);
     }
 }
@@ -327,6 +340,17 @@ function generateMenu(list) {
     }
     updateArrowStyles();
 }
+
+function addSelectedMenuIdToForm(formName, inputName) {
+    document.getElementById(formName).elements[inputName].value = CURRENT_SELECTED_MENU_ID
+}
+
+document.getElementById('selectMenuName').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+
+    document.getElementById('menuId').value = selectedOption.id;
+    document.getElementById('askedMenu').submit();
+});
 
 function getNextId() {
     let nextId = 1
@@ -697,8 +721,8 @@ function deleteMenu() {
 document.addEventListener('DOMContentLoaded', function() {
     // Function to remove flash messages from the DOM
     function removeFlashMessages() {
-        const flashMessages = document.querySelectorAll('.alert');
-        flashMessages.forEach(function(message) {
+        const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
+        Array.from(flashMessages).forEach(function(message) {
             message.remove();
         });
     }
@@ -722,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add a click event listener to the document
     document.addEventListener('click', function(event) {
-        if (document.getElementById('alert-flash')) {
+        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
             removeFlashMessages();
             clearFlashMessagesOnServer();
         }
@@ -733,9 +757,11 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onload = function() {
     MENU_NAMES = getMenuNames()
     MENU_LIST = getMenuList()
+    CURRENT_SELECTED_MENU_ID = getCurrentMenuId()
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
+    addSelectedMenuIdToForm('deleteForm', 'menuNameToDelete')
 }
 
 let allowUnload = false;
