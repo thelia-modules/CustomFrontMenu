@@ -743,3 +743,35 @@ function updateArrowStyles() {
         });
     });
 }
+/*
+var products = [
+    { "title": "Product 1", "ref": "111", "url":"1aa.com" },
+    { "title": "Product 2", "ref": "222", "url":"2bb.com"},
+    { "title": "Product 3", "ref": "333", "url":"3cc.com"},
+    { "title": "Raplapla 1", "ref": "444", "url":"4dd.com" },
+    { "title": "Raplapla 2", "ref": "555", "url":"5EE.com" },
+    { "title": "Raplapla 3", "ref": "666", "url":"6ff.com" },
+    { "title": "Pere noel", "ref": "777", "url":"7gg.com" },
+    { "title": "girafe", "ref": "888", "url":"8hh.com" }
+];
+*/
+
+function searchProducts(query) {
+    const matchingProducts = document.getElementById('matchingProducts');
+    matchingProducts.innerHTML = '';
+
+    if (query.trim() === '') return;
+
+    const filteredProducts = products.filter(product =>
+        product.title.toLowerCase().includes(query.toLowerCase())
+    );
+
+    filteredProducts.forEach(product => {
+        const li = document.createElement('li');
+        li.textContent = `${product.title} (${product.ref})`;
+        li.addEventListener('click', () => {
+            document.getElementById('menuItemUrl').value = product.url;
+        });
+        matchingProducts.appendChild(li);
+    });
+}
