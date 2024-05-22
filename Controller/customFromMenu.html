@@ -1,0 +1,76 @@
+{function name=printMenu}
+    {foreach $menuItems as $menuItem}
+        <li>
+            <a href="{$menuItem.url}">{$menuItem.title}</a>
+            <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
+                {if isset($menuItem.childrens)}
+                    {call name=printMenu menuItems=$menuItem.childrens}
+                {/if}
+            </ul>
+        </li>
+    {/foreach}
+{/function}
+
+
+<nav id="CustomFrontMenu" class="navbar navbar-default nav-main" role="navigation" itemtype="http://schema.org/SiteNavigationElement">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-categories">
+                {call name=printMenu menuItems=$menuItems}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+    #CustomFrontMenu {
+        z-index: 100000;
+
+        .child>li{
+            list-style-type: none;
+            position: relative;
+            padding: 15px;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: #707070;
+            text-wrap: nowrap;
+        }
+
+        li {
+            animation: all .3s ease-in-out;
+        }
+
+        .child {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        li:hover {
+            background-color: #f49a17;
+        }
+
+        li:hover > a {
+            color: white;
+        }
+
+        .deep {
+            top: 0;
+            left: 100%;
+        }
+
+        li:hover > .child {
+            display: block;
+        }
+
+    }
+</style>
