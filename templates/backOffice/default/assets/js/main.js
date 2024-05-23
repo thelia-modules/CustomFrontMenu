@@ -773,8 +773,8 @@ function updateArrowStyles() {
     });
 }
 
-function searchProducts(query) {
-    const matchingProducts = document.getElementById('matchingProducts');
+function searchProducts(query, formId) {
+    const matchingProducts = document.querySelector(`#${formId} ~ ul`);
     matchingProducts.innerHTML = '';
 
     if (query.trim() === '') return;
@@ -787,7 +787,7 @@ function searchProducts(query) {
         const li = document.createElement('li');
         li.textContent = `${product.title} (${product.ref})`;
         li.addEventListener('click', () => {
-            document.getElementById('menuItemUrl').value = product.url;
+            document.querySelector(`#${formId} input[name="menuItemUrl"]`).value = product.url;
         });
         matchingProducts.appendChild(li);
     });

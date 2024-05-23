@@ -59,7 +59,6 @@
 <!-- Add and edit Parent Modal -->
 <div class="modal fade" id="AddAndEditMenu" role="dialog">
     <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -72,11 +71,10 @@
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value)"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'newParentForm')"><br><br>
                 </form>
-                <ul id="matchingProducts">
+                <ul id="matchingProductsParent">
                 </ul>
-
                 <script>
                     var products = [];
                 </script>
@@ -85,7 +83,6 @@
                     var temporary = `{$TITLE} ({$REF}) {$URL}`
                     var regex = /(.+) \((\w+)\) (.+)/g;
                     var match;
-
                     while ((match = regex.exec(temporary)) !== null) {
                         var title = match[1].trim();
                         var ref = match[2].trim();
@@ -96,7 +93,6 @@
                 </script>
                 {/loop}
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')">Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">Close</button>
@@ -135,7 +131,6 @@
 <!-- Add and edit Menu Item Modal -->
 <div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
     <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -148,11 +143,30 @@
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'addMenuItemForm')"><br><br>
                 </form>
+                <ul id="matchingProductsSecondary">
+                </ul>
+                <script>
+                    var products = [];
+                </script>
+                {loop type="product" name="my_product_loop"}
+                <script>
+                    var temporary = `{$TITLE} ({$REF}) {$URL}`
+                    var regex = /(.+) \((\w+)\) (.+)/g;
+                    var match;
+                    while ((match = regex.exec(temporary)) !== null) {
+                        var title = match[1].trim();
+                        var ref = match[2].trim();
+                        var url = match[3].trim();
+                        var product = { title: title, ref: ref, url: url };
+                        products.push(product);
+                    }
+                </script>
+                {/loop}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span>  Save</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">Close</button>
             </div>
         </div>
