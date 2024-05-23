@@ -693,12 +693,13 @@ function generatePreviewMenuRecursive(menuItem){
     }
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     let newMenu = `
-    <li>
-        <a>`+menuItem.title+`</a>
-        <ul class="`+classes+`">
-            `+childrens+`
-        </ul>
-    </li>`
+        <li>
+            <a>`+menuItem.title+`</a>
+            <ul class="`+classes+`">
+                `+childrens+`
+            </ul>
+        </li>
+    `
     return newMenu;
 }
 
