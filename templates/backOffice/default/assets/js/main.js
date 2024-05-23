@@ -678,6 +678,53 @@ function generatePreviewMenuRecursive(menuItem){
 
 // ------------------------------ End Preview ------------------------------
 
+
+function updateArrowStyles() {
+    const ulItems = document.querySelectorAll('.menu-item');
+
+    ulItems.forEach((ul) => {
+        const liItems = ul.querySelectorAll(':scope > li');
+        liItems.forEach((li, index) => {
+            const upArrow = li.querySelector('.leftArrow i');
+            const downArrow = li.querySelector('.rightArrow i');
+
+            if (upArrow) {
+                upArrow.classList.remove('end-arrow');
+            }
+            if (downArrow) {
+                downArrow.classList.remove('end-arrow');
+            }
+
+            if (index === 0 && upArrow) {
+                upArrow.classList.add('end-arrow');
+            }
+            if (index === liItems.length - 1 && downArrow) {
+                downArrow.classList.add('end-arrow');
+            }
+        });
+    });
+}
+
+function searchProducts(query, formId) {
+    const matchingProducts = document.querySelector(`#${formId} ~ ul`);
+    matchingProducts.innerHTML = '';
+
+    if (query.trim() === '') return;
+
+    const filteredProducts = products.filter(product =>
+        product.title.toLowerCase().includes(query.toLowerCase())
+    );
+
+    filteredProducts.forEach(product => {
+        const li = document.createElement('li');
+        li.textContent = `${product.title} (${product.ref})`;
+        li.addEventListener('click', () => {
+            document.querySelector(`#${formId} input[name="menuItemUrl"]`).value = product.url;
+        });
+        matchingProducts.appendChild(li);
+    });
+}
+
 function saveData() {
     allowUnload = true
     const menuListJSON = JSON.stringify(MENU_LIST);
@@ -744,50 +791,3 @@ window.addEventListener('beforeunload', function(event) {
         //event.preventDefault();
     }
 }, { capture: true });
-
-
-function updateArrowStyles() {
-    const ulItems = document.querySelectorAll('.menu-item');
-
-    ulItems.forEach((ul) => {
-        const liItems = ul.querySelectorAll(':scope > li');
-        liItems.forEach((li, index) => {
-            const upArrow = li.querySelector('.leftArrow i');
-            const downArrow = li.querySelector('.rightArrow i');
-
-            if (upArrow) {
-                upArrow.classList.remove('end-arrow');
-            }
-            if (downArrow) {
-                downArrow.classList.remove('end-arrow');
-            }
-
-            if (index === 0 && upArrow) {
-                upArrow.classList.add('end-arrow');
-            }
-            if (index === liItems.length - 1 && downArrow) {
-                downArrow.classList.add('end-arrow');
-            }
-        });
-    });
-}
-
-function searchProducts(query, formId) {
-    const matchingProducts = document.querySelector(`#${formId} ~ ul`);
-    matchingProducts.innerHTML = '';
-
-    if (query.trim() === '') return;
-
-    const filteredProducts = products.filter(product =>
-        product.title.toLowerCase().includes(query.toLowerCase())
-    );
-
-    filteredProducts.forEach(product => {
-        const li = document.createElement('li');
-        li.textContent = `${product.title} (${product.ref})`;
-        li.addEventListener('click', () => {
-            document.querySelector(`#${formId} input[name="menuItemUrl"]`).value = product.url;
-        });
-        matchingProducts.appendChild(li);
-    });
-}
