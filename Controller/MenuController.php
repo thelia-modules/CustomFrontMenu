@@ -31,7 +31,8 @@ class MenuController extends BaseAdminController
             )) {
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
-        $menuId = $request->get('menuId');
+
+        $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
             $this->loadMenuItems($this->getSession(), $menuId);
@@ -142,7 +143,7 @@ class MenuController extends BaseAdminController
         $dataArray = [];
         foreach ($descendants as $descendant) {
             $newArray = [];
-            $newArray['id'] = $descendant->getId();
+            $newArray['id'] = 'menu-selected-'.$descendant->getId();
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
                 ->findByLocale($descendant->getLocale());
@@ -179,11 +180,14 @@ class MenuController extends BaseAdminController
     public function deleteMenu(Request $request) : RedirectResponse
     {
 
-        $currentMenuId = $request->get('menuId');
-        if ($currentMenuId === null) {
+        $firstCurrentMenuId = $request->get('menuId');
+        if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
             $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (1)');
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
+
+        $currentMenuId = intval(str_replace("menu-selected-", "", $firstCurrentMenuId));
+
         try {
             CustomFrontMenuItemI18nQuery::create()->findById($currentMenuId)->delete();
             CustomFrontMenuItemQuery::create()->findById($currentMenuId)->delete();
@@ -191,6 +195,7 @@ class MenuController extends BaseAdminController
         } catch (\Exception $e) {
             $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
         }
+
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 

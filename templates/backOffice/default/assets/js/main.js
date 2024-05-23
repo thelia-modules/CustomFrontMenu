@@ -2,6 +2,7 @@ var MENU_LIST
 var MENU_NAMES
 let CURRENT_SELECTED_MENU_ID
 let CURRENT_ID = null
+let allowUnload = false
 
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -69,7 +70,7 @@ function setEditFields(id) {
 function addCustomMenuItem(form, id="0") {
     let [menuItemName, menuItemUrl] = getFormItems(form);
     let element = findMenuInList(id, MENU_LIST);
-    let depthToAdd = 2;
+    let depthToAdd = 1;
     if (element !== null) {
         depthToAdd = element.depth + 1;
     }
@@ -142,6 +143,7 @@ function getCurrentMenuId(){
         .split("; ")
         .find((row) => row.startsWith("currentMenuId="))
         ?.split("=")[1]);
+    console.log(jsonMenuId)
     if (jsonMenuId) {
         return jsonMenuId
     }
@@ -191,8 +193,8 @@ function addInList(id, item, list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth != 0){
-        if (menuItem.depth%2 == 0){
+    if (menuItem.depth != 1){
+        if (menuItem.depth%2 == 1){
             depth = "even-depth"
         }
         else {
@@ -763,8 +765,6 @@ window.onload = function() {
     generatePreviewMenus()
     addSelectedMenuIdToForm('deleteForm', 'menuNameToDelete')
 }
-
-let allowUnload = false;
 
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
