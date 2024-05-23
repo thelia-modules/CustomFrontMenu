@@ -131,6 +131,7 @@ class MenuController extends BaseAdminController
 
         }
 
+        $menuNames = [];
         try {
             $menuNames = $this->loadSelectMenu();
         } catch (\Exception $e3) {
