@@ -70,7 +70,7 @@ function setEditFields(id) {
 function addCustomMenuItem(form, id="0") {
     let [menuItemName, menuItemUrl] = getFormItems(form);
     let element = findMenuInList(id, MENU_LIST);
-    let depthToAdd = 1;
+    let depthToAdd = 0;
     if (element !== null) {
         depthToAdd = element.depth + 1;
     }
@@ -143,7 +143,6 @@ function getCurrentMenuId(){
         .split("; ")
         .find((row) => row.startsWith("currentMenuId="))
         ?.split("=")[1]);
-    console.log(jsonMenuId)
     if (jsonMenuId) {
         return jsonMenuId
     }
@@ -193,8 +192,8 @@ function addInList(id, item, list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth != 1){
-        if (menuItem.depth%2 == 1){
+    if (menuItem.depth != 0){
+        if (menuItem.depth%2 == 0){
             depth = "even-depth"
         }
         else {

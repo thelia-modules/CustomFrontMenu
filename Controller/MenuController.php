@@ -115,7 +115,7 @@ class MenuController extends BaseAdminController
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
                 ->findByLocale($descendant->getLocale());
-            $newArray['depth'] = $descendant->getLevel() - 1;
+            $newArray['depth'] = $descendant->getLevel() - 2;
 
             $newArray['title'] = $content->getColumnValues('title');
             $newArray['url'] = $content->getColumnValues('url');
