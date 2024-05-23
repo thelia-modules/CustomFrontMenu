@@ -441,7 +441,7 @@ function drop(ev) {
         var mouseX = ev.clientX - rect.left;
 
         const insertionBefore = mouseY < rect.height / 2
-        const insertAsChild = mouseX > rect.width / 6
+        const insertAsChild = !insertionBefore && mouseX > rect.width / 6
 
         // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
         const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
