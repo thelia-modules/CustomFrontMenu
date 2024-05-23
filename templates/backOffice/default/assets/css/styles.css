@@ -75,7 +75,7 @@ ul.menu-item:last-child {
 .drag-and-drop-icon {
     font-size: 150%;
     margin-right: 3%;
-    cursor:move;  /*grab, move, row-resize*/
+    cursor:move;
 }
 
 .leftArrow {
