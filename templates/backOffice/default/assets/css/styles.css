@@ -5,23 +5,15 @@
     justify-content: space-between;
 }
 
-.top .btn {
-    margin-left: auto;
-}
-
-.top #toggle-all-childrens{
-    margin-left: 1%;
-    transition: all 0.3s;
-}
-
-.top #toggle-all-childrens:hover{
+.top-btn:hover{
     background-color: #ccc;
 }
 
-.selectMenu, #toggle-all-childrens{
+.top-btn{
     border-radius: 10px;
     background-color: #f5f5f5;
     border-color: #ccc;
+    transition: all 0.3s;
 }
 
 .add-parent-btn{
