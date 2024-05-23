@@ -75,8 +75,8 @@
                     <input type="text" id="menuItemUrl" name="menuItemName" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
                         {loop type="product" name="my_product_loop"}
-                        <option value="{$TITLE} (id:{$ID})">
-                            {/loop}
+                            <option value="{$TITLE} (ref: {$REF})">
+                        {/loop}
                     </datalist>
                 </form>
             </div>
@@ -134,8 +134,8 @@
                     <input type="text" id="menuItemUrl" name="menuItemName" list="productsListInItem"><br><br>
                     <datalist id="productsListInItem">
                         {loop type="product" name="my_product_loop"}
-                        <option value="{$TITLE}">
-                            {/loop}
+                            <option value="{$TITLE} (ref: {$REF})">
+                        {/loop}
                     </datalist>
                 </form>
             </div>

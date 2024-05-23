@@ -705,26 +705,6 @@ function updateArrowStyles() {
     });
 }
 
-function searchProducts(query, formId) {
-    const matchingProducts = document.querySelector(`#${formId} ~ ul`);
-    matchingProducts.innerHTML = '';
-
-    if (query.trim() === '') return;
-
-    const filteredProducts = products.filter(product =>
-        product.title.toLowerCase().includes(query.toLowerCase())
-    );
-
-    filteredProducts.forEach(product => {
-        const li = document.createElement('li');
-        li.textContent = `${product.title} (${product.ref})`;
-        li.addEventListener('click', () => {
-            document.querySelector(`#${formId} input[name="menuItemUrl"]`).value = product.url;
-        });
-        matchingProducts.appendChild(li);
-    });
-}
-
 function saveData() {
     allowUnload = true
     const menuListJSON = JSON.stringify(MENU_LIST);
