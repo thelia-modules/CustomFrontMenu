@@ -607,7 +607,7 @@ function findMenuItemById(itemId) {
 }
 
 
-// trouve l'indice d'un élément dans MENU_LIST à partir de son id
+// find the index of an element in MENU_LIST from its id
 function findIndexOfMenuItem(itemId) {
     for (var i = 0; i < MENU_LIST.length; i++) {
         if (MENU_LIST[i].id === itemId) {
@@ -620,29 +620,28 @@ function findIndexOfMenuItem(itemId) {
 function allowDrop(ev) {
     ev.preventDefault();
 
-    // recup position souris par rapport à elem cible
+    // retrieve mouse position relative to the target element
     var rect = ev.target.closest("div.item").getBoundingClientRect();
     var mouseY = ev.clientY - rect.top;
     var mouseX = ev.clientX - rect.left;
 
     try{
         var targetItem = ev.target.closest(".item").parentElement;
-        // affiche barre au-dessus ou en dessous de l'élément cible
+        // display bar above or below the target element
         var dropIndicator = document.querySelector('.drop-indicator');
 
-        dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positionne la barre à gauche de l'élément cible
-        dropIndicator.style.width = targetItem.offsetWidth + 'px'; // ajuste largeur barre à celle de l'elem cible
+        dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positions the bar to the left of the target element
+        dropIndicator.style.width = targetItem.offsetWidth + 'px'; // adjust bar width to that of the target elem
 
-        if (mouseY < rect.height / 2) { // si la souris est au-dessus de l'elem cible
-            dropIndicator.style.top = targetItem.offsetTop + 'px'; // positionne la barre au-dessus de l'élément cible
-        } else { // si la souris est en dessous de l'élément cible => positionne barre en dessous
+        if (mouseY < rect.height / 2) { // if the mouse is over the target element
+            dropIndicator.style.top = targetItem.offsetTop + 'px'; // position the bar above the target element
+        } else { // if the mouse is below the target element => positions bar below
             dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
-            if (mouseX > rect.width / 6) { // si la souris est à droite de l'elem cible
+            if (mouseX > rect.width / 6) { // if the mouse is to the right of the target element
                 dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
                 dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
             }
         }
-
         dropIndicator.style.display = 'block';
     }
     catch{}
