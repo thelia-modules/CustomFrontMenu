@@ -2,32 +2,28 @@
 
 namespace CustomFrontMenu\Controller;
 
-use CustomFrontMenu\Model\CustomFrontMenuContent;
-use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
+use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
+use Thelia\Model\Lang;
 use Thelia\Tools\URL;
 
 class MenuController extends BaseAdminController
 {
     private int $COUNT_ID = 1;
 
-    /**
-     * @Route("/admin/module/CustomFrontMenu/selectMenu", name="admin.customfrontmenu.select.menu", methods={"POST"})
-     */
+    #[Route("/admin/module/CustomFrontMenu/selectMenu", name:"admin.customfrontmenu.select.menu", methods:["POST"])]
     public function selectOtherMenu(Request $request) : RedirectResponse
     {
-        print_r("test");
         if (null !== $this->checkAuth(
                 AdminResources::MODULE,
                 ['customfrontmenu'],
@@ -37,16 +33,17 @@ class MenuController extends BaseAdminController
         }
         $menuId = $request->get('menuId');
 
-        $messages = [];
+        try {
+            $this->loadMenuItems($this->getSession(), $menuId);
+        } catch(\Exception $e) {
+            $this->getSession()->getFlashBag()->add('fail', 'Fail to load this menu (3)');
+        }
 
-        $this->loadMenuItems($this->getSession(), $menuId);
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
-    /**
-     * @Route("/admin/module/CustomFrontMenu/save", name="admin.responseform", methods={"POST"})
-     */
+    #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
     public function saveMenuItems(Request $request) : RedirectResponse
     {
         if (null !== $this->checkAuth(
@@ -58,11 +55,13 @@ class MenuController extends BaseAdminController
         }
         $dataJson = $request->get('menuData');
         $dataArray = json_decode($dataJson, true);
+        print_r($dataArray);
+        die;
 
         $messages = [];
 
         try {
-            CustomFrontMenuContentQuery::create()->deleteAll();
+            CustomFrontMenuItemI18nQuery::create()->deleteAll();
             CustomFrontMenuItemQuery::create()->deleteAll();
 
             $root = $this->getRoot();
@@ -91,10 +90,11 @@ class MenuController extends BaseAdminController
             $item = new CustomFrontMenuItem();
             $item->insertAsLastChildOf($parent);
             $item->save();
-            $content = new CustomFrontMenuContent();
+            $content = new CustomFrontMenuItemI18n();
             $content->setTitle($element['title']);
             $content->setUrl($element['url']);
-            $content->setMenuItem($item->getId());
+            $content->setId($item->getId());
+            $content->setLocale('en_US');
             $content->save();
             if (isset($element['childrens']) && $element['childrens'] !== []) {
                 $this->saveTableBrowser($element['childrens'], $item);
@@ -111,45 +111,49 @@ class MenuController extends BaseAdminController
         $descendants = $parent->getChildren();
         foreach ($descendants as $descendant) {
             $newArray = [];
-            $content = CustomFrontMenuContentQuery::create()->findByMenuItem($descendant->getId());
+            $content = CustomFrontMenuItemI18nQuery::create()
+                ->filterById($descendant->getId())
+                ->findByLocale($descendant->getLocale());
             $newArray['depth'] = $descendant->getLevel() - 1;
 
-            $newArray['title'] = $content->getColumnValues('title')[0];
-            $newArray['url'] = $content->getColumnValues('url')[0];
+            $newArray['title'] = $content->getColumnValues('title');
+            $newArray['url'] = $content->getColumnValues('url');
             $newArray['id'] = $this->COUNT_ID;
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArrayChildrens = [];
-                $this->loadTableBrowser($newArrayChildrens, $descendant);
-                $newArray['childrens'] = $newArrayChildrens;
+                $newArrayChildren = [];
+                $this->loadTableBrowser($newArrayChildren, $descendant);
+                $newArray['childrens'] = $newArrayChildren;
             }
             $dataArray[] = $newArray;
         }
     }
 
-     /**
+    /**
      * Load the different menu names
-      */
+     * @throws PropelException
+     */
     public function loadSelectMenu() : array
     {
+
         $root = $this->getRoot();
         $descendants = $root->getChildren();
         $dataArray = [];
         foreach ($descendants as $descendant) {
             $newArray = [];
             $newArray['id'] = $descendant->getId();
-            $content = CustomFrontMenuContentQuery::create()->findByMenuItem($descendant->getId());
-            $newArray['title'] = $content->getColumnValues('title')[0];
+            $content = CustomFrontMenuItemI18nQuery::create()
+                ->filterById($descendant->getId())
+                ->findByLocale($descendant->getLocale());
+
+            $newArray['title'] = $content->getColumnValues('title');
             $dataArray[] = $newArray;
         }
         return $dataArray;
     }
 
-    /**
-     * 
-     * @Route("/admin/module/CustomFrontMenu/add", name="admin.addmenu", methods={"POST"})
-     */
+    #[Route("/admin/module/CustomFrontMenu/add", name:"admin.customfrontmenu.addmenu", methods:["POST"])]
     public function addMenu(Request $request) : RedirectResponse
     {
         try {
@@ -158,9 +162,10 @@ class MenuController extends BaseAdminController
             $item = new CustomFrontMenuItem();
             $item->insertAsLastChildOf($root);
             $item->save();
-            $content = new CustomFrontMenuContent();
+            $content = new CustomFrontMenuItemI18n();
             $content->setTitle($menuName);
-            $content->setMenuItem($item->getId());
+            $content->setId($item->getId());
+            $content->setLocale('en_US');
             $content->save();
             $this->getSession()->getFlashBag()->add('success', 'New menu added successfully');
         } catch (\Exception $e) {
@@ -170,22 +175,21 @@ class MenuController extends BaseAdminController
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
-    /**
-     * 
-     * @Route("/admin/module/CustomFrontMenu/delete", name="admin.deletemenu", methods={"POST"})
-     */
+    #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
     public function deleteMenu(Request $request) : RedirectResponse
     {
+
         $currentMenuId = $request->get('menuId');
         if ($currentMenuId === null) {
+            $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (1)');
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
         try {
-            CustomFrontMenuContentQuery::create()->findByMenuItem($currentMenuId)->delete();
+            CustomFrontMenuItemI18nQuery::create()->findById($currentMenuId)->delete();
             CustomFrontMenuItemQuery::create()->findById($currentMenuId)->delete();
             $this->getSession()->getFlashBag()->add('success', 'Current menu deleted successfully');
         } catch (\Exception $e) {
-            $this->getSession()->getFlashBag()->add('fail', 'Failed to delete the current menu');
+            $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
         }
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
@@ -193,6 +197,7 @@ class MenuController extends BaseAdminController
     /**
      * Return the menu root from the database.
      * If this root doesn't exist, it's created.
+     * @throws PropelException
      */
     private function getRoot() : CustomFrontMenuItem
     {
@@ -208,8 +213,8 @@ class MenuController extends BaseAdminController
 
     /**
      * Clear all flashes
-     * @Route("/admin/module/CustomFrontMenu/clearFlashes", name="admin.clearflashes", methods={"GET"})
      */
+    #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
     public function clearFlashes() : void
     {
         $this->getSession()->getFlashBag()->clear();

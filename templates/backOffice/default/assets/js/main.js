@@ -69,7 +69,7 @@ function setEditFields(id) {
 function addCustomMenuItem(form, id="0") {
     let [menuItemName, menuItemUrl] = getFormItems(form);
     let element = findMenuInList(id, MENU_LIST);
-    let depthToAdd = 1;
+    let depthToAdd = 2;
     if (element !== null) {
         depthToAdd = element.depth + 1;
     }
