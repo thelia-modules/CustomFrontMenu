@@ -1,20 +1,16 @@
 
 <div class="general-block-decorator">
     <div class="top">
-        <select id="selectMenuName" class="btn selectMenu">
+        <select id="selectMenuName" class="btn top-btn">
 
         </select>
         <form id="askedMenu" action="{url path="/admin/module/CustomFrontMenu/selectMenu"}" method="POST" style="display:none;">
             <input type="hidden" name="menuId" id="menuId">
         </form>
-        <button data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
-        <button data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
+        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
+        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
     </div>
-    <button id="toggle-all-childrens" class="btn" onclick="toggleTopLevelVisibility()">Hide all childrens</button>
-    <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
-        Add a new parent
-        <i class="glyphicon glyphicon-plus-sign"></i>
-    </button>
+
     {if isset($smarty.session["_symfony_flashes"]["success"])}
         {foreach $smarty.session["_symfony_flashes"]["success"] as $message}
             <div class="alert alert-success alert-flash-to-delete">
@@ -38,6 +34,14 @@
         </ul>
     </div>
 
+    <div class="top">
+        <button id="toggle-all-childrens" class="btn top-btn" onclick="toggleTopLevelVisibility()">Hide all children</button>
+        <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
+            Add a new parent
+            <i class="glyphicon glyphicon-plus-sign"></i>
+        </button>
+    </div>
+
     <div class="row">
         <div class="menu">
             <ul class="menu-item depth-0" id="menu-item-list"></ul>
@@ -58,7 +62,6 @@
 <!-- Add and edit Parent Modal -->
 <div class="modal fade" id="AddAndEditMenu" role="dialog">
     <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -71,8 +74,27 @@
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'newParentForm')"><br><br>
                 </form>
+                <ul id="matchingProductsParent">
+                </ul>
+                <script>
+                    var products = [];
+                </script>
+                {loop type="product" name="my_product_loop"}
+                    <script>
+                        var temporary = `{$TITLE} ({$REF}) {$URL}`
+                        var regex = /(.+) \((\w+)\) (.+)/g;
+                        var match;
+                        while ((match = regex.exec(temporary)) !== null) {
+                            var title = match[1].trim();
+                            var ref = match[2].trim();
+                            var url = match[3].trim();
+                            var product = { title: title, ref: ref, url: url };
+                            products.push(product);
+                        }
+                    </script>
+                {/loop}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')">Save</button>
@@ -112,7 +134,6 @@
 <!-- Add and edit Menu Item Modal -->
 <div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
     <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -125,11 +146,30 @@
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'addMenuItemForm')"><br><br>
                 </form>
+                <ul id="matchingProductsSecondary">
+                </ul>
+                <script>
+                    var products = [];
+                </script>
+                {loop type="product" name="my_product_loop"}
+                    <script>
+                        var temporary = `{$TITLE} ({$REF}) {$URL}`
+                        var regex = /(.+) \((\w+)\) (.+)/g;
+                        var match;
+                        while ((match = regex.exec(temporary)) !== null) {
+                            var title = match[1].trim();
+                            var ref = match[2].trim();
+                            var url = match[3].trim();
+                            var product = { title: title, ref: ref, url: url };
+                            products.push(product);
+                        }
+                    </script>
+                {/loop}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span>  Save</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">Close</button>
             </div>
         </div>
