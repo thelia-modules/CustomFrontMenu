@@ -72,7 +72,7 @@
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemName" list="productsListParent"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
                         {loop type="product" name="my_product_loop"}
                             <option value="{$TITLE} (ref: {$REF})">
@@ -131,7 +131,7 @@
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemName" list="productsListInItem"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem"><br><br>
                     <datalist id="productsListInItem">
                         {loop type="product" name="my_product_loop"}
                             <option value="{$TITLE} (ref: {$REF})">
