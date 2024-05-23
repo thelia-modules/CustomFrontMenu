@@ -151,18 +151,18 @@
                     var products = [];
                 </script>
                 {loop type="product" name="my_product_loop"}
-                <script>
-                    var temporary = `{$TITLE} ({$REF}) {$URL}`
-                    var regex = /(.+) \((\w+)\) (.+)/g;
-                    var match;
-                    while ((match = regex.exec(temporary)) !== null) {
-                        var title = match[1].trim();
-                        var ref = match[2].trim();
-                        var url = match[3].trim();
-                        var product = { title: title, ref: ref, url: url };
-                        products.push(product);
-                    }
-                </script>
+                    <script>
+                        var temporary = `{$TITLE} ({$REF}) {$URL}`
+                        var regex = /(.+) \((\w+)\) (.+)/g;
+                        var match;
+                        while ((match = regex.exec(temporary)) !== null) {
+                            var title = match[1].trim();
+                            var ref = match[2].trim();
+                            var url = match[3].trim();
+                            var product = { title: title, ref: ref, url: url };
+                            products.push(product);
+                        }
+                    </script>
                 {/loop}
             </div>
             <div class="modal-footer">
