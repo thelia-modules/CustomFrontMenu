@@ -196,4 +196,8 @@ ul.menu-item:last-child {
     }
     /* ------------------------------ End preview ------------------------------ */
 
+    .list-style-type{
+        display:none;
+        padding: 0;
+    }
 }

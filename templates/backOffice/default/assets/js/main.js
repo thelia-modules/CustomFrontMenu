@@ -772,3 +772,23 @@ function updateArrowStyles() {
         });
     });
 }
+
+function searchProducts(query) {
+    const matchingProducts = document.getElementById('matchingProducts');
+    matchingProducts.innerHTML = '';
+
+    if (query.trim() === '') return;
+
+    const filteredProducts = products.filter(product =>
+        product.title.toLowerCase().includes(query.toLowerCase())
+    );
+
+    filteredProducts.forEach(product => {
+        const li = document.createElement('li');
+        li.textContent = `${product.title} (${product.ref})`;
+        li.addEventListener('click', () => {
+            document.getElementById('menuItemUrl').value = product.url;
+        });
+        matchingProducts.appendChild(li);
+    });
+}
