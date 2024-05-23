@@ -221,8 +221,8 @@ function generateMenuRecursive(menuItem){
                 </a>
             </div>
             <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down"></i></a>
+                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
             </span>
         </div>
         <ul class="menu-item" style="`+ ((childrens) ? "display: block;" : "display: none;") +`">
