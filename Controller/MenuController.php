@@ -56,25 +56,23 @@ class MenuController extends BaseAdminController
         }
         $dataJson = $request->get('menuData');
         $dataArray = json_decode($dataJson, true);
-        print_r($dataArray);
-        die;
-
-        $messages = [];
+        $menuId = json_decode($request->get('menuDataId'));
 
         try {
-            CustomFrontMenuItemI18nQuery::create()->deleteAll();
-            CustomFrontMenuItemQuery::create()->deleteAll();
+            $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
+            $descendants = $menu->getDescendants();
+            foreach ($descendants as $descendant) {
+                $descendantI18n = CustomFrontMenuItemI18nQuery::create()->findById($descendant->getId());
+                $descendantI18n->delete();
+            }
+            $menu->deleteDescendants();
+            $menu->save();
 
-            $root = $this->getRoot();
-
-            $this->saveTableBrowser($dataArray, $root);
+            $this->saveTableBrowser($dataArray, $menu);
 
             $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
         } catch (\Exception $e) {
-            $messages[] = $e->getMessage();
-            // Uncomment this line to display error messages
-            //$this->getSession()->getFlashBag()->add('fail', $e->getMessage());
             $this->getSession()->getFlashBag()->add('fail', 'An error occurred when saving in database.');
         }
 
@@ -230,8 +228,20 @@ class MenuController extends BaseAdminController
      */
     public function loadMenuItems(Session $session, int $menuId = null) : void
     {
-        $data = [];
+        $menuNames = [];
+        try {
+            $menuNames = $this->loadSelectMenu();
+        } catch (\Exception $e3) {
+            $session->getFlashBag()->add('fail', 'Fail to load menu names from the database');
+        }
 
+        if (!isset($menuId)) {
+            if(count($menuNames) > 0) {
+                $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
+            }
+        }
+
+        $data = [];
         if(isset($menuId)) {
             try {
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
@@ -245,15 +255,6 @@ class MenuController extends BaseAdminController
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
 
             }
-        }
-
-        $menuNames = [];
-
-        try {
-            $menuNames = $this->loadSelectMenu();
-        } catch (\Exception $e3) {
-            $session->getFlashBag()->add('fail', 'Fail to load menu names from the database');
-
         }
 
         $namesToLoad = json_encode($menuNames);

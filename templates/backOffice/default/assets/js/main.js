@@ -329,6 +329,9 @@ function generateSelect(list) {
         let option = document.createElement('option');
         option.text = menuName.title;
         option.id = menuName.id;
+        if (option.id === "menu-selected-" + CURRENT_SELECTED_MENU_ID) {
+            option.selected = true;
+        }
         menu.appendChild(option);
     }
 }
@@ -707,9 +710,9 @@ function generatePreviewMenuRecursive(menuItem){
 
 function saveData() {
     allowUnload = true
-    const menuListJSON = JSON.stringify(MENU_LIST);
-    document.getElementById('menuData').value = menuListJSON;
-    document.getElementById('savedData').submit();
+    document.getElementById('menuData').value = JSON.stringify(MENU_LIST)
+    document.getElementById('menuDataId').value = JSON.stringify(CURRENT_SELECTED_MENU_ID)
+    document.getElementById('savedData').submit()
 }
 
 function addMenu() {
