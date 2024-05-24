@@ -8,9 +8,6 @@
         <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
     </div>
 
-    <!--here juste to test, it will be moved to the client front template-->
-    {CustomFrontMenu menu_id=1}
-
     {if isset($smarty.session["_symfony_flashes"]["success"])}
         {foreach $smarty.session["_symfony_flashes"]["success"] as $message}
             <div id='alert-flash' class="alert alert-success">
