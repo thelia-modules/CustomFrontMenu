@@ -14,8 +14,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
-use Thelia\Model\Lang;
 use Thelia\Tools\URL;
+
+use CustomFrontMenu\Service\CustomFrontMenuSaveService;
+use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 
 class MenuController extends BaseAdminController
 {
@@ -71,7 +73,8 @@ class MenuController extends BaseAdminController
             $menu->save();
 
             // Add all new items in database
-            $this->saveTableBrowser($dataArray, $menu);
+            $cfmSaveService = new CustomFrontMenuSaveService;
+            $cfmSaveService->saveTableBrowser($dataArray, $menu);
 
             $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
@@ -81,60 +84,6 @@ class MenuController extends BaseAdminController
         }
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
-    }
-
-    /**
-     * Save all elements from an array recursively to the database
-     * @throws PropelException
-     */
-    private function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent) : void
-    {
-        foreach ($dataArray as $element) {
-            $item = new CustomFrontMenuItem();
-            $item->insertAsLastChildOf($parent);
-
-            $item->save();
-
-            $content = new CustomFrontMenuItemI18n();
-            $content->setTitle($element['title']);
-            $content->setUrl($element['url']);
-            $content->setId($item->getId());
-            $content->setLocale('en_US');
-            $content->save();
-
-            if (isset($element['childrens']) && $element['childrens'] !== []) {
-                $this->saveTableBrowser($element['childrens'], $item);
-            }
-            $parent->save();
-        }
-    }
-
-    /**
-     * Load all elements from the database recursively to parse them in an array
-     * @throws PropelException
-     */
-    private function loadTableBrowser(array & $dataArray, CustomFrontMenuItem $parent) : void
-    {
-        $descendants = $parent->getChildren();
-        foreach ($descendants as $descendant) {
-            $newArray = [];
-            $content = CustomFrontMenuItemI18nQuery::create()
-                ->filterById($descendant->getId())
-                ->findByLocale($descendant->getLocale());
-
-            $newArray['depth'] = $descendant->getLevel() - 2;
-            $newArray['title'] = $content->getColumnValues('title')[0];
-            $newArray['url'] = $content->getColumnValues('url')[0];
-            $newArray['id'] = $this->COUNT_ID;
-            ++$this->COUNT_ID;
-
-            if ($descendant->hasChildren()) {
-                $newArrayChildren = [];
-                $this->loadTableBrowser($newArrayChildren, $descendant);
-                $newArray['childrens'] = $newArrayChildren;
-            }
-            $dataArray[] = $newArray;
-        }
     }
 
     /**
@@ -206,23 +155,6 @@ class MenuController extends BaseAdminController
     }
 
     /**
-     * Return the menu root from the database.
-     * If this root doesn't exist, it's created.
-     * @throws PropelException
-     */
-    private function getRoot() : CustomFrontMenuItem
-    {
-        if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
-            $root = new CustomFrontMenuItem();
-            $root->makeRoot();
-            $root->save();
-        } else {
-            $root = CustomFrontMenuItemQuery::create()->findRoot();
-        }
-        return $root;
-    }
-
-    /**
      * Clear all flashes
      */
     #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
@@ -251,10 +183,12 @@ class MenuController extends BaseAdminController
 
         $data = [];
         if(isset($menuId)) {
+            $data = [];
             try {
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
                 if (isset($menu)) {
-                    $this->loadTableBrowser($data, $menu);
+                    $cfmLoadService = new CustomFrontMenuLoadService();
+                    $data = $cfmLoadService->loadTableBrowser($menu);
                 } else {
                     $session->getFlashBag()->add('fail', "This menu doesn't exist");
                 }
@@ -272,5 +206,50 @@ class MenuController extends BaseAdminController
         setcookie('menuItems', $dataToLoad);
 
         setcookie('currentMenuId', $menuId);
+        setcookie('currentMenuId', $menuId);
+    }
+
+
+    /**
+     * Return the menu root from the database.
+     * If this root doesn't exist, it's created.
+     * @throws PropelException
+     */
+    private function getRoot() : CustomFrontMenuItem
+    {
+        if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+            $root = new CustomFrontMenuItem();
+            $root->makeRoot();
+            $root->save();
+        } else {
+            $root = CustomFrontMenuItemQuery::create()->findRoot();
+        }
+        return $root;
+    }
+
+     /**
+     * Get the list of all menu items
+     * @return array
+     */
+    public function getMenuItems() : array
+    {
+        $data = [];
+        $cfmLoadService = new CustomFrontMenuLoadService();
+
+        try {
+            if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+                $root = new CustomFrontMenuItem();
+                $root->makeRoot();
+                $root->save();
+            } else {
+                $root = CustomFrontMenuItemQuery::create()->findRoot();
+            }
+            dd($root);
+            $data = $cfmLoadService->loadTableBrowser($root);
+        } catch (\Exception $e2) {
+            //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
+        }
+
+        return $data;
     }
 }

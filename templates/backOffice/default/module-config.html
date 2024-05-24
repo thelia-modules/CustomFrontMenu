@@ -74,31 +74,18 @@
                 <form id="newParentForm">
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
+
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'newParentForm')"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
+                    <datalist id="productsListParent">
+                        {loop type="product" name="my_product_loop"}
+                        <option value="{$TITLE} (id:{$ID})">
+                            {/loop}
+                    </datalist>
                 </form>
-                <ul id="matchingProductsParent">
-                </ul>
-                <script>
-                    var products = [];
-                </script>
-                {loop type="product" name="my_product_loop"}
-                    <script>
-                        var temporary = `{$TITLE} ({$REF}) {$URL}`
-                        var regex = /(.+) \((\w+)\) (.+)/g;
-                        var match;
-                        while ((match = regex.exec(temporary)) !== null) {
-                            var title = match[1].trim();
-                            var ref = match[2].trim();
-                            var url = match[3].trim();
-                            var product = { title: title, ref: ref, url: url };
-                            products.push(product);
-                        }
-                    </script>
-                {/loop}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')">Save</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  Create</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">Close</button>
             </div>
         </div>
@@ -146,31 +133,18 @@
                 <form id="addMenuItemForm">
                     <label for="menuItemName">Menu name</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
+
                     <label for="menuItemUrl">Target URL</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="searchProducts(this.value, 'addMenuItemForm')"><br><br>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem"><br><br>
+                    <datalist id="productsListInItem">
+                        {loop type="product" name="my_product_loop"}
+                        <option value="{$TITLE}">
+                            {/loop}
+                    </datalist>
                 </form>
-                <ul id="matchingProductsSecondary">
-                </ul>
-                <script>
-                    var products = [];
-                </script>
-                {loop type="product" name="my_product_loop"}
-                    <script>
-                        var temporary = `{$TITLE} ({$REF}) {$URL}`
-                        var regex = /(.+) \((\w+)\) (.+)/g;
-                        var match;
-                        while ((match = regex.exec(temporary)) !== null) {
-                            var title = match[1].trim();
-                            var ref = match[2].trim();
-                            var url = match[3].trim();
-                            var product = { title: title, ref: ref, url: url };
-                            products.push(product);
-                        }
-                    </script>
-                {/loop}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> Save</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> Create</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">Close</button>
             </div>
         </div>
@@ -237,7 +211,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()">Confirm</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  Create</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
@@ -261,7 +235,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>Confirm</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
