@@ -6,6 +6,7 @@ use CustomFrontMenu\Model\CustomFrontMenuContent;
 use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Service\CFMSaveService;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
@@ -17,21 +18,10 @@ use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Tools\URL;
 
-use CustomFrontMenu\Interface\CFMSaveInterface;
-use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Service\CFMLoadService;
 
 class MenuController extends BaseAdminController
 {
-
-    protected $cfmSave;
-    protected $cfmLoad;
-
-    public function __construct(CFMSaveInterface $cfmSave, CFMLoadInterface $cfmLoad)
-    {
-        $this->cfmSave = $cfmSave;
-        $this->cfmLoad = $cfmLoad;
-    }
-
     /**
      * @Route("/admin/module/CustomFrontMenu/save", name="admin.responseform", methods={"POST"})
      */
@@ -55,7 +45,8 @@ class MenuController extends BaseAdminController
 
             $root = $this->getRoot();
 
-            $this->cfmSave->saveTableBrowser($dataArray, $root);
+            $cfmSave = new CFMSaveService();
+            $cfmSave->saveTableBrowser($dataArray, $root);
 
             $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
@@ -129,10 +120,12 @@ class MenuController extends BaseAdminController
      */
     public function loadMenuItems() : void
     {
+        $data = [];
         try {
             $root = $this->getRoot();
 
-            $data[] = $this->cfmLoad->loadTableBrowser($root);
+            $cfmLoad = new CFMLoadService();
+            $data[] = $cfmLoad->loadTableBrowser($root);
         } catch (\Exception $e2) {
             //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
 
