@@ -59,20 +59,24 @@ class MenuController extends BaseAdminController
         $menuId = json_decode($request->get('menuDataId'));
 
         try {
+            // Delete all the items currently in database for the menu to save
             $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
+            $menu->getParent();
             $descendants = $menu->getDescendants();
             foreach ($descendants as $descendant) {
-                $descendantI18n = CustomFrontMenuItemI18nQuery::create()->findById($descendant->getId());
-                $descendantI18n->delete();
+                CustomFrontMenuItemI18nQuery::create()->findById($descendant->getId())->delete();
             }
             $menu->deleteDescendants();
+
             $menu->save();
 
+            // Add all new items in database
             $this->saveTableBrowser($dataArray, $menu);
 
             $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
         } catch (\Exception $e) {
+            print_r($e->getMessage());
             $this->getSession()->getFlashBag()->add('fail', 'An error occurred when saving in database.');
         }
 
@@ -88,16 +92,20 @@ class MenuController extends BaseAdminController
         foreach ($dataArray as $element) {
             $item = new CustomFrontMenuItem();
             $item->insertAsLastChildOf($parent);
+
             $item->save();
+
             $content = new CustomFrontMenuItemI18n();
             $content->setTitle($element['title']);
             $content->setUrl($element['url']);
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
+
             if (isset($element['childrens']) && $element['childrens'] !== []) {
                 $this->saveTableBrowser($element['childrens'], $item);
             }
+            $parent->save();
         }
     }
 
@@ -113,10 +121,10 @@ class MenuController extends BaseAdminController
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
                 ->findByLocale($descendant->getLocale());
-            $newArray['depth'] = $descendant->getLevel() - 2;
 
-            $newArray['title'] = $content->getColumnValues('title');
-            $newArray['url'] = $content->getColumnValues('url');
+            $newArray['depth'] = $descendant->getLevel() - 2;
+            $newArray['title'] = $content->getColumnValues('title')[0];
+            $newArray['url'] = $content->getColumnValues('url')[0];
             $newArray['id'] = $this->COUNT_ID;
             ++$this->COUNT_ID;
 
