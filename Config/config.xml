@@ -32,10 +32,6 @@
             <tag name="hook.event_listener" event="main.head-css" type="back" templates="css:assets/css/styles.css"/>
             <tag name="hook.event_listener" event="module.configuration" type="back" templates="js:assets/js/main.js"/>
         </hook>
-
-        <hook id="custom_front_menu.hook" class="CustomFrontMenu\Hook\FrontHook" scope="request">
-            <tag name="hook.event_listener" event="main.navbar-primary" type="front" method="renderMenu" />
-        </hook>
     </hooks>
 
     <!--
