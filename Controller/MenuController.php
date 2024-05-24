@@ -169,7 +169,7 @@ class MenuController extends BaseAdminController
     public function getMenuItems() : array
     {
         $data = [];
-        $cfmLoadService = new CustomFrontMenuLoadService();
+        $cfmLoadService = new CFMLoadService();
 
         try {
             if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
@@ -179,7 +179,7 @@ class MenuController extends BaseAdminController
             } else {
                 $root = CustomFrontMenuItemQuery::create()->findRoot();
             }
-            $cfmLoadService->loadTableBrowser($data, $root);
+            $data = $cfmLoadService->loadTableBrowser($root);
         } catch (\Exception $e2) {
             //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
         }
