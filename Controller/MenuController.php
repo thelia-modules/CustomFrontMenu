@@ -6,8 +6,6 @@ use CustomFrontMenu\Model\CustomFrontMenuContent;
 use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
-use CustomFrontMenu\Service\CusomFrontMenuSaveService;
-use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
@@ -19,8 +17,21 @@ use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Tools\URL;
 
+use CustomFrontMenu\Interface\CFMSaveInterface;
+use CustomFrontMenu\Interface\CFMLoadInterface;
+
 class MenuController extends BaseAdminController
 {
+
+    protected $cfmSave;
+    protected $cfmLoad;
+
+    public function __construct(CFMSaveInterface $cfmSave, CFMLoadInterface $cfmLoad)
+    {
+        $this->cfmSave = $cfmSave;
+        $this->cfmLoad = $cfmLoad;
+    }
+
     /**
      * @Route("/admin/module/CustomFrontMenu/save", name="admin.responseform", methods={"POST"})
      */
@@ -44,8 +55,7 @@ class MenuController extends BaseAdminController
 
             $root = $this->getRoot();
 
-            $cfmSaveService = new CusomFrontMenuSaveService();
-            $cfmSaveService->saveTableBrowser($dataArray, $root);
+            $this->cfmSave->saveTableBrowser($dataArray, $root);
 
             $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
@@ -82,15 +92,15 @@ class MenuController extends BaseAdminController
     {
         $this->getSession()->getFlashBag()->add('fail', 'Not implemented yet');
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
-        $menuName = $request->get('menuName');
-        $root = $this->getRoot();
-        $item = new CustomFrontMenuItem();
-        $item->insertAsLastChildOf($root);
-        $item->save();
-        $content = new CustomFrontMenuContent();
-        $content->setTitle($menuName);
-        $content->setMenuItem($item->getId());
-        $content->save();
+        // $menuName = $request->get('menuName');
+        // $root = $this->getRoot();
+        // $item = new CustomFrontMenuItem();
+        // $item->insertAsLastChildOf($root);
+        // $item->save();
+        // $content = new CustomFrontMenuContent();
+        // $content->setTitle($menuName);
+        // $content->setMenuItem($item->getId());
+        // $content->save();
     }
 
     /**
@@ -119,13 +129,10 @@ class MenuController extends BaseAdminController
      */
     public function loadMenuItems() : void
     {
-        $data = [];
-
         try {
             $root = $this->getRoot();
 
-            $cfmLoadService = new CustomFrontMenuLoadService();
-            $cfmLoadService->loadTableBrowser($data, $root);
+            $data[] = $this->cfmLoad->loadTableBrowser($root);
         } catch (\Exception $e2) {
             //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
 
