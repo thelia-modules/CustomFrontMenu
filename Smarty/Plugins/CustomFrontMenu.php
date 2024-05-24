@@ -1,5 +1,4 @@
 <?php
-
 namespace CustomFrontMenu\Smarty\Plugins;
 
 use TheliaSmarty\Template\AbstractSmartyPlugin;
@@ -8,6 +7,11 @@ use CustomFrontMenu\Controller\MenuController;
 
 class CustomFrontMenu extends AbstractSmartyPlugin
 {
+
+    public function __construct(private MenuController $menuController)
+    {
+    }
+
     public function getPluginDescriptors(): array
     {
         return [
@@ -26,10 +30,9 @@ class CustomFrontMenu extends AbstractSmartyPlugin
             throw new \InvalidArgumentException('The menu_id parameter is required', 0);
         }
 
-        $ctrl = new MenuController();
-
-        $menuItems = $ctrl->getMenuItems();
+        $menuItems = $this->menuController->getMenuItems();
         $smarty->assign('menuItems', $menuItems);
+
         $templatePath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
         $smarty->display($templatePath);
     }
