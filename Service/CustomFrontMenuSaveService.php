@@ -2,7 +2,8 @@
 
 namespace CustomFrontMenu\Service;
 
-use CustomFrontMenu\Model\CustomFrontMenuContent;
+use CustomFrontMenu\Service\Validator;
+use Exception;
 use Propel\Runtime\Exception\PropelException;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -15,6 +16,7 @@ class CustomFrontMenuSaveService
     /**
      * Save all elements from an array recursively to the database
      * @throws PropelException
+     * @throws Exception
      */
     public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent) : void
     {
@@ -25,8 +27,8 @@ class CustomFrontMenuSaveService
             $item->save();
 
             $content = new CustomFrontMenuItemI18n();
-            $content->setTitle($element['title']);
-            $content->setUrl($element['url']);
+            $content->setTitle(Validator::completeValidation($element['title']));
+            $content->setUrl(Validator::htmlSafeValidation($element['url']));
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
