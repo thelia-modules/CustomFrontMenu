@@ -2,7 +2,6 @@
 
 namespace CustomFrontMenu\Controller;
 
-use CustomFrontMenu\Model\CustomFrontMenuContent;
 use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
@@ -10,10 +9,8 @@ use CustomFrontMenu\Service\CFMSaveService;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Tools\URL;
