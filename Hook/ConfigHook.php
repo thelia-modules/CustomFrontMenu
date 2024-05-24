@@ -8,7 +8,8 @@ use CustomFrontMenu\Controller\MenuController;
 
 class ConfigHook extends BaseHook
 {
-    public function onModuleConfiguration(HookRenderEvent $event){
+    public function onModuleConfiguration(HookRenderEvent $event)
+    {
 
         $controller = new MenuController;
 
