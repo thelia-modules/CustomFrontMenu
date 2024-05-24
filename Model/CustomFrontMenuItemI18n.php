@@ -2,10 +2,10 @@
 
 namespace CustomFrontMenu\Model;
 
-use CustomFrontMenu\Model\Base\CustomFrontMenuContent as BaseCustomFrontMenuContent;
+use CustomFrontMenu\Model\Base\CustomFrontMenuItemI18n as BaseCustomFrontMenuItemI18n;
 
 /**
- * Skeleton subclass for representing a row from the 'custom_front_menu_content' table.
+ * Skeleton subclass for representing a row from the 'custom_front_menu_item_i18n' table.
  *
  *
  *
@@ -13,7 +13,7 @@ use CustomFrontMenu\Model\Base\CustomFrontMenuContent as BaseCustomFrontMenuCont
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
  */
-class CustomFrontMenuContent extends BaseCustomFrontMenuContent
+class CustomFrontMenuItemI18n extends BaseCustomFrontMenuItemI18n
 {
 
 }

@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS `custom_front_menu_item`;
 CREATE TABLE `custom_front_menu_item`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `view` VARCHAR(255) NOT NULL,
+    `view_id` INTEGER,
     `tree_left` INTEGER,
     `tree_right` INTEGER,
     `tree_level` INTEGER,
@@ -19,22 +21,22 @@ CREATE TABLE `custom_front_menu_item`
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- custom_front_menu_content
+-- custom_front_menu_item_i18n
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `custom_front_menu_content`;
+DROP TABLE IF EXISTS `custom_front_menu_item_i18n`;
 
-CREATE TABLE `custom_front_menu_content`
+CREATE TABLE `custom_front_menu_item_i18n`
 (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(55) NOT NULL,
-    `url` VARCHAR(100),
-    `menu_item` INTEGER NOT NULL,
-    PRIMARY KEY (`id`),
-    INDEX `custom_front_menu_content_fi_d26e96` (`menu_item`),
-    CONSTRAINT `custom_front_menu_content_fk_d26e96`
-        FOREIGN KEY (`menu_item`)
+    `id` INTEGER NOT NULL,
+    `locale` VARCHAR(5) DEFAULT 'en_US' NOT NULL,
+    `title` VARCHAR(255),
+    `url` VARCHAR(255),
+    PRIMARY KEY (`id`,`locale`),
+    CONSTRAINT `custom_front_menu_item_i18n_fk_a026f4`
+        FOREIGN KEY (`id`)
         REFERENCES `custom_front_menu_item` (`id`)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 # This restores the fkey checks, after having unset them earlier

@@ -4,20 +4,23 @@
         <select id="selectMenuName" class="btn top-btn">
 
         </select>
+        <form id="askedMenu" action="{url path="/admin/module/CustomFrontMenu/selectMenu"}" method="POST" style="display:none;">
+            <input type="hidden" name="menuId" id="menuId">
+        </form>
         <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
         <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
     </div>
 
     {if isset($smarty.session["_symfony_flashes"]["success"])}
         {foreach $smarty.session["_symfony_flashes"]["success"] as $message}
-            <div id='alert-flash' class="alert alert-success">
+            <div class="alert alert-success alert-flash-to-delete">
                 {$message}
             </div>
         {/foreach}
     {/if}
     {if isset($smarty.session["_symfony_flashes"]["fail"])}
         {foreach $smarty.session["_symfony_flashes"]["fail"] as $message}
-            <div id='alert-flash' class="alert alert-danger">
+            <div class="alert alert-danger alert-flash-to-delete">
                 {$message}
             </div>
         {/foreach}
@@ -46,6 +49,7 @@
         <div class="drop-indicator" style="display: none;"></div>
         <form id="savedData" action="{url path="/admin/module/CustomFrontMenu/save"}" method="POST" style="display:none;">
             <input type="hidden" name="menuData" id="menuData">
+            <input type="hidden" name="menuDataId" id="menuDataId">
         </form>
     </div>
 
@@ -227,6 +231,7 @@
             <div class="modal-body">
                 <p>Delete this menu ?</p>
                 <form id="deleteForm" action="{url path="/admin/module/CustomFrontMenu/delete"}" method="POST">
+                    <input type="hidden" name="menuId" id="menuNameToDelete">
                 </form>
             </div>
             <div class="modal-footer">

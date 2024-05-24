@@ -3,9 +3,9 @@
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Interface\CFMLoadInterface;
-use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use Propel\Runtime\Exception\PropelException;
+use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 
 class CFMLoadService implements CFMLoadInterface
 {
@@ -22,9 +22,11 @@ class CFMLoadService implements CFMLoadInterface
         $descendants = $parent->getChildren();
         foreach ($descendants as $descendant) {
             $newArray = [];
-            $content = CustomFrontMenuContentQuery::create()->findByMenuItem($descendant->getId());
-            $newArray['depth'] = $descendant->getLevel() - 1;
+            $content = CustomFrontMenuItemI18nQuery::create()
+                ->filterById($descendant->getId())
+                ->findByLocale($descendant->getLocale());
 
+            $newArray['depth'] = $descendant->getLevel() - 2;
             $newArray['title'] = $content->getColumnValues('title')[0];
             $newArray['url'] = $content->getColumnValues('url')[0];
             $newArray['id'] = $this->COUNT_ID;
@@ -33,7 +35,7 @@ class CFMLoadService implements CFMLoadInterface
             if ($descendant->hasChildren()) {
                 $newArray['childrens'] = $this->loadTableBrowser($descendant);
             }
-            $dataArray.array_push($newArray);
+            $dataArray[] = $newArray;
         }
         return $dataArray;
     }
