@@ -1,16 +1,15 @@
 {function name=printMenu}
-    {foreach $menuItems as $menuItem}
-        <li>
-            <a href="{$menuItem.url}">{$menuItem.title}</a>
-            <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
-                {if isset($menuItem.childrens)}
-                    {call name=printMenu menuItems=$menuItem.childrens}
-                {/if}
-            </ul>
-        </li>
-    {/foreach}
+{foreach $menuItems as $menuItem}
+<li>
+    <a href="{$menuItem.url}">{$menuItem.title}</a>
+    <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
+        {if isset($menuItem.childrens) && $menuItem.childrens|count > 0}
+        {call name=printMenu menuItems=$menuItem.childrens}
+        {/if}
+    </ul>
+</li>
+{/foreach}
 {/function}
-
 
 <nav id="CustomFrontMenu" class="navbar navbar-default nav-main" role="navigation" itemtype="http://schema.org/SiteNavigationElement">
     <div class="container-fluid">
@@ -25,48 +24,39 @@
 <style>
     #CustomFrontMenu {
         z-index: 500;
-
-        .child>li{
-            list-style-type: none;
-            position: relative;
-            padding: 15px;
-        }
-
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        a {
-            text-decoration: none;
-            color: #707070;
-            white-space: nowrap;
-        }
-
-        .child {
-            display: none;
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        li:hover {
-            background-color: #f49a17;
-        }
-
-        li:hover > a {
-            color: white;
-        }
-
-        .deep {
-            top: 0;
-            left: 100%;
-        }
-
-        li:hover > .child {
-            display: block;
-        }
-
+    }
+    #CustomFrontMenu .child>li {
+        list-style-type: none;
+        position: relative;
+        padding: 15px;
+    }
+    #CustomFrontMenu ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    #CustomFrontMenu a {
+        text-decoration: none;
+        color: #707070;
+        white-space: nowrap;
+    }
+    #CustomFrontMenu .child {
+        display: none;
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    #CustomFrontMenu li:hover {
+        background-color: #f49a17;
+    }
+    #CustomFrontMenu li:hover > a {
+        color: white;
+    }
+    #CustomFrontMenu .deep {
+        top: 0;
+        left: 100%;
+    }
+    #CustomFrontMenu li:hover > .child {
+        display: block;
     }
 </style>
