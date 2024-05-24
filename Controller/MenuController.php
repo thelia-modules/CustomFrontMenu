@@ -76,7 +76,7 @@ class MenuController extends BaseAdminController
     }
 
     /**
-     * 
+     *
      * @Route("/admin/module/CustomFrontMenu/add", name="admin.addmenu", methods={"POST"})
      */
     public function addMenu(Request $request) : RedirectResponse
@@ -95,7 +95,7 @@ class MenuController extends BaseAdminController
     }
 
     /**
-     * 
+     *
      * @Route("/admin/module/CustomFrontMenu/delete", name="admin.deletemenu", methods={"POST"})
      */
     public function deleteMenu(Request $request) : RedirectResponse
@@ -145,7 +145,7 @@ class MenuController extends BaseAdminController
         $dataToLoad = json_encode($data);
         setcookie('menuItems', $dataToLoad);
     }
-    
+
     /**
      * Return the menu root from the database.
      * If this root doesn't exist, it's created.
@@ -160,5 +160,30 @@ class MenuController extends BaseAdminController
             $root = CustomFrontMenuItemQuery::create()->findRoot();
         }
         return $root;
+    }
+
+     /**
+     * Get the list of all menu items
+     * @return array
+     */
+    public function getMenuItems() : array
+    {
+        $data = [];
+        $cfmLoadService = new CustomFrontMenuLoadService();
+
+        try {
+            if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+                $root = new CustomFrontMenuItem();
+                $root->makeRoot();
+                $root->save();
+            } else {
+                $root = CustomFrontMenuItemQuery::create()->findRoot();
+            }
+            $cfmLoadService->loadTableBrowser($data, $root);
+        } catch (\Exception $e2) {
+            //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
+        }
+
+        return $data;
     }
 }

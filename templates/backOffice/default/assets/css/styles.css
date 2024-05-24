@@ -179,7 +179,7 @@ ul.menu-item:last-child {
     a {
         text-decoration: none;
         color: #7a7a7a;
-        white-space:nowrap;
+        white-space: nowrap;
         font-family: 'Open Sans',sans-serif;
     }
     
