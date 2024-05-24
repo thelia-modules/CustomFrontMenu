@@ -24,7 +24,9 @@
     <services>
         <service id="local/modules/CustomFrontMenu/Service/CFMSaveService" class="CustomFrontMenu\Service\CFMSaveService" />
 
-        <service id="CustomFrontMenu/Controller/MenuController" synthetic="true">
+        <service id="local/modules/CustomFrontMenu/Service/CFMLoadService" class="CustomFrontMenu\Service\CFMLoadService" />
+
+        <service id="CustomFrontMenu/Controller/MenuController" class="CustomFrontMenu\Controller\MenuController">
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
         </service>
@@ -47,6 +49,7 @@
             <tag name="hook.event_listener" event="module.configuration" type="back" templates="js:assets/js/main.js"/>
         </hook>
     </hooks>
+
 
 
     <!--
