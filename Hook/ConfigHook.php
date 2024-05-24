@@ -3,6 +3,7 @@
 namespace CustomFrontMenu\Hook;
 
 use CustomFrontMenu\Controller\MenuController;
+use Thelia\Core\HttpFoundation\Request;
 use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Interface\CFMLoadInterface;
 use Thelia\Core\Hook\BaseHook;
@@ -20,9 +21,13 @@ class ConfigHook extends BaseHook
         $this->menuController = $menuController;
     }
 
-    public function onModuleConfiguration(HookRenderEvent $event): void
+    public function onModuleConfiguration(HookRenderEvent $event) : void
     {
-        $this->menuController->loadMenuItems();
+
+        $controller = new MenuController;
+
+        $controller->loadMenuItems($this->getSession());
+
         $event->add($this->render("module-config.html"));
     }
 }

@@ -22,32 +22,32 @@
     </commands>
 
     <services>
-        <service id="local/modules/CustomFrontMenu/Service/CFMSaveService" class="CustomFrontMenu\Service\CFMSaveService">
-        </service>
-
-        <service id="local/modules/CustomFrontMenu/Interface/CFMSaveInterface" synthetic="true" />
+        <service id="local/modules/CustomFrontMenu/Service/CFMSaveService" class="CustomFrontMenu\Service\CFMSaveService" />
 
         <service id="CustomFrontMenu/Controller/MenuController" synthetic="true">
-            <argument type="service" id="local/modules/CustomFrontMenu/Interface/CFMSaveInterface" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
         </service>
 
         <service id="CustomFrontMenu\Hook\ConfigHook">
-            <argument type="service" id="local/modules/CustomFrontMenu/Interface/CFMSaveInterface" />
-            <argument type="service" id="local/modules/CustomFrontMenu/Interface/CFMLoadService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
             <argument type="service" id="CustomFrontMenu/Controller/MenuController" />
         </service>
     </services>
 
-
-
-
     <hooks>
         <hook id="custom_front_menu.configuration.hook" class="CustomFrontMenu\Hook\ConfigHook" scope="request">
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
+            <argument type="service" id="CustomFrontMenu/Controller/MenuController" />
+
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration"/>
             <tag name="hook.event_listener" event="main.head-css" type="back" templates="css:assets/css/styles.css"/>
             <tag name="hook.event_listener" event="module.configuration" type="back" templates="js:assets/js/main.js"/>
         </hook>
     </hooks>
+
 
     <!--
     <exports>

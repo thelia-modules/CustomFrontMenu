@@ -5,18 +5,14 @@
 
     <table name="custom_front_menu_item" namespace="CustomFrontMenu\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="view" required="true" size="255" type="VARCHAR"/>
+        <column name="view_id" type="INTEGER"/>
+        <column name="title" size="255" type="VARCHAR"/>
+        <column name="url" size="255" type="VARCHAR"/>
         <behavior name="nested_set" />
-    </table>
-
-    <table name="custom_front_menu_content" namespace="CustomFrontMenu\Model">
-        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
-        <column name="title" required="true" size="55" type="VARCHAR"/>
-        <column name="url" size="100" type="VARCHAR"/>
-
-        <column name="menu_item" required="true" type="INTEGER"/>
-        <foreign-key foreignTable="custom_front_menu_item">
-            <reference local="menu_item" foreign="id"/>
-        </foreign-key>
+        <behavior name="i18n">
+            <parameter name="i18n_columns" value="title, url" />
+        </behavior>
     </table>
 
 </database>
