@@ -2,11 +2,12 @@
 
 namespace CustomFrontMenu\Service;
 
+use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Model\CustomFrontMenuContent;
 use Propel\Runtime\Exception\PropelException;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 
-class CusomFrontMenuSaveService
+class CFMSaveService implements CFMSaveInterface
 {
     public function __construct()
     {}

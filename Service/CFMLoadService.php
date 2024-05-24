@@ -2,11 +2,12 @@
 
 namespace CustomFrontMenu\Service;
 
+use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use Propel\Runtime\Exception\PropelException;
 
-class CustomFrontMenuLoadService
+class CFMLoadService implements CFMLoadInterface
 {
     public function __construct(private int $COUNT_ID = 1)
     {}
@@ -15,8 +16,9 @@ class CustomFrontMenuLoadService
      * Load all elements from the database recursively to parse them in an array
      * @throws PropelException
      */
-    public function loadTableBrowser(array & $dataArray, CustomFrontMenuItem $parent) : void
+    public function loadTableBrowser(CustomFrontMenuItem $parent) : array
     {
+        $dataArray = [];
         $descendants = $parent->getChildren();
         foreach ($descendants as $descendant) {
             $newArray = [];
@@ -29,11 +31,10 @@ class CustomFrontMenuLoadService
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArrayChildrens = [];
-                $this->loadTableBrowser($newArrayChildrens, $descendant);
-                $newArray['childrens'] = $newArrayChildrens;
+                $newArray['childrens'] = $this->loadTableBrowser($descendant);
             }
-            $dataArray[] = $newArray;
+            $dataArray.array_push($newArray);
         }
+        return $dataArray;
     }
 }
