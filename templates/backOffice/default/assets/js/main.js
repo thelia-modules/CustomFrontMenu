@@ -799,7 +799,7 @@ window.onload = function() {
     if (CURRENT_SELECTED_MENU_ID === 'undefined' || CURRENT_SELECTED_MENU_ID === -1 || isNaN(CURRENT_SELECTED_MENU_ID)) {
         let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
         listToDelete.forEach(function (elementToDelete) {
-            elementToDelete.remove()
+            elementToDelete.disabled = true
         })
     }
 }
