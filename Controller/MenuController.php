@@ -2,7 +2,6 @@
 
 namespace CustomFrontMenu\Controller;
 
-use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -13,7 +12,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
@@ -28,7 +27,7 @@ class MenuController extends BaseAdminController
     private int $COUNT_ID = 1;
 
     #[Route("/admin/module/CustomFrontMenu/selectMenu", name: "admin.customfrontmenu.select.menu", methods: ["POST"])]
-    public function selectOtherMenu(Request $request, Session $session) : RedirectResponse
+    public function selectOtherMenu(Request $request, SessionInterface $session) : RedirectResponse
     {
         if (null !== $this->checkAuth(
                 AdminResources::MODULE,
@@ -177,7 +176,7 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      */
-    public function loadMenuItems(Session $session, int $menuId = null) : void
+    public function loadMenuItems(SessionInterface $session, int $menuId = null) : void
     {
         $menuNames = [];
         try {
@@ -194,7 +193,6 @@ class MenuController extends BaseAdminController
 
         $data = [];
         if(isset($menuId)) {
-            $data = [];
             try {
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
                 if (isset($menu)) {

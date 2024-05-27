@@ -1,14 +1,14 @@
 
 <div class="general-block-decorator">
     <div class="top">
-        <select id="selectMenuName" class="btn top-btn">
+        <select id="selectMenuName" class="btn top-btn delete-if-no-menu">
 
         </select>
         <form id="askedMenu" action="{url path="/admin/module/CustomFrontMenu/selectMenu"}" method="POST" style="display:none;">
             <input type="hidden" name="menuId" id="menuId">
         </form>
         <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
-        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
+        <button class="btn top-btn delete-if-no-menu" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
     </div>
 
     {if isset($smarty.session["_symfony_flashes"]["success"])}
