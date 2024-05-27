@@ -780,19 +780,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to notify server to clear flash messages
     function clearFlashMessagesOnServer() {
-        fetch('/admin/module/CustomFrontMenu/clearFlashes')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status !== 200) {
+                    console.error('Network response was not ok:', xhr.statusText);
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Server response:', data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Error:', xhr.statusText);
+        };
+
+        xhr.send();
     }
 
     // Add a click event listener to the document

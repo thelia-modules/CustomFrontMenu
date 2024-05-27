@@ -9,9 +9,11 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
@@ -164,9 +166,10 @@ class MenuController extends BaseAdminController
      * Clear all flashes
      */
     #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
-    public function clearFlashes() : void
+    public function clearFlashes() : Response
     {
         $this->getSession()->getFlashBag()->clear();
+        return new Response('', ResponseAlias::HTTP_OK);
     }
 
     /**
