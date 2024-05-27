@@ -27,7 +27,6 @@ class ConfigHook extends BaseHook
         if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
             $data = $controller->loadMenuItems($this->getSession(), $_COOKIE['menuId']);
         } else {
-            echo "No menu selected";
             $data = $controller->loadMenuItems($this->getSession());
         }
 
