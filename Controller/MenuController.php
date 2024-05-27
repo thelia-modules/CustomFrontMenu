@@ -9,6 +9,7 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,8 +25,8 @@ class MenuController extends BaseAdminController
 {
     private int $COUNT_ID = 1;
 
-    #[Route("/admin/module/CustomFrontMenu/selectMenu", name:"admin.customfrontmenu.select.menu", methods:["POST"])]
-    public function selectOtherMenu(Request $request) : RedirectResponse
+    #[Route("/admin/module/CustomFrontMenu/selectMenu", name: "admin.customfrontmenu.select.menu", methods: ["POST"])]
+    public function selectOtherMenu(Request $request, Session $session) : RedirectResponse
     {
         if (null !== $this->checkAuth(
                 AdminResources::MODULE,
@@ -38,17 +39,17 @@ class MenuController extends BaseAdminController
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
-            $this->loadMenuItems($this->getSession(), $menuId);
+            $this->loadMenuItems($session, $menuId);
         } catch(\Exception $e) {
-            $this->getSession()->getFlashBag()->add('fail', 'Fail to load this menu (3)');
+            $session->getFlashBag()->add('fail', 'Fail to load this menu (3)');
         }
-
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
+
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request) : RedirectResponse
+    public function saveMenuItems(Request $request, SessionInterface $session) : RedirectResponse
     {
         if (null !== $this->checkAuth(
             AdminResources::MODULE,
@@ -77,11 +78,11 @@ class MenuController extends BaseAdminController
             $cfmSaveService = new CFMSaveService();
             $cfmSaveService->saveTableBrowser($dataArray, $menu);
 
-            $this->getSession()->getFlashBag()->add('success', 'This menu has been successfully saved !');
+            $session->getFlashBag()->add('success', 'This menu has been successfully saved !');
 
         } catch (\Exception $e) {
             print_r($e->getMessage());
-            $this->getSession()->getFlashBag()->add('fail', 'An error occurred when saving in database.');
+            $session->getFlashBag()->add('fail', 'An error occurred when saving in database.');
         }
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
@@ -110,8 +111,8 @@ class MenuController extends BaseAdminController
         return $dataArray;
     }
 
-    #[Route("/admin/module/CustomFrontMenu/add", name:"admin.customfrontmenu.addmenu", methods:["POST"])]
-    public function addMenu(Request $request) : RedirectResponse
+    #[Route("/admin/module/CustomFrontMenu/add", name: "admin.customfrontmenu.addmenu", methods: ["POST"])]
+    public function addMenu(Request $request, SessionInterface $session) : RedirectResponse
     {
         try {
             $menuName = $request->get('menuName');
@@ -124,21 +125,21 @@ class MenuController extends BaseAdminController
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
-            $this->getSession()->getFlashBag()->add('success', 'New menu added successfully');
+            $session->getFlashBag()->add('success', 'New menu added successfully');
         } catch (\Exception $e) {
-            $this->getSession()->getFlashBag()->add('fail', 'Failed to add a new menu');
+            $session->getFlashBag()->add('fail', 'Failed to add a new menu');
         }
-        
+
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
     #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
-    public function deleteMenu(Request $request) : RedirectResponse
+    public function deleteMenu(Request $request, SessionInterface $session) : RedirectResponse
     {
 
         $firstCurrentMenuId = $request->get('menuId');
         if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
-            $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (1)');
+            $session->getFlashBag()->add('fail', 'Fail to delete the current menu (1)');
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
 
@@ -147,9 +148,9 @@ class MenuController extends BaseAdminController
         try {
             CustomFrontMenuItemI18nQuery::create()->findById($currentMenuId)->delete();
             CustomFrontMenuItemQuery::create()->findById($currentMenuId)->delete();
-            $this->getSession()->getFlashBag()->add('success', 'Current menu deleted successfully');
+            $session->getFlashBag()->add('success', 'Current menu deleted successfully');
         } catch (\Exception $e) {
-            $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
+            $session->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
         }
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
@@ -159,9 +160,9 @@ class MenuController extends BaseAdminController
      * Clear all flashes
      */
     #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
-    public function clearFlashes() : void
+    public function clearFlashes(SessionInterface $session) : void
     {
-        $this->getSession()->getFlashBag()->clear();
+        $session->getFlashBag()->clear();
     }
 
     /**
@@ -232,7 +233,7 @@ class MenuController extends BaseAdminController
      * Get the list of all menu items
      * @return array
      */
-    public function getMenuItems() : array
+    public function getMenuItems(SessionInterface $session) : array
     {
         $data = [];
         $cfmLoadService = new CFMLoadService();
@@ -247,7 +248,7 @@ class MenuController extends BaseAdminController
             }
             $data = $cfmLoadService->loadTableBrowser($root);
         } catch (\Exception $e2) {
-            //$this->getSession()->getFlashBag()->add('fail', 'Fail to load data from the database');
+            $session->getFlashBag()->add('fail', 'Fail to load data from the database');
         }
 
         return $data;
