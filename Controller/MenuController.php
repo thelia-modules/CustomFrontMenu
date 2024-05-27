@@ -170,7 +170,7 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      */
-    public function loadMenuItems(SessionInterface $session, int $menuId = null) : void
+    public function loadMenuItems(SessionInterface $session, int $menuId = null) : array
     {
         $menuNames = [];
         try {

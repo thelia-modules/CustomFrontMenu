@@ -2,8 +2,6 @@
 
 namespace CustomFrontMenu\Service;
 
-use ContainerKz7i3JQ\getCartAddService;
-
 class Validator
 {
     public static function stringValidation(string $string) : string
@@ -41,14 +39,9 @@ class Validator
         return addslashes($string);
     }
 
-    public static function filterValidation(string $string, string $filter): string
+    public static function filterValidation(string $string, int $filter): string
     {
-        $filterToUse = match ($filter) {
-            'url' => FILTER_SANITIZE_URL,
-            'email' => FILTER_SANITIZE_EMAIL,
-            default => throw new \InvalidArgumentException('Invalid filter provided'),
-        };
-        if (filter_var($string, $filterToUse)) {
+        if (filter_var($string, $filter)) {
             return $string;
         }
         return '';
@@ -64,3 +57,4 @@ class Validator
         return self::sqlSafeValidation($string, true);
     }
 }
+

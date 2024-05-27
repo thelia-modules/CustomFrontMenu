@@ -29,7 +29,7 @@ class CFMSaveService implements CFMSaveInterface
 
             $content = new CustomFrontMenuItemI18n();
             $content->setTitle(Validator::completeValidation($element['title']));
-            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url']), 'url'));
+            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url']), FilterType::URL));
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
