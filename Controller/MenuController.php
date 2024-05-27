@@ -2,7 +2,6 @@
 
 namespace CustomFrontMenu\Controller;
 
-use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -27,14 +26,6 @@ class MenuController extends BaseAdminController
     #[Route("/admin/module/CustomFrontMenu/selectMenu", name:"admin.customfrontmenu.select.menu", methods:["POST"])]
     public function selectOtherMenu(Request $request) : RedirectResponse
     {
-        if (null !== $this->checkAuth(
-                AdminResources::MODULE,
-                ['customfrontmenu'],
-                AccessManager::UPDATE
-            )) {
-            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
-        }
-
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
@@ -43,6 +34,7 @@ class MenuController extends BaseAdminController
             $this->getSession()->getFlashBag()->add('fail', 'Fail to load this menu (3)');
         }
 
+        setcookie('menuId', $menuId);
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
@@ -50,13 +42,6 @@ class MenuController extends BaseAdminController
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
     public function saveMenuItems(Request $request) : RedirectResponse
     {
-        if (null !== $this->checkAuth(
-            AdminResources::MODULE,
-            ['customfrontmenu'],
-            AccessManager::UPDATE
-        )) {
-            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
-        }
         $dataJson = $request->get('menuData');
         $dataArray = json_decode($dataJson, true);
         $menuId = json_decode($request->get('menuDataId'));
@@ -93,7 +78,6 @@ class MenuController extends BaseAdminController
      */
     public function loadSelectMenu() : array
     {
-
         $root = $this->getRoot();
         $descendants = $root->getChildren();
         $dataArray = [];
@@ -152,6 +136,10 @@ class MenuController extends BaseAdminController
             $this->getSession()->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
         }
 
+        if (isset($_COOKIE['menuId'])) {
+            setcookie('menuId', -1);
+        }
+
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
@@ -167,7 +155,7 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      */
-    public function loadMenuItems(Session $session, int $menuId = null) : void
+    public function loadMenuItems(Session $session, int $menuId = null) : array
     {
         $menuNames = [];
         try {
@@ -192,6 +180,7 @@ class MenuController extends BaseAdminController
                     $data = $cfmLoadService->loadTableBrowser($menu);
                 } else {
                     $session->getFlashBag()->add('fail', "This menu doesn't exist");
+                    setcookie('menuId', -1);
                 }
                 
             } catch (\Exception $e2) {
@@ -200,32 +189,11 @@ class MenuController extends BaseAdminController
             }
         }
 
-        $namesToLoad = json_encode($menuNames);
-        setcookie('menuNames', $namesToLoad);
-
-        $dataToLoad = json_encode($data);
-        setcookie('menuItems', $dataToLoad);
-
-        setcookie('currentMenuId', $menuId);
-        setcookie('currentMenuId', $menuId);
-    }
-
-
-    /**
-     * Return the menu root from the database.
-     * If this root doesn't exist, it's created.
-     * @throws PropelException
-     */
-    private function getRoot() : CustomFrontMenuItem
-    {
-        if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
-            $root = new CustomFrontMenuItem();
-            $root->makeRoot();
-            $root->save();
-        } else {
-            $root = CustomFrontMenuItemQuery::create()->findRoot();
-        }
-        return $root;
+        return [
+            'menuNames' => json_encode($menuNames),
+            'menuItems' => json_encode($data),
+            'currentMenuId' => json_decode($menuId)
+        ];
     }
 
      /**
@@ -251,5 +219,22 @@ class MenuController extends BaseAdminController
         }
 
         return $data;
+    }
+
+    /**
+     * Return the menu root from the database.
+     * If this root doesn't exist, it's created.
+     * @throws PropelException
+     */
+    private function getRoot() : CustomFrontMenuItem
+    {
+        if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
+            $root = new CustomFrontMenuItem();
+            $root->makeRoot();
+            $root->save();
+        } else {
+            $root = CustomFrontMenuItemQuery::create()->findRoot();
+        }
+        return $root;
     }
 }
