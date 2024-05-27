@@ -11,7 +11,7 @@ class Validator
     {
         $string = trim($string);
         if (strlen($string) === 0) {
-            throw new \Exception('Cannot use empty or full space string');
+            $string = "Empty field";
         }
         return $string;
     }
@@ -20,7 +20,11 @@ class Validator
     {
         $string = trim($string);
 
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+        $string = strip_tags($string);
+
+        //$string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+
+        return $string;
     }
 
     /**
@@ -28,6 +32,6 @@ class Validator
      */
     public static function completeValidation(string $string) : string
     {
-        return self::htmlSafeValidation(self::stringValidation($string));
+        return self::stringValidation(self::htmlSafeValidation(self::stringValidation($string)));
     }
 }
