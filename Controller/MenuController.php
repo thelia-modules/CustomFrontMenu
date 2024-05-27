@@ -2,7 +2,6 @@
 
 namespace CustomFrontMenu\Controller;
 
-use CustomFrontMenu\Model\CustomFrontMenuContentQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
