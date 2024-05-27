@@ -1,11 +1,13 @@
 <?php
-namespace CustomFrontMenu\Smarty\Plugins;
+namespace CustomFrontMenuPlugin\Smarty\Plugins;
 
+use Thelia\Core\Translation\Translator;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use CustomFrontMenu\Controller\MenuController;
+use CustomFrontMenu\CustomFrontMenu;
 
-class CustomFrontMenu extends AbstractSmartyPlugin
+class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
     public function __construct(private MenuController $menuController)
@@ -17,17 +19,17 @@ class CustomFrontMenu extends AbstractSmartyPlugin
         return [
             new SmartyPluginDescriptor(
                 'function',
-                'CustomFrontMenu',
+                'CustomFrontMenuPlugin',
                 $this,
-                'renderCustomFrontMenu'
+                'renderCustomFrontMenuPlugin'
             ),
         ];
     }
 
-    public function renderCustomFrontMenu($params, $smarty): void
+    public function renderCustomFrontMenuPlugin($params, $smarty): void
     {
         if (!isset($params['menu_id'])) {
-            throw new \InvalidArgumentException('The menu_id parameter is required', 0);
+            throw new \InvalidArgumentException(Translator::getInstance()->trans('The menu_id parameter is required', [], CustomFrontMenu::DOMAIN_NAME), 0);
         }
 
         $menuItems = $this->menuController->getMenuItems();

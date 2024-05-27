@@ -9,12 +9,29 @@ return array(
     'Link to' => 'Lien à',
     'Menu name' => 'Nom du menu',
     'New link' => 'Nouveau lien',
-    'No language selected' => 'Aucune langue n\'est sélectionnée',
     'No parent' => 'Aucun parent',
     'Page' => 'Page',
     'Parent' => 'Parent',
+    'URL' => 'URL',
+
     'Select a menu' => 'Sélectionner un menu',
     'Text link' => 'Text du lien',
+
+    'No language selected' => 'Aucune langue n\'est sélectionnée',
     'This menu already exists' => 'Ce menu existe déjà',
-    'URL' => 'URL',
+    'The menu_id parameter is required' => 'Le paramètre menu_id est requis',
+    'This menu does not exists' => "Ce menu n'existe pas",
+
+    'Current menu deleted successfully' => 'Le menu a été supprimé avec succès',
+    'New menu added successfully' => 'Nouveau menu ajouté avec succès',
+    'This title has been successfully saved !' => 'Ce titre a été ajouté avec succès !',
+
+    'Fail to load menu names from the database' => 'Echec du chargement des noms des menus depuis la base de données',
+    'Fail to delete the current menu (1)'=> 'Echec de la suppression du menu courant (1)',
+    'Fail to delete the current menu (2)' => 'Echec de la suppression du menu courant (2)',
+    'Fail to load this menu (3)' => 'Echec du chargement du menu (3)',
+    'An error occurred when saving in database' => 'Une erreur est survenue lors de la sauvegarde en base de données ',
+    'Failed to add a new menu' => "Echec de l'ajout du nouveau menu",
+    'An error occurred when saving in database. Cannot save if no menu is selected' => "Une erreur est survenue lors de la sauvegarde en base de données. Impossible de sauvegarder si aucun menu n'est séléctionné",
+
 );
