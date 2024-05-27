@@ -1,6 +1,6 @@
-var MENU_LIST
 var MENU_NAMES
-let CURRENT_SELECTED_MENU_ID
+var MENU_LIST
+var CURRENT_SELECTED_MENU_ID
 let CURRENT_ID = null
 let allowUnload = false
 
@@ -115,38 +115,20 @@ function addCustomMenuItem(form, id="0") {
 }
 
 
-
 function deleteFormField(formId) {
     let form = document.getElementById(formId)
     form.elements['menuItemName'].value = null
     form.elements['menuItemUrl'].value = null
 }
 
-function getMenuList(){
-    const jsonMenuList = decodeURIComponent(document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("menuItems="))
-        ?.split("=")[1]);
-    return JSON.parse(jsonMenuList);
+function getMenuList(json){
+    const jsonMenuList = decodeURIComponent(json)
+    return JSON.parse(jsonMenuList)
 }
 
-function getMenuNames(){
-    const jsonMenuNames = decodeURIComponent(document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("menuNames="))
-        ?.split("=")[1]);
-    return JSON.parse(jsonMenuNames);
-}
-
-function getCurrentMenuId(){
-    const jsonMenuId = decodeURIComponent(document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("currentMenuId="))
-        ?.split("=")[1]);
-    if (jsonMenuId) {
-        return jsonMenuId
-    }
-    return JSON.parse(jsonMenuId);
+function getMenuNames(json){
+    const jsonMenuNames = decodeURIComponent(json)
+    return JSON.parse(jsonMenuNames)
 }
 
 function deleteMenuItem(id) {
@@ -804,14 +786,12 @@ document.addEventListener('DOMContentLoaded', function() {
             removeFlashMessages();
             clearFlashMessagesOnServer();
         }
-
     });
 });
 
 window.onload = function() {
-    MENU_NAMES = getMenuNames()
-    MENU_LIST = getMenuList()
-    CURRENT_SELECTED_MENU_ID = getCurrentMenuId()
+    MENU_NAMES = getMenuNames(menuNames)
+    MENU_LIST = getMenuList(menuItems)
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
