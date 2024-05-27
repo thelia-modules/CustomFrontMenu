@@ -813,6 +813,12 @@ window.onload = function() {
     generateMenu(MENU_LIST)
     generatePreviewMenus()
     addSelectedMenuIdToForm('deleteForm', 'menuNameToDelete')
+    if (CURRENT_SELECTED_MENU_ID === 'undefined') {
+        let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
+        listToDelete.forEach(function (elementToDelete) {
+            elementToDelete.remove()
+        })
+    }
 }
 
 window.addEventListener('beforeunload', function(event) {

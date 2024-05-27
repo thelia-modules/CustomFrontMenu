@@ -26,7 +26,7 @@
         {/foreach}
     {/if}
 
-    <div id="preview-menu">
+    <div id="preview-menu" class="delete-if-no-menu">
         <h3>Preview menu</h3>
 
         <ul id="menus">
@@ -34,7 +34,7 @@
         </ul>
     </div>
 
-    <div class="top">
+    <div class="top delete-if-no-menu">
         <button id="toggle-all-childrens" class="btn top-btn" onclick="toggleTopLevelVisibility()">Hide all children</button>
         <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
             Add a new parent
@@ -53,7 +53,7 @@
         </form>
     </div>
 
-    <div id="save-div" class="bottom">
+    <div id="save-div" class="bottom delete-if-no-menu">
         <button class="btn btn-success btn-responsive" id="save-menu" onclick="saveData()">Save</button>
         <button class="btn btn-danger btn-responsive" id="discard-change-menu" data-toggle="modal" data-target="#ConfirmDiscard">Discard changes</button>
     </div>

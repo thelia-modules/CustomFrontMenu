@@ -61,6 +61,11 @@ class MenuController extends BaseAdminController
         $dataArray = json_decode($dataJson, true);
         $menuId = json_decode($request->get('menuDataId'));
 
+        if (!isset($menuId) || $menuId === 'undefined' || $menuId === 'null') {
+            $this->getSession()->getFlashBag()->add('fail', 'An error occurred when saving in database. Cannot save if no menu is selected.');
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        }
+
         try {
             // Delete all the items currently in database for the menu to save
             $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
