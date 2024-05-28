@@ -2,7 +2,7 @@ var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
 let CURRENT_ID = null
-let allowUnload = false
+let allowUnload = true
 
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -36,7 +36,7 @@ function changeParameters(id) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
-    let titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
+    const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
     titleSpan.textContent = title
     MENU_LIST = searchInMenuList(id, title, url, MENU_LIST)
     deleteFormField('editMenuItemForm')
@@ -174,8 +174,8 @@ function addInList(id, item, list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth != 0){
-        if (menuItem.depth%2 == 0){
+    if (menuItem.depth !== 0){
+        if (menuItem.depth%2 === 0){
             depth = "even-depth"
         }
         else {
@@ -343,7 +343,7 @@ function getNextId() {
     let arrayOfIds = getAllIdOf(MENU_LIST)
     arrayOfIds.sort((a, b) => a - b)
     for (const id of arrayOfIds){
-        if (id != nextId){
+        if (id !== nextId){
             break
         }
         nextId++
@@ -455,16 +455,16 @@ function drop(ev) {
         // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
         const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
-        if (problems == 0){
+        if (problems === 0){
             console.log("success")
         }
-        else if (problems == 1){
+        else if (problems === 1){
             console.log("OSKOUR: element not found in list")
         }
-        else if (problems == 2) {
+        else if (problems === 2) {
             console.log("is parent")
         }
-        else if (problems == 3) {
+        else if (problems === 3) {
             console.log("same element")
         }
 
@@ -495,7 +495,7 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
             while (draggedItem.children.length > 0){
                 let popedChild = draggedItem.children.pop()
-                if (root == 0){
+                if (root === 0){
                     MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 else {
@@ -616,27 +616,18 @@ function findMenuItemById(itemId) {
 }
 
 
-// find the index of an element in MENU_LIST from its id
-function findIndexOfMenuItem(itemId) {
-    for (var i = 0; i < MENU_LIST.length; i++) {
-        if (MENU_LIST[i].id === itemId) {
-            return i;
-        }
-    }
-    return -1;
-}
 
 function allowDrop(ev) {
     ev.preventDefault();
-    var dropIndicator = document.querySelector('.drop-indicator');
+    const dropIndicator = document.querySelector('.drop-indicator');
 
     try{
         // retrieve mouse position relative to the target element
-        var rect = ev.target.closest("div.item").getBoundingClientRect();
-        var mouseY = ev.clientY - rect.top;
-        var mouseX = ev.clientX - rect.left;
+        const rect = ev.target.closest("div.item").getBoundingClientRect();
+        const mouseY = ev.clientY - rect.top;
+        const mouseX = ev.clientX - rect.left;
 
-        var targetItem = ev.target.closest(".item").parentElement;
+        const targetItem = ev.target.closest(".item").parentElement;
         // display bar above or below the target element
 
         dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positions the bar to the left of the target element
@@ -662,7 +653,7 @@ function allowDrop(ev) {
 
 // ------------------------------ Begin Preview ------------------------------
 function generatePreviewMenus() {
-    previewUl = document.getElementById('menus')
+    const previewUl = document.getElementById('menus')
     previewUl.innerHTML = ""
     for (const menuItem of MENU_LIST){
         previewUl.innerHTML += generatePreviewMenuRecursive(menuItem, 1)
@@ -677,15 +668,14 @@ function generatePreviewMenuRecursive(menuItem){
         }
     }
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
-    let newMenu = `
+    return `
         <li>
-            <a>`+menuItem.title+`</a>
-            <ul class="`+classes+`">
-                `+children+`
+            <a>` + menuItem.title + `</a>
+            <ul class="` + classes + `">
+                ` + children + `
             </ul>
         </li>
-    `
-    return newMenu;
+    `;
 }
 
 // ------------------------------ End Preview ------------------------------
@@ -782,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add a click event listener to the document
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function() {
         if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
             removeFlashMessages();
             clearFlashMessagesOnServer();
@@ -807,6 +797,6 @@ window.onload = function() {
 
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
-        //event.preventDefault();
+        event.preventDefault();
     }
 }, { capture: true });
