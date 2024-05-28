@@ -21,8 +21,8 @@ function searchInMenuList(id, title, url, list) {
             element.title = title
             element.url = url
         }
-        if (element.childrens && element.childrens.length > 0) {
-            element.childrens = searchInMenuList(id, title, url, element.childrens)
+        if (element.children && element.children.length > 0) {
+            element.children = searchInMenuList(id, title, url, element.children)
         }
         return element;
     })
@@ -30,8 +30,8 @@ function searchInMenuList(id, title, url, list) {
 }
 
 function changeParameters(id) {
-    let [title, url] = getFormItems('editMenuItemForm')
-    let menuItem = document.getElementById(id).parentElement
+    const [title, url] = getFormItems('editMenuItemForm')
+    const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
@@ -79,7 +79,7 @@ function addCustomMenuItem(form, id="0") {
         title: menuItemName,
         url: menuItemUrl,
         depth: depthToAdd,
-        childrens: []
+        children: []
     };
     let newMenu = generateMenuRecursive(newItem);
     if (element === null) {
@@ -148,8 +148,8 @@ function deleteMenuItem(id) {
 
 function deleteFromList(id, list) {
     list = list.filter(function(element) {
-        if (element.childrens && element.childrens.length > 0) {
-            element.childrens = deleteFromList(id, element.childrens)
+        if (element.children && element.children.length > 0) {
+            element.children = deleteFromList(id, element.children)
         }
         return element.id !== id;
     })
@@ -159,13 +159,13 @@ function deleteFromList(id, list) {
 function addInList(id, item, list) {
     list = list.map(function(element) {
         if (element.id === id) {
-            if (!Array.isArray(element.childrens)) {
-                element.childrens = []
+            if (!Array.isArray(element.children)) {
+                element.children = []
             }
-            element.childrens.push(item)
+            element.children.push(item)
         }
-        if (element.childrens && element.childrens.length > 0) {
-            element.childrens = addInList(id, item, element.childrens)
+        if (element.children && element.children.length > 0) {
+            element.children = addInList(id, item, element.children)
         }
         return element;
     })
@@ -183,15 +183,15 @@ function generateMenuRecursive(menuItem){
         }
     }
 
-    let childrens = ""
-    if (menuItem.childrens && menuItem.childrens.length > 0){
-        for (const child of menuItem.childrens){
-            childrens += generateMenuRecursive(child)
+    let children = ""
+    if (menuItem.children && menuItem.children.length > 0){
+        for (const child of menuItem.children){
+            children += generateMenuRecursive(child)
         }
     }
 
     let arrowSpan = ""
-    if (childrens !== "") {
+    if (children !== "") {
         arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
     }
 
@@ -220,8 +220,8 @@ function generateMenuRecursive(menuItem){
                 <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
             </span>
         </div>
-        <ul class="menu-item" style="`+ ((childrens) ? "display: block;" : "display: none;") +`">
-            `+childrens+`
+        <ul class="menu-item" style="`+ ((children) ? "display: block;" : "display: none;") +`">
+            `+children+`
         </ul>
     </li>`
 
@@ -257,10 +257,10 @@ function findMenuInList(id, list) {
         if (menuItem.id === id){
             return menuItem
         }
-        if (menuItem.childrens && menuItem.childrens.length > 0){
-            let childrens = menuItem.childrens
-            for (const child of childrens){
-                let result = findMenuInList(id, childrens)
+        if (menuItem.children && menuItem.children.length > 0){
+            let children = menuItem.children
+            for (const child of children){
+                let result = findMenuInList(id, children)
                 if (result){
                     return result
                 }
@@ -280,8 +280,8 @@ function moveMenuUpInList(id, list) { // recursive
             }
             return list
         }
-        if (list[i].childrens && list[i].childrens.length > 0){
-            list[i].childrens = moveMenuUpInList(id, list[i].childrens)
+        if (list[i].children && list[i].children.length > 0){
+            list[i].children = moveMenuUpInList(id, list[i].children)
         }
     }
     return list
@@ -297,8 +297,8 @@ function moveMenuDownInList(id, list) {
             }
             return list
         }
-        if (list[i].childrens && list[i].childrens.length > 0){
-            list[i].childrens = moveMenuDownInList(id, list[i].childrens)
+        if (list[i].children && list[i].children.length > 0){
+            list[i].children = moveMenuDownInList(id, list[i].children)
         }
     }
     return list
@@ -355,10 +355,10 @@ function getAllIdOf(list) {
     let arrayOfIds = []
     for (const menuItem of list){
         arrayOfIds.push(menuItem.id)
-        if (menuItem.childrens && menuItem.childrens.length > 0){
-            let childrens = menuItem.childrens
-            for (const child of childrens){
-                let result = getAllIdOf(childrens)
+        if (menuItem.children && menuItem.children.length > 0){
+            let children = menuItem.children
+            for (const child of children){
+                let result = getAllIdOf(children)
                 for (const id of result){
                     if (!arrayOfIds.includes(id)){
                         arrayOfIds.push(id)
@@ -373,7 +373,7 @@ function getAllIdOf(list) {
 // ------------------------------ Begin drop down ------------------------------
 
 function toggleTopLevelVisibility() {
-    const button = document.getElementById('toggle-all-childrens');
+    const button = document.getElementById('toggle-all-children');
     const isVisible = button.textContent === 'Hide all children';
 
     MENU_LIST.forEach(item => {
@@ -433,6 +433,8 @@ function drop(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
+    document.querySelector('.drop-indicator').style.display = 'none'
+
     // recup id de l'elem déplacé
     var data = ev.dataTransfer.getData("text/plain");
     var draggedItemId = parseInt(data);
@@ -442,9 +444,6 @@ function drop(ev) {
 
     if (draggedItem) { // Vérifier si l'élément a été trouvé
         var targetItemId = parseInt(ev.target.closest(".item").id)
-
-        var dropIndicator = document.querySelector('.drop-indicator')
-        dropIndicator.style.display = 'none'
 
         var rect = ev.target.closest("div.item").getBoundingClientRect()
         var mouseY = ev.clientY - rect.top;
@@ -494,13 +493,13 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
             }
 
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
-            while (draggedItem.childrens.length > 0){
-                let popedChild = draggedItem.childrens.pop()
+            while (draggedItem.children.length > 0){
+                let popedChild = draggedItem.children.pop()
                 if (root == 0){
                     MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 else {
-                    parentOfDragged.childrens.splice(parentOfDragged.childrens.indexOf(draggedItem)+1, 0, popedChild)
+                    parentOfDragged.children.splice(parentOfDragged.children.indexOf(draggedItem)+1, 0, popedChild)
                 }
                 popedChild.depth = (root === 0) ? 0 : parentOfDragged.depth + 1
                 updateDepth(popedChild, popedChild.depth)
@@ -514,11 +513,11 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
 
             const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
 
-            if (newParent.childrens == null){
-                newParent.childrens = [draggedItem]
+            if (newParent.children == null){
+                newParent.children = [draggedItem]
             }
             else {
-                newParent.childrens.push(draggedItem)
+                newParent.children.push(draggedItem)
             }
             draggedItem.depth = newParent.depth + 1
             updateDepth(draggedItem, draggedItem.depth)
@@ -536,7 +535,7 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
             menuToMove.depth = 0
         }
         else {
-            insertionBefore ? parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.childrens.splice(parent.childrens.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
+            insertionBefore ? parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
             menuToMove.depth = parent.depth + 1
         }
 
@@ -548,8 +547,8 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
 
 function isParentOf(parent, child){
     let parentElement = findMenuInList(parent, MENU_LIST)
-    if (parentElement.childrens && parentElement.childrens.length > 0){
-        for (const childElement of parentElement.childrens){
+    if (parentElement.children && parentElement.children.length > 0){
+        for (const childElement of parentElement.children){
             if (childElement.id === child || isParentOf(childElement.id, child)) {
                 return true
             }
@@ -559,8 +558,8 @@ function isParentOf(parent, child){
 }
 
 function updateDepth(menuItem, depth){
-    if (menuItem.childrens && menuItem.childrens.length > 0){
-        for (const child of menuItem.childrens){
+    if (menuItem.children && menuItem.children.length > 0){
+        for (const child of menuItem.children){
             child.depth = depth + 1
             updateDepth(child, child.depth)
         }
@@ -572,10 +571,10 @@ function findParentOf(id, list) {
         if (menuItem.id === id) {
             return [0, menuItem]
         }
-        if (menuItem.childrens && menuItem.childrens.length > 0){
-            let childrens = menuItem.childrens
-            for (const _ of childrens){
-                let result = findParentOf(id, childrens)
+        if (menuItem.children && menuItem.children.length > 0){
+            let children = menuItem.children
+            for (const _ of children){
+                let result = findParentOf(id, children)
                 if (result){
                     if (result[0] === 0){
                         return [1, menuItem]
@@ -596,13 +595,13 @@ function popFromMenuList(id, list){
             }
             return menuItem
         }
-        if (menuItem.childrens && menuItem.childrens.length > 0){
-            let childrens = menuItem.childrens
-            for (const child of childrens){
-                let result = popFromMenuList(id, childrens)
+        if (menuItem.children && menuItem.children.length > 0){
+            let children = menuItem.children
+            for (const child of children){
+                let result = popFromMenuList(id, children)
                 if (result) {
-                    if (childrens.indexOf(result) !== -1){
-                        return childrens.splice(childrens.indexOf(result), 1)[0]
+                    if (children.indexOf(result) !== -1){
+                        return children.splice(children.indexOf(result), 1)[0]
                     }
                     return result
                 }
@@ -629,16 +628,16 @@ function findIndexOfMenuItem(itemId) {
 
 function allowDrop(ev) {
     ev.preventDefault();
-
-    // retrieve mouse position relative to the target element
-    var rect = ev.target.closest("div.item").getBoundingClientRect();
-    var mouseY = ev.clientY - rect.top;
-    var mouseX = ev.clientX - rect.left;
+    var dropIndicator = document.querySelector('.drop-indicator');
 
     try{
+        // retrieve mouse position relative to the target element
+        var rect = ev.target.closest("div.item").getBoundingClientRect();
+        var mouseY = ev.clientY - rect.top;
+        var mouseX = ev.clientX - rect.left;
+
         var targetItem = ev.target.closest(".item").parentElement;
         // display bar above or below the target element
-        var dropIndicator = document.querySelector('.drop-indicator');
 
         dropIndicator.style.left = targetItem.offsetLeft + 'px'; // positions the bar to the left of the target element
         dropIndicator.style.width = targetItem.offsetWidth + 'px'; // adjust bar width to that of the target elem
@@ -654,7 +653,9 @@ function allowDrop(ev) {
         }
         dropIndicator.style.display = 'block';
     }
-    catch{}
+    catch{
+        dropIndicator.style.display = 'none';
+    }
 }
 
 // ------------------------------ End drag and drop ------------------------------
@@ -669,10 +670,10 @@ function generatePreviewMenus() {
 }
 
 function generatePreviewMenuRecursive(menuItem){
-    let childrens = ""
-    if (menuItem.childrens && menuItem.childrens.length > 0){
-        for (const child of menuItem.childrens){
-            childrens += generatePreviewMenuRecursive(child)
+    let children = ""
+    if (menuItem.children && menuItem.children.length > 0){
+        for (const child of menuItem.children){
+            children += generatePreviewMenuRecursive(child)
         }
     }
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
@@ -680,7 +681,7 @@ function generatePreviewMenuRecursive(menuItem){
         <li>
             <a>`+menuItem.title+`</a>
             <ul class="`+classes+`">
-                `+childrens+`
+                `+children+`
             </ul>
         </li>
     `

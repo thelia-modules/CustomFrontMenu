@@ -34,8 +34,8 @@ class CFMSaveService implements CFMSaveInterface
             $content->setLocale('en_US');
             $content->save();
 
-            if (isset($element['childrens']) && $element['childrens'] !== []) {
-                $this->saveTableBrowser($element['childrens'], $item);
+            if (isset($element['children']) && $element['children'] !== []) {
+                $this->saveTableBrowser($element['children'], $item);
             }
             $parent->save();
         }
