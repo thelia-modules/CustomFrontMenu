@@ -1,5 +1,5 @@
 <?php
-namespace CustomFrontMenuPlugin\Smarty\Plugins;
+namespace CustomFrontMenu\Smarty\Plugins;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;

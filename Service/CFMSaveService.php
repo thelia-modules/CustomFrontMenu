@@ -19,7 +19,8 @@ class CFMSaveService implements CFMSaveInterface
      * @throws PropelException
      * @throws Exception
      */
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent) : void
+
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, string $locale) : void
     {
         foreach ($dataArray as $element) {
             $item = new CustomFrontMenuItem();
@@ -31,11 +32,11 @@ class CFMSaveService implements CFMSaveInterface
             $content->setTitle(Validator::completeValidation($element['title']));
             $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url']), FilterType::URL));
             $content->setId($item->getId());
-            $content->setLocale('en_US');
+            $content->setLocale($locale);
             $content->save();
 
             if (isset($element['children']) && $element['children'] !== []) {
-                $this->saveTableBrowser($element['children'], $item);
+                $this->saveTableBrowser($element['children'], $item, $locale);
             }
             $parent->save();
         }

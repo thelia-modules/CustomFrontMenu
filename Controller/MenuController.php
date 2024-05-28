@@ -34,7 +34,8 @@ class MenuController extends BaseAdminController
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
-            $this->loadMenuItems($session, $menuId);
+            $locale = $session->get('_locale', 'en_US');
+            $this->loadMenuItems($locale,$session, $menuId);
         } catch(\Exception $e) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load this menu (3)', [], CustomFrontMenu::DOMAIN_NAME));
         }
@@ -70,8 +71,9 @@ class MenuController extends BaseAdminController
             $menu->save();
 
             // Add all new items in database
+            $locale = $session->get('_locale', 'en_US');
             $cfmSaveService = new CFMSaveService();
-            $cfmSaveService->saveTableBrowser($dataArray, $menu);
+            $cfmSaveService->saveTableBrowser($dataArray, $menu, $locale);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
@@ -87,7 +89,7 @@ class MenuController extends BaseAdminController
      * Load the different menu names
      * @throws PropelException
      */
-    public function loadSelectMenu() : array
+    public function loadSelectMenu(string $locale) : array
     {
         $root = $this->getRoot();
         $descendants = $root->getChildren();
@@ -97,8 +99,7 @@ class MenuController extends BaseAdminController
             $newArray['id'] = 'menu-selected-'.$descendant->getId();
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
-                ->findByLocale($descendant->getLocale());
-
+                ->findByLocale($locale);
             $newArray['title'] = $content->getColumnValues('title');
             $dataArray[] = $newArray;
         }
@@ -172,11 +173,12 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      */
-    public function loadMenuItems(SessionInterface $session, int $menuId = null) : array
+
+    public function loadMenuItems(string $locale, SessionInterface $session, ?int $menuId = null) : array
     {
         $menuNames = [];
         try {
-            $menuNames = $this->loadSelectMenu();
+            $menuNames = $this->loadSelectMenu($locale);
         } catch (\Exception $e3) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load menu names from the database', [], CustomFrontMenu::DOMAIN_NAME));
         }
@@ -198,7 +200,7 @@ class MenuController extends BaseAdminController
                     $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
                     setcookie('menuId', -1);
                 }
-                
+
             } catch (\Exception $e2) {
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
 
@@ -212,7 +214,8 @@ class MenuController extends BaseAdminController
         ];
     }
 
-     /**
+
+    /**
      * Get the list of all menu items
      * @return array
      */
