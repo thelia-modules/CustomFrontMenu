@@ -157,7 +157,6 @@ ul.menu-item:last-child {
     
     li {
         position: relative;
-        padding: 10px 15px;
     }
     
     li:hover>.parent {
@@ -170,6 +169,11 @@ ul.menu-item:last-child {
 
     li:hover {
         background-color: #f49a17;
+    }
+
+    li>a{
+        display: block;
+        padding: 10px 15px;
     }
 
     li:hover>a {
