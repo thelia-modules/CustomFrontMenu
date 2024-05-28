@@ -7,8 +7,8 @@
         <form id="askedMenu" action="{url path="/admin/module/CustomFrontMenu/selectMenu"}" method="POST" style="display:none;">
             <input type="hidden" name="menuId" id="menuId">
         </form>
-        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
-        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
+        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">{intl l="Add a new menu" d="customfrontmenu.bo.default"}</button>
+        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmDeleteMenu">{intl l="Delete this menu" d="customfrontmenu.bo.default"}</button>
     </div>
 
     {if isset($smarty.session["_symfony_flashes"]["success"])}
@@ -27,7 +27,7 @@
     {/if}
 
     <div id="preview-menu" class="delete-if-no-menu">
-        <h3>Preview menu</h3>
+        <h3>{intl l="Preview menu" d="customfrontmenu.bo.default"}</h3>
 
         <ul id="menus">
 
@@ -35,9 +35,9 @@
     </div>
 
     <div class="top delete-if-no-menu">
-        <button id="toggle-all-childrens" class="btn top-btn" onclick="toggleTopLevelVisibility()">Hide all children</button>
+        <button id="toggle-all-childrens" class="btn top-btn" onclick="toggleTopLevelVisibility()">{intl l="Hide all children" d="customfrontmenu.bo.default"}</button>
         <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn" data-toggle="modal" data-target="#AddAndEditMenu">
-            Add a new parent
+            {intl l="Add a new parent" d="customfrontmenu.bo.default"}
             <i class="glyphicon glyphicon-plus-sign"></i>
         </button>
     </div>
@@ -54,8 +54,8 @@
     </div>
 
     <div id="save-div" class="bottom delete-if-no-menu">
-        <button class="btn btn-success btn-responsive" id="save-menu" onclick="saveData()">Save</button>
-        <button class="btn btn-danger btn-responsive" id="discard-change-menu" data-toggle="modal" data-target="#ConfirmDiscard">Discard changes</button>
+        <button class="btn btn-success btn-responsive" id="save-menu" onclick="saveData()">{intl l="Save" d="customfrontmenu.bo.default"}</button>
+        <button class="btn btn-danger btn-responsive" id="discard-change-menu" data-toggle="modal" data-target="#ConfirmDiscard">{intl l="Discard changes" d="customfrontmenu.bo.default"}</button>
     </div>
 </div>
 
