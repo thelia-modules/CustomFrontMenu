@@ -374,7 +374,7 @@ function getAllIdOf(list) {
 
 function toggleTopLevelVisibility() {
     const button = document.getElementById('toggle-all-children');
-    const isVisible = button.textContent === 'Hide all children';
+    const isVisible = (buttonState === 'hide');
 
     MENU_LIST.forEach(item => {
         if (item.depth === 0) {
@@ -393,7 +393,8 @@ function toggleTopLevelVisibility() {
             }
         }
     });
-    button.textContent = isVisible ? 'Show all children' : 'Hide all children';
+    buttonState = isVisible ? 'show' : 'hide';
+    button.textContent = isVisible ? translations.showAllChildren : translations.hideAllChildren;
 }
 
 

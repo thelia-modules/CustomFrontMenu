@@ -33,6 +33,7 @@ return array(
     'Update item' => 'Mise à jour de l\'élément',
     'Preview menu' => 'Prévisualisation du menu',
     'Save' => 'Enregistrer',
+    'Show all children' => 'Voir tous les enfants',
     'Submenu name' => 'Nom du sous-menu',
     'Target product' => 'Produit cible',
     'Would you like to delete this menu item ?' => 'Voulez-vous supprimer ce lien ?',
