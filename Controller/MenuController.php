@@ -32,13 +32,13 @@ class MenuController extends BaseAdminController
     private int $COUNT_ID = 1;
 
     #[Route("/admin/module/CustomFrontMenu/selectMenu", name: "admin.customfrontmenu.select.menu", methods: ["POST"])]
-    public function selectOtherMenu(Request $request, SessionInterface $session) : RedirectResponse
+    public function selectOtherMenu(Request $request, SessionInterface $session, CFMLoadService $cfmLoadService) : RedirectResponse
     {
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
             $locale = $session->get('_locale', 'en_US');
-            $this->loadMenuItems($locale,$session, $menuId);
+            $this->loadMenuItems($locale, $session, $cfmLoadService, $menuId);
         } catch(\Exception $e) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load this menu (3)', [], CustomFrontMenu::DOMAIN_NAME));
         }
@@ -71,16 +71,19 @@ class MenuController extends BaseAdminController
             }
             $menu->deleteDescendants();
 
+            $locale = $session->get('_locale', 'en_US');
+
             $menu->save();
 
             // Add all new items in database
             $locale = $session->get('_locale', 'en_US');
-            $cfmSaveService->saveTableBrowser($dataArray, $menu, $locale);
+            $cfmSaveService->saveTableBrowser($dataArray, $menu, $session, $locale);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
         } catch (\Exception $e) {
             print_r($e->getMessage());
+            die;
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('An error occurred when saving in database', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
@@ -110,7 +113,7 @@ class MenuController extends BaseAdminController
     }
 
     #[Route("/admin/module/CustomFrontMenu/add", name: "admin.customfrontmenu.addmenu", methods: ["POST"])]
-    public function addMenu(Request $request, SessionInterface $session) : RedirectResponse
+    public function addMenu(Request $request, SessionInterface $session, CFMLoadService $cfmLoadService) : RedirectResponse
     {
         try {
             $menuName = $request->get('menuName');
@@ -123,10 +126,12 @@ class MenuController extends BaseAdminController
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
-            $this->loadMenuItems($session, $item->getId());
+            $locale = $session->get('_locale', 'en_US');
+            $this->loadMenuItems($locale, $session, $cfmLoadService, $item->getId());
             setcookie('menuId', $item->getId());
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
+            dd($e->getMessage());
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Failed to add a new menu', [], CustomFrontMenu::DOMAIN_NAME));
         }
 

@@ -12,20 +12,13 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CFMSaveService implements CFMSaveInterface
 {
-    protected $session;
-
-    public function __construct(SessionInterface $session)
-    {
-        $this->session = $session;
-    }
-
     /**
      * Save all elements from an array recursively to the database
      * @throws PropelException
      * @throws Exception
      */
 
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, string $locale) : void
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session, string $locale) : void
     {
         foreach ($dataArray as $element) {
             $item = new CustomFrontMenuItem();
@@ -41,7 +34,7 @@ class CFMSaveService implements CFMSaveInterface
             $content->save();
 
             if (isset($element['children']) && $element['children'] !== []) {
-                $this->saveTableBrowser($element['children'], $item, $locale);
+                $this->saveTableBrowser($element['children'], $item, $session, $locale);
             }
             $parent->save();
         }
