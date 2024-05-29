@@ -120,15 +120,24 @@
 
         <!-- Modal content-->
         <div class="modal-content">
-            <div class="modal-header">
+            <li class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">{intl l="Edit menu" d="customfrontmenu.bo.default"}</h4>
-            </div>
+            </li>
+            <ul class="dropdown-menu">
+
+            </ul>
             <div class="modal-body">
                 <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
+                <div class="dropdown open">
+                    <button class="dropdown-toggle" data-toggle="dropdown">
+                        <img class="flags" src="http://thelia-modules.th/assets/backOffice/default/template-assets/assets/img/svgFlags/fa1fe83.svg">
+                    </button>
+                </div>
                 <form id="editMenuItemForm">
                     <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemName" name="menuItemName"><br><br>
+                    <input type="text" id="menuItemName" name="menuItemName">
+                    <button type="button" class="btn btn-success" data-dismiss="modal"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
                 </form>
