@@ -89,7 +89,7 @@ class MenuController extends BaseAdminController
      * Load the different menu names
      * @throws PropelException
      */
-    public function loadSelectMenu(string $locale) : array
+    public function loadSelectMenu() : array
     {
         $root = $this->getRoot();
         $descendants = $root->getChildren();
@@ -99,7 +99,7 @@ class MenuController extends BaseAdminController
             $newArray['id'] = 'menu-selected-'.$descendant->getId();
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
-                ->findByLocale($locale);
+                ->findByLocale("en_US");
             $newArray['title'] = $content->getColumnValues('title');
             $dataArray[] = $newArray;
         }
@@ -178,7 +178,7 @@ class MenuController extends BaseAdminController
     {
         $menuNames = [];
         try {
-            $menuNames = $this->loadSelectMenu($locale);
+            $menuNames = $this->loadSelectMenu();
         } catch (\Exception $e3) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load menu names from the database', [], CustomFrontMenu::DOMAIN_NAME));
         }
@@ -195,7 +195,7 @@ class MenuController extends BaseAdminController
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
                 if (isset($menu)) {
                     $cfmLoadService = new CFMLoadService();
-                    $data = $cfmLoadService->loadTableBrowser($menu);
+                    $data = $cfmLoadService->loadTableBrowser($menu, $locale);
                 } else {
                     $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
                     setcookie('menuId', -1);
@@ -203,7 +203,6 @@ class MenuController extends BaseAdminController
 
             } catch (\Exception $e2) {
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
-
             }
         }
 
