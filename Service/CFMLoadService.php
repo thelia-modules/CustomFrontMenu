@@ -33,7 +33,7 @@ class CFMLoadService implements CFMLoadInterface
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArray['childrens'] = $this->loadTableBrowser($descendant);
+                $newArray['children'] = $this->loadTableBrowser($descendant);
             }
             $dataArray[] = $newArray;
         }

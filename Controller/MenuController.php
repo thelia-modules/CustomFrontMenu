@@ -2,6 +2,9 @@
 
 namespace CustomFrontMenu\Controller;
 
+use CustomFrontMenu\CustomFrontMenu;
+use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -17,6 +20,7 @@ use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
+use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
 use CustomFrontMenu\Service\Validator;
 
@@ -33,9 +37,10 @@ class MenuController extends BaseAdminController
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
-            $this->loadMenuItems($session, $menuId);
+            $locale = $session->get('_locale', 'en_US');
+            $this->loadMenuItems($locale,$session, $menuId);
         } catch(\Exception $e) {
-            $session->getFlashBag()->add('fail', 'Fail to load this menu (3)');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load this menu (3)', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         setcookie('menuId', $menuId);
@@ -45,14 +50,14 @@ class MenuController extends BaseAdminController
 
 
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request, SessionInterface $session) : RedirectResponse
+    public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSaveService) : RedirectResponse
     {
         $dataJson = $request->get('menuData');
         $dataArray = json_decode($dataJson, true);
         $menuId = json_decode($request->get('menuDataId'));
 
         if (!isset($menuId) || $menuId === 'undefined' || $menuId === 'null') {
-            $this->getSession()->getFlashBag()->add('fail', 'An error occurred when saving in database. Cannot save if no menu is selected.');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('An error occurred when saving in database. Cannot save if no menu is selected', [], CustomFrontMenu::DOMAIN_NAME));
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
 
@@ -69,14 +74,14 @@ class MenuController extends BaseAdminController
             $menu->save();
 
             // Add all new items in database
-            $cfmSaveService = new CFMSaveService();
-            $cfmSaveService->saveTableBrowser($dataArray, $menu);
+            $locale = $session->get('_locale', 'en_US');
+            $cfmSaveService->saveTableBrowser($dataArray, $menu, $locale);
 
-            $session->getFlashBag()->add('success', 'This menu has been successfully saved !');
+            $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
         } catch (\Exception $e) {
             print_r($e->getMessage());
-            $session->getFlashBag()->add('fail', 'An error occurred when saving in database.');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('An error occurred when saving in database', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
@@ -86,7 +91,7 @@ class MenuController extends BaseAdminController
      * Load the different menu names
      * @throws PropelException
      */
-    public function loadSelectMenu() : array
+    public function loadSelectMenu(string $locale) : array
     {
         $root = $this->getRoot();
         $descendants = $root->getChildren();
@@ -120,9 +125,9 @@ class MenuController extends BaseAdminController
             $content->save();
             $this->loadMenuItems($session, $item->getId());
             setcookie('menuId', $item->getId());
-            $session->getFlashBag()->add('success', 'New menu added successfully');
+            $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
-            $session->getFlashBag()->add('fail', 'Failed to add a new menu');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Failed to add a new menu', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
@@ -134,7 +139,7 @@ class MenuController extends BaseAdminController
 
         $firstCurrentMenuId = $request->get('menuId');
         if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
-            $session->getFlashBag()->add('fail', 'Fail to delete the current menu (1)');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to delete the current menu (1)', [], CustomFrontMenu::DOMAIN_NAME));
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
 
@@ -143,9 +148,9 @@ class MenuController extends BaseAdminController
         try {
             CustomFrontMenuItemI18nQuery::create()->findById($currentMenuId)->delete();
             CustomFrontMenuItemQuery::create()->findById($currentMenuId)->delete();
-            $session->getFlashBag()->add('success', 'Current menu deleted successfully');
+            $session->getFlashBag()->add('success', Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
-            $session->getFlashBag()->add('fail', 'Fail to delete the current menu (2)');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to delete the current menu (2)', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         if (isset($_COOKIE['menuId'])) {
@@ -173,13 +178,14 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      */
-    public function loadMenuItems(SessionInterface $session, int $menuId = null) : array
+
+    public function loadMenuItems(string $locale, SessionInterface $session, CFMLoadInterface $cfmLoadService, ?int $menuId = null) : array
     {
         $menuNames = [];
         try {
-            $menuNames = $this->loadSelectMenu();
+            $menuNames = $this->loadSelectMenu($locale);
         } catch (\Exception $e3) {
-            $session->getFlashBag()->add('fail', 'Fail to load menu names from the database');
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load menu names from the database', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         if (!isset($menuId)) {
@@ -193,13 +199,12 @@ class MenuController extends BaseAdminController
             try {
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
                 if (isset($menu)) {
-                    $cfmLoadService = new CFMLoadService();
                     $data = $cfmLoadService->loadTableBrowser($menu);
                 } else {
-                    $session->getFlashBag()->add('fail', "This menu doesn't exist");
+                    $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
                     setcookie('menuId', -1);
                 }
-                
+
             } catch (\Exception $e2) {
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
 
@@ -213,14 +218,14 @@ class MenuController extends BaseAdminController
         ];
     }
 
-     /**
+
+    /**
      * Get the list of all menu items
      * @return array
      */
-    public function getMenuItems(SessionInterface $session) : array
+    public function getMenuItems(SessionInterface $session, CFMLoadInterface $cfmLoadService) : array
     {
         $data = [];
-        $cfmLoadService = new CFMLoadService();
 
         try {
             if (CustomFrontMenuItemQuery::create()->findRoot() === null) {

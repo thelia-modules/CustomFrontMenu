@@ -12,8 +12,8 @@
         <form id="askedMenu" action="{url path="/admin/module/CustomFrontMenu/selectMenu"}" method="POST" style="display:none;">
             <input type="hidden" name="menuId" id="menuId">
         </form>
-        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">Add a new menu</button>
-        <button class="btn top-btn delete-if-no-menu" data-toggle="modal" data-target="#ConfirmDeleteMenu">Delete this menu</button>
+        <button class="btn top-btn" data-toggle="modal" data-target="#ConfirmAddMenu">{intl l="Add a new menu" d="customfrontmenu.bo.default"}</button>
+        <button class="btn top-btn delete-if-no-menu" data-toggle="modal" data-target="#ConfirmDeleteMenu">{intl l="Delete this menu" d="customfrontmenu.bo.default"}</button>
     </div>
 
     {if isset($smarty.session["_symfony_flashes"]["success"])}
@@ -32,7 +32,7 @@
     {/if}
 
     <div id="preview-menu">
-        <h3>Preview menu</h3>
+        <h3>{intl l="Preview menu" d="customfrontmenu.bo.default"}</h3>
 
         <ul id="menus">
 
@@ -40,9 +40,9 @@
     </div>
 
     <div class="top">
-        <button id="toggle-all-childrens" class="btn top-btn delete-if-no-menu" onclick="toggleTopLevelVisibility()">Hide all children</button>
+        <button id="toggle-all-children" class="btn top-btn delete-if-no-menu" onclick="toggleTopLevelVisibility()">{intl l="Hide all children" d="customfrontmenu.bo.default"}</button>
         <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn delete-if-no-menu" data-toggle="modal" data-target="#AddAndEditMenu">
-            Add a new parent
+            {intl l="Add a new parent" d="customfrontmenu.bo.default"}
             <i class="glyphicon glyphicon-plus-sign"></i>
         </button>
     </div>
@@ -59,9 +59,19 @@
     </div>
 
     <div id="save-div" class="bottom">
-        <button class="btn btn-success btn-responsive delete-if-no-menu" id="save-menu" onclick="saveData()">Save</button>
-        <button class="btn btn-danger btn-responsive delete-if-no-menu" id="discard-change-menu" data-toggle="modal" data-target="#ConfirmDiscard">Discard changes</button>
+        <button class="btn btn-success btn-responsive delete-if-no-menu" id="save-menu" onclick="saveData()">{intl l="Save" d="customfrontmenu.bo.default"}</button>
+        <button class="btn btn-danger btn-responsive delete-if-no-menu" id="discard-change-menu" data-toggle="modal" data-target="#ConfirmDiscard">{intl l="Discard changes" d="customfrontmenu.bo.default"}</button>
     </div>
+
+    <script>
+        var translations = {
+            hideAllChildren: '{intl l="Hide all children" d="customfrontmenu.bo.default"}',
+            showAllChildren: '{intl l="Show all children" d="customfrontmenu.bo.default"}'
+        };
+
+        var buttonState = 'hide';
+    </script>
+
 </div>
 
 <!-- Modal -->
@@ -72,15 +82,15 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add/Edit menu</h4>
+                <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Add a new menu item</p>
+                <p>{intl l="Add a new menu item" d="customfrontmenu.bo.default"}</p>
                 <form id="newParentForm">
-                    <label for="menuItemName">Menu name</label>
+                    <label for="menuItemName">{intl l="Menu title" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
-                    <label for="menuItemUrl">Target URL</label>
+                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
                         {loop type="product" name="my_product_loop"}
@@ -90,8 +100,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  Create</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">Close</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
@@ -105,41 +115,41 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Edit menu</h4>
+                <h4 class="modal-title">{intl l="Edit menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Edit a menu item</p>
+                <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
                 <form id="editMenuItemForm">
-                    <label for="menuItemName">Menu name</label>
+                    <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
-                    <label for="menuItemUrl">Target URL</label>
+                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span> Save</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">Close</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Add and edit Menu Item Modal -->
+<!-- Add and edit Menu Item Modal from a child -->
 <div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
     <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add/Edit menu</h4>
+                <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Add a new menu item</p>
+                <p>{intl l="Add a submenu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuItemForm">
-                    <label for="menuItemName">Menu name</label>
+                    <label for="menuItemName">{intl l="Submenu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
-                    <label for="menuItemUrl">Target URL</label>
+                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem"><br><br>
                     <datalist id="productsListInItem">
                         {loop type="product" name="my_product_loop"}
@@ -149,8 +159,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> Create</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">Close</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
@@ -164,14 +174,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Delete menu</h4>
+                <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Delete this menu item ?</p>
+                <p>{intl l="Would you like to delete this menu item ?" d="customfrontmenu.bo.default"}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenuItem(getCurrentId())"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenuItem(getCurrentId())"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
@@ -185,14 +195,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Discard changes</h4>
+                <h4 class="modal-title">{intl l="Discard changes" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Discard all changes ?</p>
+                <p>{intl l="Would you like to discard all changes ?" d="customfrontmenu.bo.default"}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="allowUnload = true ; location.reload()"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="allowUnload = true ; location.reload()"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
@@ -206,18 +216,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add a new menu</h4>
+                <h4 class="modal-title">{intl l="Add a new menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Add a new menu</p>
+                <p>{intl l="Add a new menu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuForm" action="{url path="/admin/module/CustomFrontMenu/add"}" method="POST">
-                    <label for="menuName">Menu name</label>
+                    <label for="menuName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuName" name="menuName"><br><br>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  Create</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
@@ -231,17 +241,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Delete Menu</h4>
+                <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
-                <p>Delete this menu ?</p>
+                <p>{intl l="Would you like to delete this menu ?" d="customfrontmenu.bo.default"}</p>
                 <form id="deleteForm" action="{url path="/admin/module/CustomFrontMenu/delete"}" method="POST">
                     <input type="hidden" name="menuId" id="menuNameToDelete">
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>  Delete</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
     </div>
