@@ -3,6 +3,8 @@
 namespace CustomFrontMenu\Controller;
 
 use CustomFrontMenu\CustomFrontMenu;
+use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -47,7 +49,7 @@ class MenuController extends BaseAdminController
 
 
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request, SessionInterface $session) : RedirectResponse
+    public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSaveService) : RedirectResponse
     {
         $dataJson = $request->get('menuData');
         $dataArray = json_decode($dataJson, true);
@@ -72,7 +74,6 @@ class MenuController extends BaseAdminController
 
             // Add all new items in database
             $locale = $session->get('_locale', 'en_US');
-            $cfmSaveService = new CFMSaveService();
             $cfmSaveService->saveTableBrowser($dataArray, $menu, $locale);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
@@ -174,7 +175,7 @@ class MenuController extends BaseAdminController
      * Load the menu items
      */
 
-    public function loadMenuItems(string $locale, SessionInterface $session, ?int $menuId = null) : array
+    public function loadMenuItems(string $locale, SessionInterface $session, CFMLoadInterface $cfmLoadService, ?int $menuId = null) : array
     {
         $menuNames = [];
         try {
@@ -194,7 +195,6 @@ class MenuController extends BaseAdminController
             try {
                 $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
                 if (isset($menu)) {
-                    $cfmLoadService = new CFMLoadService();
                     $data = $cfmLoadService->loadTableBrowser($menu);
                 } else {
                     $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
@@ -219,10 +219,9 @@ class MenuController extends BaseAdminController
      * Get the list of all menu items
      * @return array
      */
-    public function getMenuItems(SessionInterface $session) : array
+    public function getMenuItems(SessionInterface $session, CFMLoadInterface $cfmLoadService) : array
     {
         $data = [];
-        $cfmLoadService = new CFMLoadService();
 
         try {
             if (CustomFrontMenuItemQuery::create()->findRoot() === null) {
