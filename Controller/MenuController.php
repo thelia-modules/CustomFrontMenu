@@ -82,8 +82,6 @@ class MenuController extends BaseAdminController
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
         } catch (\Exception $e) {
-            print_r($e->getMessage());
-            die;
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('An error occurred when saving in database', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
