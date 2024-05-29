@@ -2,25 +2,38 @@
 
 namespace CustomFrontMenu\Service;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 class Validator
 {
-    public static function stringValidation(string $string) : string
+    public static function stringValidation(string $string, SessionInterface $session) : string
     {
         $string = trim($string);
         if (strlen($string) === 0) {
             $string = "Empty field";
+            $session->getFlashBag()->add('fail', 'One or more empty fields were replaced by the tag "Empty field".');
+        }
+        return self::backQuoteProhibed($string, $session);
+    }
+
+    public static function backQuoteProhibed(string $string, SessionInterface $session) : string
+    {
+        $string = trim($string);
+        if (strpos($string, '`') !== false) {
+            $string = str_replace('`', "'", $string);
+            $session->getFlashBag()->add('fail', "One or more back quotes were replaced by simple quotes : ` -> ' .");
         }
         return $string;
     }
 
-    public static function htmlSafeValidation(string $string, bool $canBeEmpty = false) : string
+    public static function htmlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = false) : string
     {
         $string = trim($string);
 
         $string = strip_tags($string);
 
         if ($canBeEmpty) {
-            $string = self::stringValidation($string);
+            $string = self::stringValidation($string, $session);
         }
 
         //$string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
@@ -28,12 +41,12 @@ class Validator
         return $string;
     }
 
-    public static function sqlSafeValidation(string $string, bool $canBeEmpty = false) : string
+    public static function sqlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = false) : string
     {
         $string = trim($string);
 
         if ($canBeEmpty) {
-            $string = self::stringValidation($string);
+            $string = self::stringValidation($string, $session);
         }
 
         return addslashes($string);
@@ -47,14 +60,11 @@ class Validator
         return '';
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function completeValidation(string $string) : string
+    public static function completeValidation(string $string, SessionInterface $session) : string
     {
-        $string = self::stringValidation($string);
-        $string = self::htmlSafeValidation($string, true);
-        return self::sqlSafeValidation($string, true);
+        $string = self::stringValidation($string, $session);
+        $string = self::htmlSafeValidation($string, $session, true);
+        return self::sqlSafeValidation($string, $session, true);
     }
 }
 

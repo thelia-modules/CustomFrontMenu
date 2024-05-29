@@ -121,14 +121,38 @@ function deleteFormField(formId) {
     form.elements['menuItemUrl'].value = null
 }
 
-function getMenuList(json){
-    const jsonMenuList = decodeURIComponent(json)
-    return JSON.parse(jsonMenuList)
+let quotePattern = '&280&quote&280&';
+let percentPattern = '&280&percent&280&';
+
+function replaceQuoteAndPercent(string){
+    while (string.includes("\\'") || string.includes("%")) {
+        string = string
+            .replace("\\'", quotePattern)
+            .replace("%", percentPattern);
+    }
+    return string
 }
 
-function getMenuNames(json){
-    const jsonMenuNames = decodeURIComponent(json)
-    return JSON.parse(jsonMenuNames)
+function putQuoteAndPercent(string){
+    while (string.includes(quotePattern) || string.includes(percentPattern)) {
+        console.log(string)
+        string = string
+            .replace(quotePattern, "'")
+            .replace(percentPattern, "%");
+        console.log(string)
+    }
+    return string
+}
+
+function getFromJson(json){
+    
+    json = replaceQuoteAndPercent(json)
+    result = JSON.parse(decodeURIComponent(json))
+    result.forEach(function(element) {
+        element.title = putQuoteAndPercent(element.title)
+    })
+    console.log(result)
+    return result
 }
 
 function deleteMenuItem(id) {
@@ -174,6 +198,9 @@ function addInList(id, item, list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
+
+    menuItem.title = putQuoteAndPercent(menuItem.title)
+
     if (menuItem.depth != 0){
         if (menuItem.depth%2 == 0){
             depth = "even-depth"
@@ -790,8 +817,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.onload = function() {
-    MENU_NAMES = getMenuNames(menuNames)
-    MENU_LIST = getMenuList(menuItems)
+    MENU_NAMES = getFromJson(menuNames)
+    MENU_LIST = getFromJson(menuItems)
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()

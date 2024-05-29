@@ -18,6 +18,7 @@ use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Tools\URL;
+use CustomFrontMenu\Service\Validator;
 
 use CustomFrontMenu\Service\CFMLoadService;
 use CustomFrontMenu\Service\CFMSaveService;
@@ -97,7 +98,7 @@ class MenuController extends BaseAdminController
                 ->filterById($descendant->getId())
                 ->findByLocale($descendant->getLocale());
 
-            $newArray['title'] = $content->getColumnValues('title');
+            $newArray['title'] = $content->getColumnValues('title')[0];
             $dataArray[] = $newArray;
         }
         return $dataArray;
@@ -113,10 +114,12 @@ class MenuController extends BaseAdminController
             $item->insertAsLastChildOf($root);
             $item->save();
             $content = new CustomFrontMenuItemI18n();
-            $content->setTitle($menuName);
+            $content->setTitle(Validator::completeValidation($menuName, $session));
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
+            $this->loadMenuItems($session, $item->getId());
+            setcookie('menuId', $item->getId());
             $session->getFlashBag()->add('success', 'New menu added successfully');
         } catch (\Exception $e) {
             $session->getFlashBag()->add('fail', 'Failed to add a new menu');
@@ -206,7 +209,7 @@ class MenuController extends BaseAdminController
         return [
             'menuNames' => json_encode($menuNames),
             'menuItems' => json_encode($data),
-            'currentMenuId' => json_decode($menuId)
+            'currentMenuId' => utf8_encode($menuId)
         ];
     }
 

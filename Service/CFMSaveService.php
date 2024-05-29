@@ -8,11 +8,16 @@ use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use Propel\Runtime\Exception\PropelException;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CFMSaveService implements CFMSaveInterface
 {
-    public function __construct()
-    {}
+    protected $session;
+
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+    }
 
     /**
      * Save all elements from an array recursively to the database
@@ -28,8 +33,8 @@ class CFMSaveService implements CFMSaveInterface
             $item->save();
 
             $content = new CustomFrontMenuItemI18n();
-            $content->setTitle(Validator::completeValidation($element['title']));
-            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url']), FilterType::URL));
+            $content->setTitle(Validator::completeValidation($element['title'], $session));
+            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'], $session), FilterType::URL));
             $content->setId($item->getId());
             $content->setLocale('en_US');
             $content->save();
