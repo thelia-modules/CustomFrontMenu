@@ -23,6 +23,13 @@
             </div>
         {/foreach}
     {/if}
+    {if isset($smarty.session["_symfony_flashes"]["warning"])}
+        {foreach $smarty.session["_symfony_flashes"]["warning"] as $message}
+            <div class="alert alert-warning alert-flash-to-delete">
+                {$message}
+            </div>
+        {/foreach}
+    {/if}
     {if isset($smarty.session["_symfony_flashes"]["fail"])}
         {foreach $smarty.session["_symfony_flashes"]["fail"] as $message}
             <div class="alert alert-danger alert-flash-to-delete">
@@ -221,12 +228,13 @@
             <div class="modal-body">
                 <p>{intl l="Add a new menu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuForm" action="{url path="/admin/module/CustomFrontMenu/add"}" method="POST">
+                    <div id="error-message" style="color: red; display: none;">Menu name cannot be empty</div>
                     <label for="menuName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuName" name="menuName"><br><br>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-success" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>

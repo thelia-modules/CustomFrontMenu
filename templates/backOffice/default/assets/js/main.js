@@ -135,11 +135,9 @@ function replaceQuoteAndPercent(string){
 
 function putQuoteAndPercent(string){
     while (string.includes(quotePattern) || string.includes(percentPattern)) {
-        console.log(string)
         string = string
             .replace(quotePattern, "'")
             .replace(percentPattern, "%");
-        console.log(string)
     }
     return string
 }
@@ -151,7 +149,6 @@ function getFromJson(json){
     result.forEach(function(element) {
         element.title = putQuoteAndPercent(element.title)
     })
-    console.log(result)
     return result
 }
 
@@ -763,7 +760,16 @@ function saveData() {
 }
 
 function addMenu() {
-    document.getElementById('addMenuForm').submit();
+    const menuName = document.getElementById('menuName').value;
+    const errorMessage = document.getElementById('error-message');
+
+    if (menuName.trim().length === 0) {
+        errorMessage.style.display = 'block';
+    } else {
+        $('#ConfirmAddMenu').modal('hide');
+        errorMessage.style.display = 'none';
+        document.getElementById('addMenuForm').submit();
+    }
 }
 
 function deleteMenu() {

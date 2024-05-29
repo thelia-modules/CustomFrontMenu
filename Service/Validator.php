@@ -11,7 +11,7 @@ class Validator
         $string = trim($string);
         if (strlen($string) === 0) {
             $string = "Empty field";
-            $session->getFlashBag()->add('fail', 'One or more empty fields were replaced by the tag "Empty field".');
+            $session->getFlashBag()->add('warning', 'One or more empty fields were replaced by the tag "Empty field".');
         }
         return self::backQuoteProhibed($string, $session);
     }
@@ -21,7 +21,7 @@ class Validator
         $string = trim($string);
         if (strpos($string, '`') !== false) {
             $string = str_replace('`', "'", $string);
-            $session->getFlashBag()->add('fail', "One or more back quotes were replaced by simple quotes : ` -> ' .");
+            $session->getFlashBag()->add('warning', "One or more back quotes were replaced by simple quotes : ` -> ' .");
         }
         return $string;
     }
