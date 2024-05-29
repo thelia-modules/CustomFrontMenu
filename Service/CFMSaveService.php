@@ -8,19 +8,17 @@ use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use Propel\Runtime\Exception\PropelException;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CFMSaveService implements CFMSaveInterface
 {
-    public function __construct()
-    {}
-
     /**
      * Save all elements from an array recursively to the database
      * @throws PropelException
      * @throws Exception
      */
 
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, string $locale) : void
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session, string $locale) : void
     {
         foreach ($dataArray as $element) {
             $item = new CustomFrontMenuItem();
@@ -29,14 +27,14 @@ class CFMSaveService implements CFMSaveInterface
             $item->save();
 
             $content = new CustomFrontMenuItemI18n();
-            $content->setTitle(Validator::completeValidation($element['title']));
-            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url']), FilterType::URL));
+            $content->setTitle(Validator::completeValidation($element['title'], $session));
+            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'], $session), FilterType::URL));
             $content->setId($item->getId());
             $content->setLocale($locale);
             $content->save();
 
             if (isset($element['children']) && $element['children'] !== []) {
-                $this->saveTableBrowser($element['children'], $item, $locale);
+                $this->saveTableBrowser($element['children'], $item, $session, $locale);
             }
             $parent->save();
         }

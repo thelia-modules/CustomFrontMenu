@@ -121,14 +121,35 @@ function deleteFormField(formId) {
     form.elements['menuItemUrl'].value = null
 }
 
-function getMenuList(json){
-    const jsonMenuList = decodeURIComponent(json)
-    return JSON.parse(jsonMenuList)
+let quotePattern = '&280&quote&280&';
+let percentPattern = '&280&percent&280&';
+
+function replaceQuoteAndPercent(string){
+    while (string.includes("\\'") || string.includes("%")) {
+        string = string
+            .replace("\\'", quotePattern)
+            .replace("%", percentPattern);
+    }
+    return string
 }
 
-function getMenuNames(json){
-    const jsonMenuNames = decodeURIComponent(json)
-    return JSON.parse(jsonMenuNames)
+function putQuoteAndPercent(string){
+    while (string.includes(quotePattern) || string.includes(percentPattern)) {
+        string = string
+            .replace(quotePattern, "'")
+            .replace(percentPattern, "%");
+    }
+    return string
+}
+
+function getFromJson(json){
+    
+    json = replaceQuoteAndPercent(json)
+    result = JSON.parse(decodeURIComponent(json))
+    result.forEach(function(element) {
+        element.title = putQuoteAndPercent(element.title)
+    })
+    return result
 }
 
 function deleteMenuItem(id) {
@@ -174,8 +195,11 @@ function addInList(id, item, list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth !== 0){
-        if (menuItem.depth%2 === 0){
+
+    menuItem.title = putQuoteAndPercent(menuItem.title)
+
+    if (menuItem.depth != 0){
+        if (menuItem.depth%2 == 0){
             depth = "even-depth"
         }
         else {
@@ -374,7 +398,7 @@ function getAllIdOf(list) {
 
 function toggleTopLevelVisibility() {
     const button = document.getElementById('toggle-all-children');
-    const isVisible = button.textContent === 'Hide all children';
+    const isVisible = (buttonState === 'hide');
 
     MENU_LIST.forEach(item => {
         if (item.depth === 0) {
@@ -393,7 +417,8 @@ function toggleTopLevelVisibility() {
             }
         }
     });
-    button.textContent = isVisible ? 'Show all children' : 'Hide all children';
+    buttonState = isVisible ? 'show' : 'hide';
+    button.textContent = isVisible ? translations.showAllChildren : translations.hideAllChildren;
 }
 
 
@@ -735,7 +760,16 @@ function saveData() {
 }
 
 function addMenu() {
-    document.getElementById('addMenuForm').submit();
+    const menuName = document.getElementById('menuName').value;
+    const errorMessage = document.getElementById('error-message');
+
+    if (menuName.trim().length === 0) {
+        errorMessage.style.display = 'block';
+    } else {
+        $('#ConfirmAddMenu').modal('hide');
+        errorMessage.style.display = 'none';
+        document.getElementById('addMenuForm').submit();
+    }
 }
 
 function deleteMenu() {
@@ -781,8 +815,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.onload = function() {
-    MENU_NAMES = getMenuNames(menuNames)
-    MENU_LIST = getMenuList(menuItems)
+    MENU_NAMES = getFromJson(menuNames)
+    MENU_LIST = getFromJson(menuItems)
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
