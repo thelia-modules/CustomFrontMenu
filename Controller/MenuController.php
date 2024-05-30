@@ -131,7 +131,6 @@ class MenuController extends BaseAdminController
             setcookie('menuId', $item->getId());
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
-            dd($e->getMessage());
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Failed to add a new menu', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
@@ -212,7 +211,6 @@ class MenuController extends BaseAdminController
                 }
 
             } catch (\Exception $e2) {
-                dd($e2->getMessage());
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
             }
         }

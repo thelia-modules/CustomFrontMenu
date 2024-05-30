@@ -86,7 +86,6 @@ ul.menu-item:last-child {
 .rightArrow {
     float: right;
     cursor: pointer;
-
 }
 
 .arrows{
@@ -117,6 +116,7 @@ ul.menu-item:last-child {
     margin-bottom: 20px;
 }
 
+
 .edit-modal-line {
     display: flex;
     align-items: center;
@@ -126,7 +126,6 @@ ul.menu-item:last-child {
 .edit-modal-line label{
     margin-bottom: 0;
 }
-
 
 .edit-modal-line label, .edit-modal-line input, .edit-modal-line button {
     margin-right: 10px;
@@ -139,6 +138,14 @@ ul.menu-item:last-child {
 
 .edit-modal-line:last-child{
     margin-bottom: 0;
+}
+
+
+.dropdown-menu {
+    padding: 15px;
+    min-width: 50px;
+    right: 0;
+    left: auto;
 }
 
 .dropdown-menu li:hover {
