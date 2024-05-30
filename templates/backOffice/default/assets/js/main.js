@@ -4,6 +4,7 @@ var CURRENT_SELECTED_MENU_ID
 var LOCALE
 let CURRENT_ID = null
 let allowUnload = true
+var selectedLanguage;
 
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -460,7 +461,7 @@ function toggleFlags() {
 }
 
 function selectLanguage(languageElement) {
-    var selectedLanguage = languageElement.getAttribute('data-locale');
+    selectedLanguage = languageElement.getAttribute('data-locale');
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
@@ -858,6 +859,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function saveMenuItemName() {
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemName doesn't exist")
+        return
+    }
+
+    console.log(document.forms["editMenuItemForm"]["menuItemName"].value)
+    menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
+
+}
+
+function saveMenuItemUrl() {
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemUrl doesn't exist")
+        return
+    }
+
+    menuToModify.url[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemUrl"].value;
+}
 
 window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
