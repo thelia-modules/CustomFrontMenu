@@ -868,8 +868,7 @@ function saveMenuItemName() {
         console.error("The id given in saveMenuItemName doesn't exist")
         return
     }
-
-    console.log(document.forms["editMenuItemForm"]["menuItemName"].value)
+    
     menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
 
 }
