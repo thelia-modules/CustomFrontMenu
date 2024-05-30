@@ -19,9 +19,8 @@ function setCurrentId(id) {
 function searchInMenuList(id, title, url, list) {
     list = list.map(function(element) {
         if (element.id === id) {
-            console.log(element)
-            element.title = title
-            element.url = url
+            element.title[LOCALE] = title
+            element.url[LOCALE] = url
         }
         if (element.children && element.children.length > 0) {
             element.children = searchInMenuList(id, title, url, element.children)
@@ -78,11 +77,14 @@ function addCustomMenuItem(form, id="0") {
     }
     let newItem = {
         id: getNextId(),
-        title: {LOCALE: menuItemName},
-        url: {LOCALE: menuItemUrl},
+        title: {},
+        url: {},
         depth: depthToAdd,
         children: []
     };
+    newItem.title[LOCALE] = menuItemName;
+    newItem.url[LOCALE] = menuItemUrl;
+
     let newMenu = generateMenuRecursive(newItem);
     if (element === null) {
         document.getElementById('menu-item-list').innerHTML += newMenu;
