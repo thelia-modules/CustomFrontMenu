@@ -369,13 +369,6 @@ function addSelectedMenuIdToForm(formName, inputName) {
     document.getElementById(formName).elements[inputName].value = CURRENT_SELECTED_MENU_ID
 }
 
-document.getElementById('selectMenuName').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-
-    document.getElementById('menuId').value = selectedOption.id;
-    document.getElementById('askedMenu').submit();
-});
-
 function getNextId() {
     let nextId = 1
     let arrayOfIds = getAllIdOf(MENU_LIST)
@@ -888,3 +881,10 @@ window.addEventListener('beforeunload', function(event) {
         event.preventDefault();
     }
 }, { capture: true });
+
+document.getElementById('selectMenuName').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+
+    document.getElementById('menuId').value = selectedOption.id;
+    document.getElementById('askedMenu').submit();
+});
