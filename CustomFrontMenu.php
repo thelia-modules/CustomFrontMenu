@@ -38,6 +38,15 @@ class CustomFrontMenu extends BaseModule
         return true;
     }
 
+    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
+    {
+        $database = new Database($con);
+
+        if ($deleteModuleData) {
+            $database->insertSql(null, [__DIR__.'/Config/sql/destroy.sql']);
+        }
+    }
+
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
