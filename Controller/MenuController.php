@@ -127,7 +127,7 @@ class MenuController extends BaseAdminController
             $content->setLocale('en_US');
             $content->save();
             $locale = $session->get('_locale', 'en_US');
-            $this->loadMenuItems($locale, $session, $cfmLoadService, $item->getId());
+            $this->loadMenuItems($session, $cfmLoadService, $item->getId());
             setcookie('menuId', $item->getId());
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
@@ -210,7 +210,6 @@ class MenuController extends BaseAdminController
                 }
 
             } catch (\Exception $e2) {
-                echo $e2->getMessage();
                 $session->getFlashBag()->add('fail', 'Fail to load data from the database');
             }
         }
