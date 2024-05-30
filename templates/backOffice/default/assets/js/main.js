@@ -1,6 +1,7 @@
 var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
+var LOACALE
 let CURRENT_ID = null
 let allowUnload = true
 
@@ -143,13 +144,7 @@ function putQuoteAndPercent(string){
 }
 
 function getFromJson(json){
-    
-    json = replaceQuoteAndPercent(json)
-    result = JSON.parse(decodeURIComponent(json))
-    result.forEach(function(element) {
-        element.title = putQuoteAndPercent(element.title)
-    })
-    return result
+    return JSON.parse(decodeURIComponent(replaceQuoteAndPercent(json)))
 }
 
 function deleteMenuItem(id) {
@@ -193,11 +188,27 @@ function addInList(id, item, list) {
     return list
 }
 
+function getTitleOf(title) {
+    let found = false
+    for (const [key, val] of Object.entries(title)) {
+        if (key === LOCALE) {
+            title = val
+            found = true
+            break
+        }
+        else if (key === 'en_US') {
+            title = val
+            found = true
+        }
+    }
+    if (!found) {
+        title = menuItem.title[Object.keys(menuItem.title)[0]]
+    }
+    return title
+}
+
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-
-    menuItem.title = putQuoteAndPercent(menuItem.title)
-
     if (menuItem.depth != 0){
         if (menuItem.depth%2 == 0){
             depth = "even-depth"
@@ -226,7 +237,7 @@ function generateMenuRecursive(menuItem){
                 <i class="fas fa-bars"></i>
             </a>
             <div class="title-container">
-                <span data-id="titleSpan">`+menuItem.title+`</span>` + arrowSpan + `
+                <span data-id="titleSpan">`+ getTitleOf(menuItem.title) +`</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
                 <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setCurrentId(`+menuItem.id+`); setEditFields(getCurrentId())">
@@ -714,7 +725,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a>` + menuItem.title + `</a>
+            <a>` + getTitleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
@@ -795,6 +806,27 @@ function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
 
+
+function replaceAllQuotesAndPercent(MenuList){
+    for (const val of MenuList){
+        replaceAllQuotesAndPercentRec(val)
+    }
+}
+
+function replaceAllQuotesAndPercentRec(MenuList){
+    console.log(MenuList)
+    for (const [lang, title] of Object.entries(MenuList.title)){
+        MenuList.title[lang] = putQuoteAndPercent(title)
+    }
+    
+    if (!MenuList.children || MenuList.children.length <= 0){
+        return
+    }
+    for (let child of MenuList.children){
+        replaceAllQuotesAndPercentRec(child)
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Function to remove flash messages from the DOM
     function removeFlashMessages() {
@@ -836,6 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
+    replaceAllQuotesAndPercent(MENU_LIST)
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
