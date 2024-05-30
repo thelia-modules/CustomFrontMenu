@@ -7,5 +7,5 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 interface CFMSaveInterface
 {
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session, string $locale): void;
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session): void;
 }
