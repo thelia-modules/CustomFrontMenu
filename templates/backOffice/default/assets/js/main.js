@@ -822,44 +822,6 @@ function replaceAllQuotesAndPercentRec(MenuList){
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to remove flash messages from the DOM
-    function removeFlashMessages() {
-        const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
-        Array.from(flashMessages).forEach(function(message) {
-            message.remove();
-        });
-    }
-
-    // Function to notify server to clear flash messages
-    function clearFlashMessagesOnServer() {
-        let xhr = new XMLHttpRequest();
-        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status !== 200) {
-                    console.error('Network response was not ok:', xhr.statusText);
-                }
-            }
-        };
-
-        xhr.onerror = function () {
-            console.error('Error:', xhr.statusText);
-        };
-
-        xhr.send();
-    }
-
-    // Add a click event listener to the document
-    document.addEventListener('click', function() {
-        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages();
-            clearFlashMessagesOnServer();
-        }
-    });
-});
-
 function saveMenuItemName() {
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
@@ -912,4 +874,42 @@ document.getElementById('selectMenuName').addEventListener('change', function() 
 
     document.getElementById('menuId').value = selectedOption.id;
     document.getElementById('askedMenu').submit();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to remove flash messages from the DOM
+    function removeFlashMessages() {
+        const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
+        Array.from(flashMessages).forEach(function(message) {
+            message.remove();
+        });
+    }
+
+    // Function to notify server to clear flash messages
+    function clearFlashMessagesOnServer() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status !== 200) {
+                    console.error('Network response was not ok:', xhr.statusText);
+                }
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Error:', xhr.statusText);
+        };
+
+        xhr.send();
+    }
+
+    // Add a click event listener to the document
+    document.addEventListener('click', function() {
+        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
+            removeFlashMessages();
+            clearFlashMessagesOnServer();
+        }
+    });
 });
