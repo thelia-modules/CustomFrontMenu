@@ -39,7 +39,7 @@ function changeParameters(id) {
     }
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
     titleSpan.textContent = title
-    MENU_LIST = saveTitleAndUrl(id, title, url)
+    saveTitleAndUrl(id, title, url)
     deleteFormField('editMenuItemForm')
     generatePreviewMenus()
 }
