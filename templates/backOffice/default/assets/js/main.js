@@ -1,7 +1,7 @@
 var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
-var LOACALE
+var LOCALE
 let CURRENT_ID = null
 let allowUnload = true
 
@@ -19,6 +19,7 @@ function setCurrentId(id) {
 function searchInMenuList(id, title, url, list) {
     list = list.map(function(element) {
         if (element.id === id) {
+            console.log(element)
             element.title = title
             element.url = url
         }
@@ -77,8 +78,8 @@ function addCustomMenuItem(form, id="0") {
     }
     let newItem = {
         id: getNextId(),
-        title: menuItemName,
-        url: menuItemUrl,
+        title: {LOCALE: menuItemName},
+        url: {LOCALE: menuItemUrl},
         depth: depthToAdd,
         children: []
     };
