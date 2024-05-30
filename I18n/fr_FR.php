@@ -27,9 +27,8 @@ return array(
     'This title has been successfully saved !' => 'Ce titre a été ajouté avec succès !',
 
     'Fail to load menu names from the database' => 'Echec du chargement des noms des menus depuis la base de données',
-    'Fail to delete the current menu (1)'=> 'Echec de la suppression du menu courant (1)',
-    'Fail to delete the current menu (2)' => 'Echec de la suppression du menu courant (2)',
-    'Fail to load this menu (3)' => 'Echec du chargement du menu (3)',
+    'Fail to delete the current menu'=> 'Echec de la suppression du menu courant',
+    'Fail to load this menu' => 'Echec du chargement du menu',
     'An error occurred when saving in database' => 'Une erreur est survenue lors de la sauvegarde en base de données ',
     'Failed to add a new menu' => "Echec de l'ajout du nouveau menu",
     'An error occurred when saving in database. Cannot save if no menu is selected' => "Une erreur est survenue lors de la sauvegarde en base de données. Impossible de sauvegarder si aucun menu n'est séléctionné",
