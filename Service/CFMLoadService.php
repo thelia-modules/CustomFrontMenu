@@ -3,14 +3,35 @@
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Interface\CFMLoadInterface;
-use CustomFrontMenu\Model\CustomFrontMenuItem;
 use Propel\Runtime\Exception\PropelException;
+use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 
 class CFMLoadService implements CFMLoadInterface
 {
     public function __construct(private int $COUNT_ID = 1)
     {}
+
+    /**
+     * Load the different menu names
+     * @throws PropelException
+     */
+    public function loadSelectMenu($root, string $locale) : array
+    {
+        $descendants = $root->getChildren();
+        $dataArray = [];
+        foreach ($descendants as $descendant) {
+            $newArray = [];
+            $newArray['id'] = 'menu-selected-'.$descendant->getId();
+            $content = CustomFrontMenuItemI18nQuery::create()
+                ->filterById($descendant->getId())
+                ->findByLocale($descendant->getLocale());
+
+            $newArray['title'] = $content->getColumnValues('title')[0];
+            $dataArray[] = $newArray;
+        }
+        return $dataArray;
+    }
 
     /**
      * Load all elements from the database recursively to parse them in an array
