@@ -18,7 +18,7 @@ class CFMSaveService implements CFMSaveInterface
      * @throws Exception
      */
 
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session, string $locale) : void
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session) : void
     {
         foreach ($dataArray as $element) {
             $item = new CustomFrontMenuItem();
@@ -26,15 +26,23 @@ class CFMSaveService implements CFMSaveInterface
 
             $item->save();
 
-            $content = new CustomFrontMenuItemI18n();
-            $content->setTitle(Validator::completeValidation($element['title'], $session));
-            $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'], $session), FilterType::URL));
-            $content->setId($item->getId());
-            $content->setLocale($locale);
-            $content->save();
+            foreach ($element['title'] as $locale => $title) {
+                $content = new CustomFrontMenuItemI18n();
+                $content->setTitle(Validator::completeValidation($title, $session));
+                if (isset($element['url']) && isset($element['url'][$locale])) {
+                    $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$locale], $session), FilterType::URL));
+                }
+                else{
+                    $content->setUrl("");
+                }
+                $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$locale], $session), FilterType::URL));
+                $content->setId($item->getId());
+                $content->setLocale($locale);
+                $content->save();
+            }
 
             if (isset($element['children']) && $element['children'] !== []) {
-                $this->saveTableBrowser($element['children'], $item, $session, $locale);
+                $this->saveTableBrowser($element['children'], $item, $session);
             }
             $parent->save();
         }

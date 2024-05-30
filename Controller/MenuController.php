@@ -78,7 +78,7 @@ class MenuController extends BaseAdminController
 
             // Add all new items in database
             $locale = $session->get('_locale', 'en_US');
-            $cfmSaveService->saveTableBrowser($newMenu, $menu, $session, $locale);
+            $cfmSaveService->saveTableBrowser($newMenu, $menu, $session);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 

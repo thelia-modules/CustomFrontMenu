@@ -58,14 +58,14 @@ function getFormItems(formId) {
 }
 
 function setEditFields(id) {
-    let element = findMenuInList(id, MENU_LIST)
+    const element = findMenuInList(id, MENU_LIST)
     if (element === null) {
         console.error("The id given in setEditField doesn't exist")
         return
     }
-    let form = document.getElementById('editMenuItemForm')
-    form.elements['menuItemName'].value = element.title
-    form.elements['menuItemUrl'].value = element.url
+    const form = document.getElementById('editMenuItemForm')
+    form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
+    form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
 }
 
 function addCustomMenuItem(form, id="0") {
@@ -188,23 +188,23 @@ function addInList(id, item, list) {
     return list
 }
 
-function getTitleOf(title) {
+function getValueByLocaleOf(element) {
     let found = false
-    for (const [key, val] of Object.entries(title)) {
+    for (const [key, val] of Object.entries(element)) {
         if (key === LOCALE) {
-            title = val
+            result = val
             found = true
             break
         }
         else if (key === 'en_US') {
-            title = val
+            result = val
             found = true
         }
     }
     if (!found) {
-        title = menuItem.title[Object.keys(menuItem.title)[0]]
+        result = element[Object.keys(element)[0]]
     }
-    return title
+    return result
 }
 
 function generateMenuRecursive(menuItem){
@@ -237,7 +237,7 @@ function generateMenuRecursive(menuItem){
                 <i class="fas fa-bars"></i>
             </a>
             <div class="title-container">
-                <span data-id="titleSpan">`+ getTitleOf(menuItem.title) +`</span>` + arrowSpan + `
+                <span data-id="titleSpan">`+ getValueByLocaleOf(menuItem.title) +`</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
                 <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setCurrentId(`+menuItem.id+`); setEditFields(getCurrentId())">
@@ -725,7 +725,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a>` + getTitleOf(menuItem.title) + `</a>
+            <a>` + getValueByLocaleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
@@ -814,7 +814,6 @@ function replaceAllQuotesAndPercent(MenuList){
 }
 
 function replaceAllQuotesAndPercentRec(MenuList){
-    console.log(MenuList)
     for (const [lang, title] of Object.entries(MenuList.title)){
         MenuList.title[lang] = putQuoteAndPercent(title)
     }
