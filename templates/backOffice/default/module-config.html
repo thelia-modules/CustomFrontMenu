@@ -135,7 +135,7 @@
 
                         <div class="dropdown">
                             <button id="selectedLanguageBtn" class="dropdown-toggle" onclick="toggleFlags()">
-                                -- language to translate --
+                                {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
                             </button>
                             <ul class="dropdown-menu" id="flags-list" style="display: none;">
                                 {loop type="lang" name="the-loop-name"}
@@ -143,24 +143,24 @@
                                 {/loop}
                             </ul>
                         </div>
-
-
                     </div>
                 </div>
 
-
                 <form id="editMenuItemForm">
+                    <input type="hidden" id="menuId" name="menuId" value="">
+
                     <div class="edit-modal-line">
                         <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemName" name="menuItemName">
-                        <button type="button" class="btn btn-success" data-dismiss="modal">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
+                        <button type="button" class="btn btn-success" onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     </div>
                     <div class="edit-modal-line">
                         <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemUrl" name="menuItemUrl">
-                        <button type="button" class="btn btn-success" data-dismiss="modal">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br><br><br>
+                        <button type="button" class="btn btn-success" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br><br><br>
                     </div>
                 </form>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button>

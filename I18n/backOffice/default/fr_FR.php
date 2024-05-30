@@ -39,4 +39,5 @@ return array(
     'Would you like to delete this menu item ?' => 'Voulez-vous supprimer ce lien ?',
     'Would you like to delete this menu ?' => 'Voulez-vous supprimer ce menu ?',
     'Would you like to discard all changes ?' => 'Voulez-vous annuler les modifications ?',
+    '-- language to translate into --' => '-- langue dans laquelle traduire --',
 );
