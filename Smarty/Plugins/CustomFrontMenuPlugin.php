@@ -1,15 +1,15 @@
 <?php
 namespace CustomFrontMenu\Smarty\Plugins;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Interface\CFMMenuInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
-use CustomFrontMenu\Controller\MenuController;
 
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
-    public function __construct(private MenuController $menuController)
+    public function __construct(private CFMLoadInterface $CFMLoadService, private CFMMenuInterface $cfmMenu)
     {
     }
 
@@ -25,13 +25,18 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
         ];
     }
 
-    public function renderCustomFrontMenuPlugin($params, $smarty, SessionInterface $session): void
+    public function renderCustomFrontMenuPlugin($params, $smarty): void
     {
         if (!isset($params['menu_id'])) {
-            throw new \InvalidArgumentException('The menu_id parameter is required', 0);
+            throw new \InvalidArgumentException('The menu_id parameter is required', 1);
         }
 
-        $menuItems = $this->menuController->getMenuItems($session);
+        $menu = $this->cfmMenu->getMenu($params['menu_id']);
+        if (!isset($menu)) {
+            throw new \InvalidArgumentException('The menu does not exist', 2);
+        }
+
+        $menuItems = $this->CFMLoadService->loadTableBrowser($menu);
         $smarty->assign('menuItems', $menuItems);
 
         $templatePath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
