@@ -1,14 +1,14 @@
 {function name=printMenu}
-{foreach $menuItems as $menuItem}
-<li>
-    <a href="{$menuItem.url}">{$menuItem.title}</a>
-    <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
-        {if isset($menuItem.children) && $menuItem.children|count > 0}
-        {call name=printMenu menuItems=$menuItem.children}
-        {/if}
-    </ul>
-</li>
-{/foreach}
+    {foreach $menuItems as $menuItem}
+        <li>
+            <a href="{$menuItem.url}">{$menuItem.title}</a>
+            <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
+                {if isset($menuItem.children) && $menuItem.children|count > 0}
+                    {call name=printMenu menuItems=$menuItem.children}
+                {/if}
+            </ul>
+        </li>
+    {/foreach}
 {/function}
 
 <nav id="CustomFrontMenu" class="navbar navbar-default nav-main" role="navigation" itemtype="http://schema.org/SiteNavigationElement">
