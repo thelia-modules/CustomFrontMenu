@@ -52,7 +52,7 @@ class CFMMenuService implements CFMMenuInterface
         CustomFrontMenuItemQuery::create()->findById($menuId)->delete();
     }
 
-    public function getMenu(int $menuId) : CustomFrontMenuItem
+    public function getMenu(int $menuId) : ?CustomFrontMenuItem
     {
         return CustomFrontMenuItemQuery::create()->findOneById($menuId);
     }

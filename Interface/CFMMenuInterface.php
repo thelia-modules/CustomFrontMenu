@@ -13,5 +13,5 @@ interface CFMMenuInterface
 
     public function deleteMenu(int $menuId) : void;
 
-    public function getMenu(int $menuId) : CustomFrontMenuItem;
+    public function getMenu(int $menuId) : ?CustomFrontMenuItem;
 }
