@@ -208,15 +208,6 @@ function getTitleOf(title) {
 }
 
 function generateMenuRecursive(menuItem){
-    if (typeof menuItem.title === 'object') {
-        for (const [key, val] of Object.entries(menuItem.title)) {
-            menuItem.title[key] = putQuoteAndPercent(val)
-        }
-    }
-    else {
-        menuItem.title = putQuoteAndPercent(menuItem.title)
-    }
-
     let depth = "zero-depth"
     if (menuItem.depth != 0){
         if (menuItem.depth%2 == 0){
@@ -796,6 +787,27 @@ function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
 
+
+function replaceAllQuotesAndPercent(MenuList){
+    for (const val of MenuList){
+        replaceAllQuotesAndPercentRec(val)
+    }
+}
+
+function replaceAllQuotesAndPercentRec(MenuList){
+    console.log(MenuList)
+    for (const [lang, title] of Object.entries(MenuList.title)){
+        MenuList.title[lang] = putQuoteAndPercent(title)
+    }
+    
+    if (!MenuList.children || MenuList.children.length <= 0){
+        return
+    }
+    for (let child of MenuList.children){
+        replaceAllQuotesAndPercentRec(child)
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Function to remove flash messages from the DOM
     function removeFlashMessages() {
@@ -837,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
-    console.log(MENU_LIST)
+    replaceAllQuotesAndPercent(MENU_LIST)
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
