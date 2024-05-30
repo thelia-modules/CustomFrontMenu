@@ -128,18 +128,37 @@
 
             </ul>
             <div class="modal-body">
-                <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
-                <div class="dropdown open">
-                    <button class="dropdown-toggle" data-toggle="dropdown">
-                        <img class="flags" src="http://thelia-modules.th/assets/backOffice/default/template-assets/assets/img/svgFlags/fa1fe83.svg">
-                    </button>
+                <div class="top-edit">
+                    <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
+                    <div class="dropdown open">
+
+                        <div class="dropdown">
+                            <button id="selectedLanguageBtn" class="dropdown-toggle" onclick="toggleFlags()">
+                                -- language to translate --
+                            </button>
+                            <ul class="dropdown-menu" id="flags-list" style="display: none;">
+                                {loop type="lang" name="the-loop-name"}
+                                <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>
+                                {/loop}
+                            </ul>
+                        </div>
+
+
+                    </div>
                 </div>
+
+
                 <form id="editMenuItemForm">
-                    <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemName" name="menuItemName">
-                    <button type="button" class="btn btn-success" data-dismiss="modal"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
-                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl"><br><br>
+                    <div class="edit-modal-line">
+                        <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
+                        <input type="text" id="menuItemName" name="menuItemName">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
+                    </div>
+                    <div class="edit-modal-line">
+                        <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                        <input type="text" id="menuItemUrl" name="menuItemUrl">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br><br><br>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">

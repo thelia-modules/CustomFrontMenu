@@ -443,6 +443,25 @@ function toggleChildren(span, event) {
     }
 }
 
+
+function toggleFlags() {
+    var flagsList = document.getElementById('flags-list');
+    if (flagsList.style.display === 'none') {
+        flagsList.style.display = 'block';
+    } else {
+        flagsList.style.display = 'none';
+    }
+}
+
+function selectLanguage(languageElement) {
+    var selectedLanguage = languageElement.getAttribute('data-locale');
+    document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
+    toggleFlags();
+}
+
+
+
+
 // ------------------------------ End drop down ------------------------------
 
 // ------------------------------ Begin drag and drop ------------------------------
