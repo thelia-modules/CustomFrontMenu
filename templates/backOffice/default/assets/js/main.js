@@ -16,18 +16,17 @@ function setCurrentId(id) {
     CURRENT_ID = id
 }
 
-function searchInMenuList(id, title, url, list) {
-    list = list.map(function(element) {
-        if (element.id === id) {
-            element.title[LOCALE] = title
-            element.url[LOCALE] = url
-        }
-        if (element.children && element.children.length > 0) {
-            element.children = searchInMenuList(id, title, url, element.children)
-        }
-        return element;
-    })
-    return list
+function saveTitleAndUrl(id, title, url) {
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(id, MENU_LIST)
+
+    if (menuToModify === null) {
+        console.error("The id given in saveTitleAndUrl doesn't exist")
+        return
+    }
+
+    menuToModify.title[modifiedLocal] = title
+    menuToModify.url[modifiedLocal] = url
 }
 
 function changeParameters(id) {
