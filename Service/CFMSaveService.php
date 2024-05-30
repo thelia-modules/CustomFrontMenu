@@ -35,7 +35,6 @@ class CFMSaveService implements CFMSaveInterface
                 else{
                     $content->setUrl("");
                 }
-                $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$locale], $session), FilterType::URL));
                 $content->setId($item->getId());
                 $content->setLocale($locale);
                 $content->save();

@@ -462,6 +462,9 @@ function toggleFlags() {
 
 function selectLanguage(languageElement) {
     selectedLanguage = languageElement.getAttribute('data-locale');
+    currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
+    document.forms["editMenuItemForm"]["menuItemName"].value = currentMenu.title[selectedLanguage] ? currentMenu.title[selectedLanguage] : currentMenu.title[LOCALE]
+    document.forms["editMenuItemForm"]["menuItemUrl"].value = currentMenu.url[selectedLanguage] ? currentMenu.url[selectedLanguage] : currentMenu.url[LOCALE]
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
