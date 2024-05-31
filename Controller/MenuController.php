@@ -38,8 +38,7 @@ class MenuController extends BaseAdminController
         $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
 
         try {
-            $locale = $session->get('_locale', 'en_US');
-            $this->loadMenuItems($locale, $session, $cfmLoad, $cfmMenu, $menuId);
+            $this->loadMenuItems($session, $cfmLoad, $cfmMenu, $menuId);
         } catch(\Exception $e) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load this menu (3)', [], CustomFrontMenu::DOMAIN_NAME));
         }
@@ -99,7 +98,7 @@ class MenuController extends BaseAdminController
             $root = $cfmMenu->getRoot();
             $itemId = $cfmMenu->addMenu($root, $menuName, $session);
             $locale = $session->get('_locale', 'en_US');
-            $this->loadMenuItems($locale, $session, $cfmLoad, $cfmMenu, $itemId);
+            $this->loadMenuItems($session, $cfmLoad, $cfmMenu, $itemId);
             setcookie('menuId', $itemId);
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
@@ -162,12 +161,12 @@ class MenuController extends BaseAdminController
      * @param int|null $menuId The id of the menu to load
      * @return array All the data necessary to load the page content : Menu names,  menu items and the current menu id.
      */
-    public function loadMenuItems(string $locale, SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, ?int $menuId = null) : array
+    public function loadMenuItems(SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, ?int $menuId = null) : array
     {
         $menuNames = [];
         try {
             $root = $cfmMenu->getRoot();
-            $menuNames = $cfmLoad->loadSelectMenu($root, $locale);
+            $menuNames = $cfmLoad->loadSelectMenu($root);
         } catch (\Exception $e3) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load menu names from the database', [], CustomFrontMenu::DOMAIN_NAME));
         }
