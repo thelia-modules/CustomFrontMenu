@@ -58,12 +58,6 @@ class MenuController extends BaseAdminController
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
         }
 
-        $locale = $session->getAdminLang()->getLocale();
-
-        $parent = CustomFrontMenuItemQuery::create()->findOneById($menuId);
-        $oldMenu = $cfmLoad->loadTableBrowser($parent);
-
-
         try {
             // Delete all the items currently in database for the menu to save
             $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
@@ -76,12 +70,9 @@ class MenuController extends BaseAdminController
             }
             $menu->deleteDescendants();
 
-            $locale = $session->get('_locale', 'en_US');
-
             $menu->save();
 
             // Add all new items in database
-            $locale = $session->get('_locale', 'en_US');
             $cfmSave->saveTableBrowser($newMenu, $menu, $session);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
