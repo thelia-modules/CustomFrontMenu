@@ -72,8 +72,7 @@ class MenuController extends BaseAdminController
             $menu = $cfmSave->deleteSpecificItems($menuId);
 
             // Add all new items in database
-            $locale = $session->get('_locale', 'en_US');
-            $cfmSave->saveTableBrowser($dataArray, $menu, $session, $locale);
+            $cfmSave->saveTableBrowser($dataArray, $menu, $session);
 
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
@@ -104,7 +103,6 @@ class MenuController extends BaseAdminController
             setcookie('menuId', $itemId);
             $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
         } catch (\Exception $e) {
-            dd($e->getMessage());
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Failed to add a new menu', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
@@ -171,7 +169,6 @@ class MenuController extends BaseAdminController
             $root = $cfmMenu->getRoot();
             $menuNames = $cfmLoad->loadSelectMenu($root, $locale);
         } catch (\Exception $e3) {
-            dd($e3->getMessage());
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load menu names from the database', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
