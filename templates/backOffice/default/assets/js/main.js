@@ -8,13 +8,13 @@ let selectedLanguage;
 let quotePattern = '&280&quote&280&';
 let percentPattern = '&280&percent&280&';
 
-// ------------------------------ Begin get from json ------------------------------
+// Get from json
 function getFromJson(json){
     return JSON.parse(decodeURIComponent(replaceQuoteAndPercent(json)))
 }
-// ------------------------------ End get from json ------------------------------
+// End get from json
 
-// ----------------------------- Begin current id -----------------------------
+// Current id
 function getCurrentId() {
     if (CURRENT_ID === null) {
         console.error("CURRENT_ID not set")
@@ -25,9 +25,9 @@ function getCurrentId() {
 function setCurrentId(id) {
     CURRENT_ID = id
 }
-// ------------------------------ End current id ------------------------------
+// End current id
 
-// ------------------------------ Begin close closest modal ------------------------------
+// Close closest modal
 function closeClosestModal(element) {
     let modal = element.closest('.modal');
     if (modal) {
@@ -35,9 +35,9 @@ function closeClosestModal(element) {
         $(`#${modalId}`).modal('hide');
     }
 }
-// ------------------------------ End close closest modal ------------------------------
+// End close closest modal
 
-// ------------------------------ Begin get next id ------------------------------
+// Get next id
 function getNextId() {
     let nextId = 1
     let arrayOfIds = getAllIdOf(MENU_LIST)
@@ -76,9 +76,9 @@ function getAllIdOf(list) {
     }
     return arrayOfIds
 }
-// ------------------------------ End get next id -------------------------------
+// End get next id-
 
-// ------------------------------ Begin replace of quotes and percent ------------------------------
+// Replace of quotes and percent
 function replaceQuoteAndPercent(string){
     while (string.includes("\\'") || string.includes("%")) {
         string = string
@@ -114,9 +114,9 @@ function replaceAllQuotesAndPercentRec(MenuList){
         replaceAllQuotesAndPercentRec(child)
     }
 }
-// ------------------------------ End replace of quotes and percent ------------------------------
+// End replace of quotes and percent
 
-// ------------------------------ Begin save data ------------------------------
+// Save data
 function saveData() {
     allowUnload = true
     document.getElementById('menuData').value = JSON.stringify(MENU_LIST)
@@ -169,9 +169,9 @@ function saveTitleAndUrl(id, title, url) {
     menuToModify.title[modifiedLocal] = title
     menuToModify.url[modifiedLocal] = url
 }
-// ------------------------------ End save data ------------------------------
+// End save data
 
-// ------------------------------ Begin find menu in list ------------------------------
+// Find menu in list
 function findMenuInList(id, list) {
     for (const menuItem of list){
         if (menuItem.id === id){
@@ -189,9 +189,9 @@ function findMenuInList(id, list) {
     }
     return null
 }
-// ------------------------------ End find menu in list ------------------------------
+// End find menu in list
 
-// ------------------------------ Begin add menu ------------------------------
+// Add menu
 function addMenu() {
     const menuName = document.getElementById('menuName').value;
     const errorMessageEmpty = document.getElementById('error-message-empty');
@@ -282,9 +282,9 @@ function addCustomMenuItem(form, id="0") {
 
     closeClosestModal(document.getElementById(form));
 }
-// ------------------------------ End add menu ------------------------------
+// End add menu
 
-// ------------------------------ Begin edit menu item ------------------------------
+// Edit menu item
 function changeParameters(id) {
     if (!isValid('editMenuItemForm')) {
         return
@@ -320,9 +320,9 @@ function getFormItems(formId) {
     }
     return [menuItemName, menuItemUrl]
 }
-// ------------------------------ End edit menu item ------------------------------
+// End edit menu item
 
-// ------------------------------ Begin delete menu item ------------------------------
+// Delete menu item
 function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
     if (elementToRemove) {
@@ -351,9 +351,9 @@ function deleteFromList(id, list) {
 function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
-// ------------------------------ End delete menu item ------------------------------
+// End delete menu item
 
-// ------------------------------ Begin validation ------------------------------
+// Validation
 function isValid(formId) {
     let form = document.getElementById(formId)
     let menuItemName = form.elements['menuItemName'].value.trim()
@@ -378,9 +378,9 @@ function isValid(formId) {
 
     return noError
 }
-// ------------------------------ End validation ------------------------------
+// End validation
 
-// ------------------------------ Begin form edit field ------------------------------
+// Form edit field
 function setEditFields(id) {
     const element = findMenuInList(id, MENU_LIST)
     if (element === null) {
@@ -397,9 +397,9 @@ function deleteEditField(formId) {
     form.elements['menuItemName'].value = ""
     form.elements['menuItemUrl'].value = ""
 }
-// ------------------------------ End form edit field --------------------------------
+// End form edit field--
 
-// ------------------------------ Begin move menu ------------------------------
+// Move menu
 function moveMenuUp(id) {
     menuToMove = document.getElementById(id).parentNode
     if (menuToMove.previousElementSibling){
@@ -482,9 +482,9 @@ function updateArrowStyles() {
         });
     });
 }
-// ------------------------------ End move menu ------------------------------
+// End move menu
 
-// ------------------------------ Begin generate menus ------------------------------
+// Generate menus
 function generateSelect(list) {
     let menu = document.getElementById('selectMenuName')
     menu.innerHTML = ""
@@ -564,9 +564,9 @@ function generateMenuRecursive(menuItem){
     updateArrowStyles();
     return newMenu;
 }
-// ------------------------------ End generate menus ------------------------------
+// End generate menus
 
-// ------------------------------ Begin drop down ------------------------------
+// Drop down
 function toggleTopLevelVisibility() {
     const button = document.getElementById('toggle-all-children');
     const isVisible = (buttonState === 'hide');
@@ -630,9 +630,9 @@ function selectLanguage(languageElement) {
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
-// ------------------------------ End drop down ------------------------------
+// End drop down
 
-// ------------------------------ Begin drag and drop ------------------------------
+// Drag and drop
 function drag(ev) {
     ev.dataTransfer.setData("text/plain", ev.target.children[0].id);
 }
@@ -851,9 +851,9 @@ function allowDrop(ev) {
         dropIndicator.style.display = 'none';
     }
 }
-// ------------------------------ End drag and drop ------------------------------
+// End drag and drop
 
-// ------------------------------ Begin Preview ------------------------------
+// Preview
 function generatePreviewMenus() {
     const previewUl = document.getElementById('menus')
     previewUl.innerHTML = ""
@@ -879,9 +879,9 @@ function generatePreviewMenuRecursive(menuItem){
         </li>
     `;
 }
-// ------------------------------ End Preview ------------------------------
+// End Preview
 
-// ------------------------------ Begin search product ------------------------------
+// Search product
 function searchProducts(query, formId) {
     const matchingProducts = document.querySelector(`#${formId} ~ ul`);
     matchingProducts.innerHTML = '';
@@ -901,9 +901,9 @@ function searchProducts(query, formId) {
         matchingProducts.appendChild(li);
     });
 }
-// ------------------------------ End search product ------------------------------
+// End search product
 
-// ------------------------------ Event Listener ------------------------------
+// Event Listener
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
         event.preventDefault();
@@ -954,9 +954,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-// ------------------------------ End Event Listener ------------------------------
+// End Event Listener
 
-// ------------------------------ Begin Initialization ------------------------------
+// Initialization
 window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
@@ -975,4 +975,4 @@ window.onload = function() {
         })
     }
 }
-// ------------------------------ End Initialization ------------------------------
+// End Initialization
