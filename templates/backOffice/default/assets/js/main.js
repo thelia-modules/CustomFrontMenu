@@ -14,6 +14,16 @@ function getFromJson(json){
 }
 // End get from json
 
+// Close closest modal
+function closeClosestModal(element) {
+    let modal = element.closest('.modal');
+    if (modal) {
+        let modalId = modal.getAttribute('id');
+        $(`#${modalId}`).modal('hide');
+    }
+}
+// End close closest modal
+
 // Current id
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -26,16 +36,6 @@ function setCurrentId(id) {
     CURRENT_ID = id
 }
 // End current id
-
-// Close closest modal
-function closeClosestModal(element) {
-    let modal = element.closest('.modal');
-    if (modal) {
-        let modalId = modal.getAttribute('id');
-        $(`#${modalId}`).modal('hide');
-    }
-}
-// End close closest modal
 
 // Get next id
 function getNextId() {
@@ -76,9 +76,9 @@ function getAllIdOf(list) {
     }
     return arrayOfIds
 }
-// End get next id-
+// End get next id
 
-// Replace of quotes and percent
+// Replace annoying characters
 function replaceQuoteAndPercent(string){
     while (string.includes("\\'") || string.includes("%")) {
         string = string
@@ -114,82 +114,7 @@ function replaceAllQuotesAndPercentRec(MenuList){
         replaceAllQuotesAndPercentRec(child)
     }
 }
-// End replace of quotes and percent
-
-// Save data
-function saveData() {
-    allowUnload = true
-    document.getElementById('menuData').value = JSON.stringify(MENU_LIST)
-    document.getElementById('menuDataId').value = JSON.stringify(CURRENT_SELECTED_MENU_ID)
-    document.getElementById('savedData').submit()
-}
-
-function saveMenuItemName() {
-    if (!isValid('editMenuItemForm')) {
-        return
-    }
-
-    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
-    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
-    
-    if (menuToModify === null) {
-        console.error("The id given in saveMenuItemName doesn't exist")
-        return
-    }
-    
-    menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
-
-}
-
-function saveMenuItemUrl() {
-    if (!isValid('editMenuItemForm')) {
-        return
-    }
-
-    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
-    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
-    
-    if (menuToModify === null) {
-        console.error("The id given in saveMenuItemUrl doesn't exist")
-        return
-    }
-
-    menuToModify.url[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemUrl"].value;
-}
-
-function saveTitleAndUrl(id, title, url) {
-    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
-    const menuToModify = findMenuInList(id, MENU_LIST)
-
-    if (menuToModify === null) {
-        console.error("The id given in saveTitleAndUrl doesn't exist")
-        return
-    }
-
-    menuToModify.title[modifiedLocal] = title
-    menuToModify.url[modifiedLocal] = url
-}
-// End save data
-
-// Find menu in list
-function findMenuInList(id, list) {
-    for (const menuItem of list){
-        if (menuItem.id === id){
-            return menuItem
-        }
-        if (menuItem.children && menuItem.children.length > 0){
-            let children = menuItem.children
-            for (const child of children){
-                let result = findMenuInList(id, children)
-                if (result){
-                    return result
-                }
-            }
-        }
-    }
-    return null
-}
-// End find menu in list
+// End replace annoying characters
 
 // Add menu
 function addMenu() {
@@ -284,7 +209,27 @@ function addCustomMenuItem(form, id="0") {
 }
 // End add menu
 
-// Edit menu item
+// Find menu
+function findMenuInList(id, list) {
+    for (const menuItem of list){
+        if (menuItem.id === id){
+            return menuItem
+        }
+        if (menuItem.children && menuItem.children.length > 0){
+            let children = menuItem.children
+            for (const child of children){
+                let result = findMenuInList(id, children)
+                if (result){
+                    return result
+                }
+            }
+        }
+    }
+    return null
+}
+// End find menu
+
+// Edit menu
 function changeParameters(id) {
     if (!isValid('editMenuItemForm')) {
         return
@@ -320,9 +265,9 @@ function getFormItems(formId) {
     }
     return [menuItemName, menuItemUrl]
 }
-// End edit menu item
+// End edit menu
 
-// Delete menu item
+// Delete menu
 function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
     if (elementToRemove) {
@@ -351,7 +296,7 @@ function deleteFromList(id, list) {
 function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
-// End delete menu item
+// End delete menu
 
 // Validation
 function isValid(formId) {
@@ -380,6 +325,61 @@ function isValid(formId) {
 }
 // End validation
 
+// Save data
+function saveData() {
+    allowUnload = true
+    document.getElementById('menuData').value = JSON.stringify(MENU_LIST)
+    document.getElementById('menuDataId').value = JSON.stringify(CURRENT_SELECTED_MENU_ID)
+    document.getElementById('savedData').submit()
+}
+
+function saveMenuItemName() {
+    if (!isValid('editMenuItemForm')) {
+        return
+    }
+
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemName doesn't exist")
+        return
+    }
+    
+    menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
+
+}
+
+function saveMenuItemUrl() {
+    if (!isValid('editMenuItemForm')) {
+        return
+    }
+
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemUrl doesn't exist")
+        return
+    }
+
+    menuToModify.url[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemUrl"].value;
+}
+
+function saveTitleAndUrl(id, title, url) {
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    const menuToModify = findMenuInList(id, MENU_LIST)
+
+    if (menuToModify === null) {
+        console.error("The id given in saveTitleAndUrl doesn't exist")
+        return
+    }
+
+    menuToModify.title[modifiedLocal] = title
+    menuToModify.url[modifiedLocal] = url
+}
+// End save data
+
 // Form edit field
 function setEditFields(id) {
     const element = findMenuInList(id, MENU_LIST)
@@ -397,7 +397,89 @@ function deleteEditField(formId) {
     form.elements['menuItemName'].value = ""
     form.elements['menuItemUrl'].value = ""
 }
-// End form edit field--
+// End form edit field
+
+// Generate menu
+function generateSelect(list) {
+    let menu = document.getElementById('selectMenuName')
+    menu.innerHTML = ""
+    for (const menuName of list){
+        let option = document.createElement('option');
+        option.text = menuName.title;
+        option.id = menuName.id;
+        if (option.id === "menu-selected-" + CURRENT_SELECTED_MENU_ID) {
+            option.selected = true;
+        }
+        menu.appendChild(option);
+    }
+}
+
+function generateMenu(list) {
+    let menu = document.getElementById('menu-item-list')
+    menu.innerHTML = ""
+    for (const menuItem of list){
+        menu.innerHTML += generateMenuRecursive(menuItem)
+    }
+    updateArrowStyles();
+}
+
+function generateMenuRecursive(menuItem){
+    let depth = "zero-depth"
+    if (menuItem.depth != 0){
+        if (menuItem.depth%2 == 0){
+            depth = "even-depth"
+        }
+        else {
+            depth = ""
+        }
+    }
+
+    let children = ""
+    if (menuItem.children && menuItem.children.length > 0){
+        for (const child of menuItem.children){
+            children += generateMenuRecursive(child)
+        }
+    }
+
+    let arrowSpan = ""
+    if (children !== "") {
+        arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
+    }
+
+    let newMenu = `
+    <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
+            <a class="drag-and-drop-icon">
+                <i class="fas fa-bars"></i>
+            </a>
+            <div class="title-container">
+                <span data-id="titleSpan">`+ getValueByLocaleOf(menuItem.title) +`</span>` + arrowSpan + `
+            </div>
+            <div class="btn-group priority-over-drop-and-down">
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(`+menuItem.id+`)">
+                    <i class="glyphicon glyphicon-edit"></i>
+                </a>
+                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(`+menuItem.id+`)">
+                    <i class="glyphicon glyphicon-plus-sign"></i>
+                </a>
+                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-toggle="modal" data-target="#DeleteMenu" onclick="setCurrentId(`+menuItem.id+`)">
+                    <i class="glyphicon glyphicon-trash"></i>
+                </a>
+            </div>
+            <span class="arrows  priority-over-drop-and-down">
+                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
+            </span>
+        </div>
+        <ul class="menu-item" style="`+ ((children) ? "display: block;" : "display: none;") +`">
+            `+children+`
+        </ul>
+    </li>`
+
+    updateArrowStyles();
+    return newMenu;
+}
+// End generate menu
 
 // Move menu
 function moveMenuUp(id) {
@@ -483,88 +565,6 @@ function updateArrowStyles() {
     });
 }
 // End move menu
-
-// Generate menus
-function generateSelect(list) {
-    let menu = document.getElementById('selectMenuName')
-    menu.innerHTML = ""
-    for (const menuName of list){
-        let option = document.createElement('option');
-        option.text = menuName.title;
-        option.id = menuName.id;
-        if (option.id === "menu-selected-" + CURRENT_SELECTED_MENU_ID) {
-            option.selected = true;
-        }
-        menu.appendChild(option);
-    }
-}
-
-function generateMenu(list) {
-    let menu = document.getElementById('menu-item-list')
-    menu.innerHTML = ""
-    for (const menuItem of list){
-        menu.innerHTML += generateMenuRecursive(menuItem)
-    }
-    updateArrowStyles();
-}
-
-function generateMenuRecursive(menuItem){
-    let depth = "zero-depth"
-    if (menuItem.depth != 0){
-        if (menuItem.depth%2 == 0){
-            depth = "even-depth"
-        }
-        else {
-            depth = ""
-        }
-    }
-
-    let children = ""
-    if (menuItem.children && menuItem.children.length > 0){
-        for (const child of menuItem.children){
-            children += generateMenuRecursive(child)
-        }
-    }
-
-    let arrowSpan = ""
-    if (children !== "") {
-        arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
-    }
-
-    let newMenu = `
-    <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
-            <a class="drag-and-drop-icon">
-                <i class="fas fa-bars"></i>
-            </a>
-            <div class="title-container">
-                <span data-id="titleSpan">`+ getValueByLocaleOf(menuItem.title) +`</span>` + arrowSpan + `
-            </div>
-            <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(`+menuItem.id+`)">
-                    <i class="glyphicon glyphicon-edit"></i>
-                </a>
-                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(`+menuItem.id+`)">
-                    <i class="glyphicon glyphicon-plus-sign"></i>
-                </a>
-                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-toggle="modal" data-target="#DeleteMenu" onclick="setCurrentId(`+menuItem.id+`)">
-                    <i class="glyphicon glyphicon-trash"></i>
-                </a>
-            </div>
-            <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
-            </span>
-        </div>
-        <ul class="menu-item" style="`+ ((children) ? "display: block;" : "display: none;") +`">
-            `+children+`
-        </ul>
-    </li>`
-
-    updateArrowStyles();
-    return newMenu;
-}
-// End generate menus
 
 // Drop down
 function toggleTopLevelVisibility() {
