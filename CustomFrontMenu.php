@@ -23,9 +23,10 @@ class CustomFrontMenu extends BaseModule
     const DOMAIN_NAME = 'customfrontmenu';
 
     /**
+     * Create the database when the module is activated.
      * @return bool true to continue module activation, false to prevent it
      */
-    public function preActivation(ConnectionInterface $con = null)
+    public function preActivation(ConnectionInterface $con = null): bool
     {
         if (!self::getConfigValue('is_initialized', false)) {
             $database = new Database($con);
@@ -38,6 +39,9 @@ class CustomFrontMenu extends BaseModule
         return true;
     }
 
+    /**
+     * Delete the database when the module is deleted if $deleteModuleBase is true
+     */
     public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
     {
         $database = new Database($con);

@@ -6,6 +6,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Validator
 {
+    /**
+     * Manage the problems with empty fields or back quotes presence
+     */
     public static function stringValidation(string $string, SessionInterface $session) : string
     {
         $string = trim($string);
@@ -13,13 +16,16 @@ class Validator
             $string = "Empty field";
             $session->getFlashBag()->add('warning', 'One or more empty fields were replaced by the tag "Empty field".');
         }
-        return self::backQuoteProhibed($string, $session);
+        return self::backQuoteProhibited($string, $session);
     }
 
-    public static function backQuoteProhibed(string $string, SessionInterface $session) : string
+    /**
+     * Replace back quotes with simple quotes and add a warning flash message.
+     */
+    public static function backQuoteProhibited(string $string, SessionInterface $session) : string
     {
         $string = trim($string);
-        if (strpos($string, '`') !== false) {
+        if (str_contains($string, '`')) {
             $string = str_replace('`', "'", $string);
             $session->getFlashBag()->add('warning', "One or more back quotes were replaced by simple quotes : ` -> ' .");
         }
@@ -60,6 +66,9 @@ class Validator
         return '';
     }
 
+    /**
+     * Check the empty space, back quote, html and sql constraints
+     */
     public static function completeValidation(string $string, SessionInterface $session) : string
     {
         $string = self::stringValidation($string, $session);

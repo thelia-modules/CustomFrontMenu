@@ -17,8 +17,6 @@ class CFMMenuService implements CFMMenuInterface
     {}
 
     /**
-     * Return the menu root from the database.
-     * If this root doesn't exist, it's created.
      * @throws PropelException
      */
     public function getRoot() : CustomFrontMenuItem
@@ -33,6 +31,9 @@ class CFMMenuService implements CFMMenuInterface
         return $root;
     }
 
+    /**
+     * @throws PropelException
+     */
     public function addMenu(CustomFrontMenuItem $root, string $menuName, SessionInterface $session) : int
     {
         $item = new CustomFrontMenuItem();
