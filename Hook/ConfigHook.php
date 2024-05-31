@@ -25,11 +25,10 @@ class ConfigHook extends BaseHook
     public function onModuleConfiguration(HookRenderEvent $event) : void
     {
         $session = $this->getRequest()->getSession();
-        $locale = $session->getAdminLang()->getLocale();
         if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
-            $data = $this->menuController->loadMenuItems($locale, $session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
+            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
         } else {
-            $data = $this->menuController->loadMenuItems($locale, $session, $this->cfmLoad, $this->cfmMenu);
+            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu);
         }
 
         $event->add($this->render("module-config.html", $data));
