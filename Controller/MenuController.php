@@ -25,6 +25,13 @@ class MenuController extends BaseAdminController
 {
     private int $COUNT_ID = 1;
 
+    /**
+     * Load the menu selected by the user.
+     * @param Request $request The user request with the desired menu id
+     * @param SessionInterface $session The user session, used to get locale and to display flashes
+     * @param CFMLoadInterface $cfmLoad The loading service
+     * @param CFMMenuInterface $cfmMenu The menu service
+     */
     #[Route("/admin/module/CustomFrontMenu/selectMenu", name: "admin.customfrontmenu.select.menu", methods: ["POST"])]
     public function selectOtherMenu(Request $request, SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu) : RedirectResponse
     {
@@ -42,7 +49,12 @@ class MenuController extends BaseAdminController
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
-
+    /**
+     * Save the selected menu items in database.
+     * @param Request $request The user request with the menu items and the selected menu id
+     * @param SessionInterface $session The user session, used to get locale and to display flashes
+     * @param CFMSaveInterface $cfmSave The saving service
+     */
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
     public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSave) : RedirectResponse
     {
@@ -72,6 +84,14 @@ class MenuController extends BaseAdminController
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
+    /**
+     * Add a new menu with the name given by the user.
+     * The user is redirected in this new menu.
+     * @param Request $request The user request with the menu name
+     * @param SessionInterface $session The user session, used to display flashes
+     * @param CFMLoadInterface $cfmLoad The loading service
+     * @param CFMMenuInterface $cfmMenu The menu service
+     */
     #[Route("/admin/module/CustomFrontMenu/add", name: "admin.customfrontmenu.addmenu", methods: ["POST"])]
     public function addMenu(Request $request, SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu) : RedirectResponse
     {
@@ -91,6 +111,13 @@ class MenuController extends BaseAdminController
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
+    /**
+     * Delete the current menu.
+     * The user is redirected in the first menu if it exists.
+     * @param Request $request The user request with the menu id
+     * @param SessionInterface $session The user session, used to display flashes
+     * @param CFMMenuInterface $cfmMenu The menu service
+     */
     #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
     public function deleteMenu(Request $request, SessionInterface $session, CFMMenuInterface $cfmMenu) : RedirectResponse
     {
@@ -119,6 +146,7 @@ class MenuController extends BaseAdminController
 
     /**
      * Clear all flashes
+     * @param SessionInterface $session The user session, used to manage flashes
      */
     #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
     public function clearFlashes(SessionInterface $session) : Response
@@ -130,8 +158,12 @@ class MenuController extends BaseAdminController
 
     /**
      * Load the menu items
+     * @param SessionInterface $session The user session, used to get locale and to display flashes
+     * @param CFMLoadInterface $cfmLoad The loading service
+     * @param CFMMenuInterface $cfmMenu The menu service
+     * @param int|null $menuId The id of the menu to load
+     * @return array All the data necessary to load the page content : Menu names,  menu items and the current menu id.
      */
-
     public function loadMenuItems(string $locale, SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, ?int $menuId = null) : array
     {
         $menuNames = [];
