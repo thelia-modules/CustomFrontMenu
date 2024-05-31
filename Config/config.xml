@@ -26,14 +26,18 @@
 
         <service id="local/modules/CustomFrontMenu/Service/CFMLoadService" class="CustomFrontMenu\Service\CFMLoadService" />
 
+        <service id="local/modules/CustomFrontMenu/Service/CFMMenuService" class="CustomFrontMenu\Service\CFMMenuService" />
+
         <service id="CustomFrontMenu/Controller/MenuController" class="CustomFrontMenu\Controller\MenuController">
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMMenuService" />
         </service>
 
         <service id="CustomFrontMenu\Hook\ConfigHook">
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMMenuService" />
             <argument type="service" id="CustomFrontMenu/Controller/MenuController" />
         </service>
     </services>
@@ -42,6 +46,7 @@
         <hook id="custom_front_menu.configuration.hook" class="CustomFrontMenu\Hook\ConfigHook" scope="request">
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMSaveService" />
             <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMLoadService" />
+            <argument type="service" id="local/modules/CustomFrontMenu/Service/CFMMenuService" />
             <argument type="service" id="CustomFrontMenu/Controller/MenuController" />
 
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration"/>

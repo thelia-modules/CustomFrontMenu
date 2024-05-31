@@ -2,16 +2,37 @@
 
 namespace CustomFrontMenu\Service;
 
+use CustomFrontMenu\Interface\CFMSaveInterface;
 use CustomFrontMenu\Service\Validator;
 use Exception;
-use CustomFrontMenu\Interface\CFMSaveInterface;
-use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use Propel\Runtime\Exception\PropelException;
+use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
+use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
+use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CFMSaveService implements CFMSaveInterface
 {
+
+    /**
+     * Delete all the items currently in database for the menu to save
+     * @throws PropelException
+     */
+    public function deleteSpecificItems(int $menuId) :  CustomFrontMenuItem
+    {
+        $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
+        $menu->getParent();
+        $descendants = $menu->getDescendants();
+        foreach ($descendants as $descendant) {
+            CustomFrontMenuItemI18nQuery::create()->findById($descendant->getId())->delete();
+        }
+        $menu->deleteDescendants();
+        $menu->save();
+        return $menu;
+    }
+
+
     /**
      * Save all elements from an array recursively to the database
      * @throws PropelException

@@ -3,8 +3,9 @@
 namespace CustomFrontMenu\Hook;
 
 use CustomFrontMenu\Controller\MenuController;
-use CustomFrontMenu\Interface\CFMSaveInterface;
-use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Service\CFMSaveService;
+use CustomFrontMenu\Service\CFMLoadService;
+use CustomFrontMenu\Service\CFMMenuService;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Translation\Translator;
@@ -12,13 +13,14 @@ use CustomFrontMenu\CustomFrontMenu;
 
 class ConfigHook extends BaseHook
 {
-    protected $cfmSave, $cfmLoad, $menuController;
+    protected $cfmSave, $cfmLoad, $cfmMenu, $menuController;
 
-    public function __construct(CFMSaveInterface $cfmSave, CFMLoadInterface $cfmLoad, MenuController $menuController)
+    public function __construct(CFMSaveService $cfmSave, CFMLoadService $cfmLoad, CFMMenuService $cfmMenu, MenuController $menuController)
     {
         parent::__construct();
         $this->cfmSave = $cfmSave;
         $this->cfmLoad = $cfmLoad;
+        $this->cfmMenu = $cfmMenu;
         $this->menuController = $menuController;
     }
 
@@ -27,9 +29,9 @@ class ConfigHook extends BaseHook
         $session = $this->getRequest()->getSession();
         try {
             if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
-                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad,$_COOKIE['menuId']);
+                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
             } else {
-                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad);
+                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu);
             }
         }
         catch (\Exception $e) {

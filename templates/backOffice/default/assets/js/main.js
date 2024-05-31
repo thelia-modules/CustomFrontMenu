@@ -33,17 +33,27 @@ function saveTitleAndUrl(id, title, url) {
 }
 
 function changeParameters(id) {
+
+    if (!isValid('editMenuItemForm')) {
+        return
+    }
+
     const [title, url] = getFormItems('editMenuItemForm')
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
-    const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
-    titleSpan.textContent = title
+    
     saveTitleAndUrl(id, title, url)
+
+    const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
+    titleSpan.textContent = findMenuInList(id, MENU_LIST).title[LOCALE]
+
     deleteFormField('editMenuItemForm')
     generatePreviewMenus()
+
+    closeClosestModal(document.getElementById('editMenuItemForm'));
 }
 
 function getFormItems(formId) {
@@ -70,7 +80,36 @@ function setEditFields(id) {
     form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
 }
 
+function isValid(formId) {
+    let form = document.getElementById(formId)
+    let menuItemName = form.elements['menuItemName'].value.trim()
+    let menuItemUrl = form.elements['menuItemUrl'].value.trim()
+    let errorMessageTitle = form.querySelector('#error-message-title');
+    let errorMessageUrl = form.querySelector('#error-message-url');
+    let noError = true
+    
+    if (menuItemName.includes("`")) {
+        errorMessageTitle.style.display = 'block';
+        noError = false
+    } else {
+        errorMessageTitle.style.display = 'none';
+    }
+
+    if (menuItemUrl.includes("`")) {
+        errorMessageUrl.style.display = 'block';
+        noError = false
+    } else {
+        errorMessageUrl.style.display = 'none';
+    }
+
+    return noError
+}
+
 function addCustomMenuItem(form, id="0") {
+    if (!isValid(form)) {
+        return
+    }
+    
     let [menuItemName, menuItemUrl] = getFormItems(form);
     let element = findMenuInList(id, MENU_LIST);
     let depthToAdd = 0;
@@ -118,6 +157,16 @@ function addCustomMenuItem(form, id="0") {
     deleteFormField(form);
     generatePreviewMenus();
     updateArrowStyles();
+
+    closeClosestModal(document.getElementById(form));
+}
+
+function closeClosestModal(element) {
+    let modal = element.closest('.modal');
+    if (modal) {
+        let modalId = modal.getAttribute('id');
+        $(`#${modalId}`).modal('hide');
+    }
 }
 
 
@@ -790,13 +839,19 @@ function saveData() {
 
 function addMenu() {
     const menuName = document.getElementById('menuName').value;
-    const errorMessage = document.getElementById('error-message');
+    const errorMessageEmpty = document.getElementById('error-message-empty');
+    const errorMessageBackQuote = document.getElementById('error-message-back-quote');
 
     if (menuName.trim().length === 0) {
-        errorMessage.style.display = 'block';
+        errorMessageEmpty.style.display = 'block';
+        errorMessageBackQuote.style.display = 'none';
+    } else if (menuName.includes("`")) {
+        errorMessageEmpty.style.display = 'none';
+        errorMessageBackQuote.style.display = 'block';
     } else {
         $('#ConfirmAddMenu').modal('hide');
-        errorMessage.style.display = 'none';
+        errorMessageEmpty.style.display = 'none';
+        errorMessageBackQuote.style.display = 'none';
         document.getElementById('addMenuForm').submit();
     }
 }

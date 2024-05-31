@@ -95,9 +95,11 @@
             <div class="modal-body">
                 <p>{intl l="Add a new menu item" d="customfrontmenu.bo.default"}</p>
                 <form id="newParentForm">
+                    <div id="error-message-title" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <label for="menuItemName">{intl l="Menu title" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
+                    <div id="error-message-url" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
@@ -108,7 +110,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
@@ -146,21 +148,24 @@
                 <form id="editMenuItemForm">
                     <input type="hidden" id="menuId" name="menuId" value="">
 
+                    <div id="error-message-title" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <div class="edit-modal-line">
                         <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemName" name="menuItemName">
                         <button type="button" class="btn btn-success" onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     </div>
+
                     <div class="edit-modal-line">
+                        <div id="error-message-url" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                         <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemUrl" name="menuItemUrl">
-                        <button type="button" class="btn btn-success" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br><br><br>
+                        <button type="button" class="btn btn-success" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     </div>
                 </form>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
@@ -179,9 +184,11 @@
             <div class="modal-body">
                 <p>{intl l="Add a submenu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuItemForm">
+                    <div id="error-message-title" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <label for="menuItemName">{intl l="Submenu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
+                    <div id="error-message-url" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem"><br><br>
                     <datalist id="productsListInItem">
@@ -192,7 +199,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
@@ -254,7 +261,8 @@
             <div class="modal-body">
                 <p>{intl l="Add a new menu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuForm" action="{url path="/admin/module/CustomFrontMenu/add"}" method="POST">
-                    <div id="error-message" style="color: red; display: none;">Menu name cannot be empty</div>
+                    <div id="error-message-empty" style="color: red; display: none;">Menu name cannot be empty</div>
+                    <div id="error-message-back-quote" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <label for="menuName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuName" name="menuName"><br><br>
                 </form>
