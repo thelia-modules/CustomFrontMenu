@@ -5,6 +5,8 @@ var LOCALE
 let CURRENT_ID = null
 let allowUnload = true
 var selectedLanguage;
+let quotePattern = '&280&quote&280&';
+let percentPattern = '&280&percent&280&';
 
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -19,7 +21,7 @@ function setCurrentId(id) {
 
 function saveTitleAndUrl(id, title, url) {
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
-    menuToModify = findMenuInList(id, MENU_LIST)
+    const menuToModify = findMenuInList(id, MENU_LIST)
 
     if (menuToModify === null) {
         console.error("The id given in saveTitleAndUrl doesn't exist")
@@ -125,8 +127,6 @@ function deleteFormField(formId) {
     form.elements['menuItemUrl'].value = null
 }
 
-let quotePattern = '&280&quote&280&';
-let percentPattern = '&280&percent&280&';
 
 function replaceQuoteAndPercent(string){
     while (string.includes("\\'") || string.includes("%")) {
