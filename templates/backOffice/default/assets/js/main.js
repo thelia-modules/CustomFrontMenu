@@ -171,7 +171,11 @@ function closeClosestModal(element) {
 
 
 function deleteFormField(formId) {
-    let form = document.getElementById(formId)
+    const form = document.getElementById(formId)
+    const errorMessageTitle = form.querySelector('#error-message-title');
+    const errorMessageUrl = form.querySelector('#error-message-url');
+    errorMessageTitle.style.display = 'none';
+    errorMessageUrl.style.display = 'none';
     form.elements['menuItemName'].value = null
     form.elements['menuItemUrl'].value = null
 }
@@ -574,6 +578,12 @@ function drop(ev) {
         generateMenu(MENU_LIST)
 
         generatePreviewMenus();
+
+        const button = document.getElementById('toggle-all-children');
+        const isVisible = false;
+        buttonState = isVisible ? 'show' : 'hide';
+        button.textContent = isVisible ? translations.showAllChildren : translations.hideAllChildren;
+
     } else {
         console.error("L'élément avec l'ID", draggedItemId, "n'a pas été trouvé dans MENU_LIST.");
     }
