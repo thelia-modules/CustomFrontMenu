@@ -1,8 +1,12 @@
 var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
+var LOCALE
 let CURRENT_ID = null
 let allowUnload = true
+var selectedLanguage;
+let quotePattern = '&280&quote&280&';
+let percentPattern = '&280&percent&280&';
 
 function getCurrentId() {
     if (CURRENT_ID === null) {
@@ -15,23 +19,22 @@ function setCurrentId(id) {
     CURRENT_ID = id
 }
 
-function searchInMenuList(id, title, url, list) {
-    list = list.map(function(element) {
-        if (element.id === id) {
-            element.title = title
-            element.url = url
-        }
-        if (element.children && element.children.length > 0) {
-            element.children = searchInMenuList(id, title, url, element.children)
-        }
-        return element;
-    })
-    return list
+function saveTitleAndUrl(id, title, url) {
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    const menuToModify = findMenuInList(id, MENU_LIST)
+
+    if (menuToModify === null) {
+        console.error("The id given in saveTitleAndUrl doesn't exist")
+        return
+    }
+
+    menuToModify.title[modifiedLocal] = title
+    menuToModify.url[modifiedLocal] = url
 }
 
 function changeParameters(id) {
 
-    if (isInvalid('editMenuItemForm', 'EditMenu')) {
+    if (!isValid('editMenuItemForm')) {
         return
     }
 
@@ -41,11 +44,16 @@ function changeParameters(id) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
+    
+    saveTitleAndUrl(id, title, url)
+
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
-    titleSpan.textContent = title
-    MENU_LIST = searchInMenuList(id, title, url, MENU_LIST)
+    titleSpan.textContent = findMenuInList(id, MENU_LIST).title[LOCALE]
+
     deleteFormField('editMenuItemForm')
     generatePreviewMenus()
+
+    closeClosestModal(document.getElementById('editMenuItemForm'));
 }
 
 function getFormItems(formId) {
@@ -62,17 +70,17 @@ function getFormItems(formId) {
 }
 
 function setEditFields(id) {
-    let element = findMenuInList(id, MENU_LIST)
+    const element = findMenuInList(id, MENU_LIST)
     if (element === null) {
         console.error("The id given in setEditField doesn't exist")
         return
     }
-    let form = document.getElementById('editMenuItemForm')
-    form.elements['menuItemName'].value = element.title
-    form.elements['menuItemUrl'].value = element.url
+    const form = document.getElementById('editMenuItemForm')
+    form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
+    form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
 }
 
-function isInvalid(formId, modalId) {
+function isValid(formId) {
     let form = document.getElementById(formId)
     let menuItemName = form.elements['menuItemName'].value.trim()
     let menuItemUrl = form.elements['menuItemUrl'].value.trim()
@@ -86,28 +94,19 @@ function isInvalid(formId, modalId) {
     } else {
         errorMessageTitle.style.display = 'none';
     }
+
     if (menuItemUrl.includes("`")) {
         errorMessageUrl.style.display = 'block';
         noError = false
     } else {
         errorMessageUrl.style.display = 'none';
     }
-    if (noError === false) {
-        return true
-    }
-    const formIdParsed = '#'+modalId
-    $(formIdParsed).modal('hide');
-    return false
+
+    return noError
 }
 
 function addCustomMenuItem(form, id="0") {
-
-    let modalId = 'AddAndEditMenu'
-    if (id !== '0') {
-        modalId = 'AddAndEditSecondaryMenu'
-    }
-
-    if (isInvalid(form, modalId)) {
+    if (!isValid(form)) {
         return
     }
     
@@ -119,11 +118,14 @@ function addCustomMenuItem(form, id="0") {
     }
     let newItem = {
         id: getNextId(),
-        title: menuItemName,
-        url: menuItemUrl,
+        title: {},
+        url: {},
         depth: depthToAdd,
         children: []
     };
+    newItem.title[LOCALE] = menuItemName;
+    newItem.url[LOCALE] = menuItemUrl;
+
     let newMenu = generateMenuRecursive(newItem);
     if (element === null) {
         document.getElementById('menu-item-list').innerHTML += newMenu;
@@ -155,6 +157,16 @@ function addCustomMenuItem(form, id="0") {
     deleteFormField(form);
     generatePreviewMenus();
     updateArrowStyles();
+
+    closeClosestModal(document.getElementById(form));
+}
+
+function closeClosestModal(element) {
+    let modal = element.closest('.modal');
+    if (modal) {
+        let modalId = modal.getAttribute('id');
+        $(`#${modalId}`).modal('hide');
+    }
 }
 
 
@@ -164,8 +176,6 @@ function deleteFormField(formId) {
     form.elements['menuItemUrl'].value = null
 }
 
-let quotePattern = '&280&quote&280&';
-let percentPattern = '&280&percent&280&';
 
 function replaceQuoteAndPercent(string){
     while (string.includes("\\'") || string.includes("%")) {
@@ -186,13 +196,7 @@ function putQuoteAndPercent(string){
 }
 
 function getFromJson(json){
-    
-    json = replaceQuoteAndPercent(json)
-    result = JSON.parse(decodeURIComponent(json))
-    result.forEach(function(element) {
-        element.title = putQuoteAndPercent(element.title)
-    })
-    return result
+    return JSON.parse(decodeURIComponent(replaceQuoteAndPercent(json)))
 }
 
 function deleteMenuItem(id) {
@@ -236,11 +240,27 @@ function addInList(id, item, list) {
     return list
 }
 
+function getValueByLocaleOf(element) {
+    let found = false
+    for (const [key, val] of Object.entries(element)) {
+        if (key === LOCALE) {
+            result = val
+            found = true
+            break
+        }
+        else if (key === 'en_US') {
+            result = val
+            found = true
+        }
+    }
+    if (!found) {
+        result = element[Object.keys(element)[0]]
+    }
+    return result
+}
+
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-
-    menuItem.title = putQuoteAndPercent(menuItem.title)
-
     if (menuItem.depth != 0){
         if (menuItem.depth%2 == 0){
             depth = "even-depth"
@@ -269,7 +289,7 @@ function generateMenuRecursive(menuItem){
                 <i class="fas fa-bars"></i>
             </a>
             <div class="title-container">
-                <span data-id="titleSpan">`+menuItem.title+`</span>` + arrowSpan + `
+                <span data-id="titleSpan">`+ getValueByLocaleOf(menuItem.title) +`</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
                 <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setCurrentId(`+menuItem.id+`); setEditFields(getCurrentId())">
@@ -398,13 +418,6 @@ function addSelectedMenuIdToForm(formName, inputName) {
     document.getElementById(formName).elements[inputName].value = CURRENT_SELECTED_MENU_ID
 }
 
-document.getElementById('selectMenuName').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-
-    document.getElementById('menuId').value = selectedOption.id;
-    document.getElementById('askedMenu').submit();
-});
-
 function getNextId() {
     let nextId = 1
     let arrayOfIds = getAllIdOf(MENU_LIST)
@@ -485,6 +498,28 @@ function toggleChildren(span, event) {
         }
     }
 }
+
+
+function toggleFlags() {
+    var flagsList = document.getElementById('flags-list');
+    if (flagsList.style.display === 'none') {
+        flagsList.style.display = 'block';
+    } else {
+        flagsList.style.display = 'none';
+    }
+}
+
+function selectLanguage(languageElement) {
+    selectedLanguage = languageElement.getAttribute('data-locale');
+    currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
+    document.forms["editMenuItemForm"]["menuItemName"].value = currentMenu.title[selectedLanguage] ? currentMenu.title[selectedLanguage] : currentMenu.title[LOCALE]
+    document.forms["editMenuItemForm"]["menuItemUrl"].value = currentMenu.url[selectedLanguage] ? currentMenu.url[selectedLanguage] : currentMenu.url[LOCALE]
+    document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
+    toggleFlags();
+}
+
+
+
 
 // ------------------------------ End drop down ------------------------------
 
@@ -738,7 +773,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a>` + menuItem.title + `</a>
+            <a>` + getValueByLocaleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
@@ -825,6 +860,91 @@ function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
 
+
+function replaceAllQuotesAndPercent(MenuList){
+    for (const val of MenuList){
+        replaceAllQuotesAndPercentRec(val)
+    }
+}
+
+function replaceAllQuotesAndPercentRec(MenuList){
+    for (const [lang, title] of Object.entries(MenuList.title)){
+        MenuList.title[lang] = putQuoteAndPercent(title)
+    }
+    
+    if (!MenuList.children || MenuList.children.length <= 0){
+        return
+    }
+    for (let child of MenuList.children){
+        replaceAllQuotesAndPercentRec(child)
+    }
+}
+
+function saveMenuItemName() {
+    if (!isValid('editMenuItemForm')) {
+        return
+    }
+
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemName doesn't exist")
+        return
+    }
+    
+    menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
+
+}
+
+function saveMenuItemUrl() {
+    if (!isValid('editMenuItemForm')) {
+        return
+    }
+
+    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
+    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    
+    if (menuToModify === null) {
+        console.error("The id given in saveMenuItemUrl doesn't exist")
+        return
+    }
+
+    menuToModify.url[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemUrl"].value;
+}
+
+window.onload = function() {
+    MENU_NAMES = getFromJson(menuNames)
+    MENU_LIST = getFromJson(menuItems)
+    replaceAllQuotesAndPercent(MENU_LIST)
+    for (menu of MENU_NAMES){
+        menu.title = putQuoteAndPercent(menu.title)
+    }
+    generateSelect(MENU_NAMES)
+    generateMenu(MENU_LIST)
+    generatePreviewMenus()
+    addSelectedMenuIdToForm('deleteForm', 'menuNameToDelete')
+    if (CURRENT_SELECTED_MENU_ID === 'undefined' || CURRENT_SELECTED_MENU_ID === -1 || isNaN(CURRENT_SELECTED_MENU_ID)) {
+        let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
+        listToDelete.forEach(function (elementToDelete) {
+            elementToDelete.disabled = true
+        })
+    }
+}
+
+window.addEventListener('beforeunload', function(event) {
+    if (!allowUnload) {
+        event.preventDefault();
+    }
+}, { capture: true });
+
+document.getElementById('selectMenuName').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+
+    document.getElementById('menuId').value = selectedOption.id;
+    document.getElementById('askedMenu').submit();
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     // Function to remove flash messages from the DOM
     function removeFlashMessages() {
@@ -862,24 +982,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-window.onload = function() {
-    MENU_NAMES = getFromJson(menuNames)
-    MENU_LIST = getFromJson(menuItems)
-    generateSelect(MENU_NAMES)
-    generateMenu(MENU_LIST)
-    generatePreviewMenus()
-    addSelectedMenuIdToForm('deleteForm', 'menuNameToDelete')
-    if (CURRENT_SELECTED_MENU_ID === 'undefined' || CURRENT_SELECTED_MENU_ID === -1 || isNaN(CURRENT_SELECTED_MENU_ID)) {
-        let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
-        listToDelete.forEach(function (elementToDelete) {
-            elementToDelete.disabled = true
-        })
-    }
-}
-
-window.addEventListener('beforeunload', function(event) {
-    if (!allowUnload) {
-        event.preventDefault();
-    }
-}, { capture: true });

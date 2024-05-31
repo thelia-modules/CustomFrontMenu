@@ -8,6 +8,8 @@ use CustomFrontMenu\Service\CFMLoadService;
 use CustomFrontMenu\Service\CFMMenuService;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
+use Thelia\Core\Translation\Translator;
+use CustomFrontMenu\CustomFrontMenu;
 
 class ConfigHook extends BaseHook
 {
@@ -25,10 +27,15 @@ class ConfigHook extends BaseHook
     public function onModuleConfiguration(HookRenderEvent $event) : void
     {
         $session = $this->getRequest()->getSession();
-        if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
-            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
-        } else {
-            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu);
+        try {
+            if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
+                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
+            } else {
+                $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu);
+            }
+        }
+        catch (\Exception $e) {
+            $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to load this menu', [], CustomFrontMenu::DOMAIN_NAME));
         }
 
         $event->add($this->render("module-config.html", $data));

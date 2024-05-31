@@ -86,7 +86,6 @@ ul.menu-item:last-child {
 .rightArrow {
     float: right;
     cursor: pointer;
-
 }
 
 .arrows{
@@ -107,6 +106,53 @@ ul.menu-item:last-child {
 }
 
 /* ------------------------------ End item ------------------------------ */
+
+/* ------------------------------ Begin edit modal ------------------------------ */
+
+.top-edit{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+
+.edit-modal-line {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.edit-modal-line label{
+    margin-bottom: 0;
+}
+
+.edit-modal-line label, .edit-modal-line input, .edit-modal-line button {
+    margin-right: 10px;
+}
+
+.edit-modal-line input, .edit-modal-line button {
+    height: 32px;
+    box-sizing: border-box;
+}
+
+.edit-modal-line:last-child{
+    margin-bottom: 0;
+}
+
+
+.dropdown-menu {
+    padding: 15px;
+    min-width: 50px;
+    right: 0;
+    left: auto;
+}
+
+.dropdown-menu li:hover {
+    background-color: #ccc;
+}
+
+/* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
 

@@ -41,4 +41,5 @@ return array(
     'Would you like to discard all changes ?' => 'Voulez-vous annuler les modifications ?',
     'Cannot use back quote ( ` )' => 'Vous ne pouvez pas utiliser de back quote ( ` )',
     'Menu name cannot be empty' => 'Le nom d\'un menu ne peut pas être vide',
+    '-- language to translate into --' => '-- langue dans laquelle traduire --',
 );
