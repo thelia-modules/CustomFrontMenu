@@ -14,6 +14,27 @@ function getFromJson(json){
 }
 // End get from json
 
+// Get value by locale
+function getValueByLocaleOf(element) {
+    let found = false
+    for (const [key, val] of Object.entries(element)) {
+        if (key === LOCALE) {
+            result = val
+            found = true
+            break
+        }
+        else if (key === 'en_US') {
+            result = val
+            found = true
+        }
+    }
+    if (!found) {
+        result = element[Object.keys(element)[0]]
+    }
+    return result
+}
+// End get value by locale
+
 // Close closest modal
 function closeClosestModal(element) {
     let modal = element.closest('.modal');
