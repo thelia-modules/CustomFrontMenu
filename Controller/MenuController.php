@@ -63,7 +63,7 @@ class MenuController extends BaseAdminController
             $locale = $session->get('_locale', 'en_US');
             $cfmSave->saveTableBrowser($dataArray, $menu, $session, $locale);
 
-            $session->getFlashBag()->add('success', Translator::getInstance()->trans('This title has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
+            $session->getFlashBag()->add('success', Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
         } catch (\Exception $e) {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('An error occurred when saving in database', [], CustomFrontMenu::DOMAIN_NAME));
