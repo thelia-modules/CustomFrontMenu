@@ -854,6 +854,9 @@ window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
+    for (menu of MENU_NAMES){
+        menu.title = putQuoteAndPercent(menu.title)
+    }
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
