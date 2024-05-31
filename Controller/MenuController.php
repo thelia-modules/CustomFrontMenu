@@ -119,7 +119,6 @@ class MenuController extends BaseAdminController
     #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
     public function deleteMenu(Request $request, SessionInterface $session, CFMMenuInterface $cfmMenu) : RedirectResponse
     {
-
         $firstCurrentMenuId = $request->get('menuId');
         if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
             $session->getFlashBag()->add('fail', Translator::getInstance()->trans('Fail to delete the current menu', [], CustomFrontMenu::DOMAIN_NAME));
