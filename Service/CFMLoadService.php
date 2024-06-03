@@ -5,6 +5,7 @@ namespace CustomFrontMenu\Service;
 use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
+use Propel\Runtime\Exception\PropelException;
 
 class CFMLoadService implements CFMLoadInterface
 {
@@ -13,7 +14,6 @@ class CFMLoadService implements CFMLoadInterface
 
     /**
      * Load the different menu names
-     * @throws PropelException
      */
     public function loadSelectMenu(CustomFrontMenuItem $root) : array
     {
@@ -32,6 +32,9 @@ class CFMLoadService implements CFMLoadInterface
         return $dataArray;
     }
 
+    /**
+     * @throws PropelException
+     */
     public function loadTableBrowser(CustomFrontMenuItem $parent) : array
     {
         $dataArray = [];
