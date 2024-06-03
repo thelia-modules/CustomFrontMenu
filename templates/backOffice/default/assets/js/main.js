@@ -471,7 +471,6 @@ function generateMenuRecursive(menuItem){
         arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
     }
 
-    console.log(getValueByLocaleOf(menuItem.title))
     let newMenu = `
     <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
