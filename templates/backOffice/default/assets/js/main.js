@@ -15,10 +15,13 @@ function getFromJson(json){
 // End get from json
 
 // Get value by locale
-function getValueByLocaleOf(element) {
+function getValueByLocaleOf(element, locale) {
+    if (!locale) {
+        locale = LOCALE
+    }
     let found = false
     for (const [key, val] of Object.entries(element)) {
-        if (key === LOCALE) {
+        if (key === locale) {
             result = val
             found = true
             break
@@ -266,7 +269,7 @@ function changeParameters(id) {
     saveTitleAndUrl(id, title, url)
 
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
-    titleSpan.textContent = findMenuInList(id, MENU_LIST).title[LOCALE]
+    titleSpan.textContent = getValueByLocaleOf(findMenuInList(id, MENU_LIST).title)
 
     deleteEditField('editMenuItemForm')
     generatePreviewMenus()
@@ -468,6 +471,7 @@ function generateMenuRecursive(menuItem){
         arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
     }
 
+    console.log(getValueByLocaleOf(menuItem.title))
     let newMenu = `
     <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
@@ -647,8 +651,8 @@ function toggleFlags() {
 function selectLanguage(languageElement) {
     selectedLanguage = languageElement.getAttribute('data-locale');
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
-    document.forms["editMenuItemForm"]["menuItemName"].value = currentMenu.title[selectedLanguage] ? currentMenu.title[selectedLanguage] : currentMenu.title[LOCALE]
-    document.forms["editMenuItemForm"]["menuItemUrl"].value = currentMenu.url[selectedLanguage] ? currentMenu.url[selectedLanguage] : currentMenu.url[LOCALE]
+    document.forms["editMenuItemForm"]["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
+    document.forms["editMenuItemForm"]["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
