@@ -133,7 +133,7 @@
                     <div class="dropdown open">
 
                         <div class="dropdown">
-                            <button id="selectedLanguageBtn" class="dropdown-toggle" onclick="toggleFlags()">
+                            <button id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
                                 {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
                             </button>
                             <ul class="dropdown-menu" id="flags-list" style="display: none;">
@@ -152,20 +152,20 @@
                     <div class="edit-modal-line">
                         <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemName" name="menuItemName">
-                        <button type="button" class="btn btn-success" onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
+                        <button type="button" class="btn btn-success rounded" onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     </div>
 
                     <div id="error-message-url" style="color: red; display: none;">Cannot use back quote ( ` )</div>
                     <div class="edit-modal-line">
                         <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemUrl" name="menuItemUrl">
-                        <button type="button" class="btn btn-success" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
+                        <button type="button" class="btn btn-success rounded" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
                     </div>
                 </form>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save" d="customfrontmenu.bo.default"}</button>
+                <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save everything" d="customfrontmenu.bo.default"}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
             </div>
         </div>
