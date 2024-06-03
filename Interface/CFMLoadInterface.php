@@ -3,7 +3,6 @@
 namespace CustomFrontMenu\Interface;
 
 use CustomFrontMenu\Model\CustomFrontMenuItem;
-use Propel\Runtime\Exception\PropelException;
 
 interface CFMLoadInterface
 {
@@ -18,7 +17,6 @@ interface CFMLoadInterface
      * Load all elements from the database recursively to parse them in an array
      * @param CustomFrontMenuItem $parent
      * @return array All the descendants items of the menu root given in parameter
-     * @throws PropelException
      */
     public function loadTableBrowser(CustomFrontMenuItem $parent) : array;
 }
