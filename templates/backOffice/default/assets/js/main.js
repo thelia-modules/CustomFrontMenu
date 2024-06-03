@@ -471,7 +471,6 @@ function generateMenuRecursive(menuItem){
         arrowSpan = `<span> <i class="fas fa-caret-down tree-icon"></i></span>`;
     }
 
-    console.log(getValueByLocaleOf(menuItem.title))
     let newMenu = `
     <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
@@ -959,14 +958,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeFlashMessages() {
         const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
         Array.from(flashMessages).forEach(function(message) {
-            message.remove();
+            message.remove()
         });
     }
 
     // Function to notify server to clear flash messages
     function clearFlashMessagesOnServer() {
-        let xhr = new XMLHttpRequest();
-        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true);
+        let xhr = new XMLHttpRequest()
+        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
@@ -980,17 +979,17 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', xhr.statusText);
         };
 
-        xhr.send();
+        xhr.send()
     }
 
     // Add a click event listener to the document
     document.addEventListener('click', function() {
         if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages();
-            clearFlashMessagesOnServer();
+            removeFlashMessages()
+            clearFlashMessagesOnServer()
         }
-    });
-});
+    })
+})
 // End Event Listener
 
 // Initialization
@@ -998,7 +997,7 @@ window.onload = function() {
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
-    for (menu of MENU_NAMES){
+    for (let menu of MENU_NAMES){
         menu.title = putQuoteAndPercent(menu.title)
     }
     generateSelect(MENU_NAMES)
