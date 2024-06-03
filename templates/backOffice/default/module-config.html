@@ -47,6 +47,7 @@
         </ul>
     </div>
 
+
     <div class="top">
         <button id="toggle-all-children" class="btn top-btn delete-if-no-menu" onclick="toggleTopLevelVisibility()">{intl l="Hide all children" d="customfrontmenu.bo.default"}</button>
         <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn delete-if-no-menu" data-toggle="modal" data-target="#AddAndEditMenu">
@@ -138,7 +139,10 @@
                             </button>
                             <ul class="dropdown-menu" id="flags-list" style="display: none;">
                                 {loop type="lang" name="the-loop-name"}
-                                    <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>
+                                    <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
+                                    <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
+                                        <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}">
+                                    </li>
                                 {/loop}
                             </ul>
                         </div>

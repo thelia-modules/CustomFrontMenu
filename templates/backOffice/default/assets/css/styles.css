@@ -154,6 +154,10 @@ ul.menu-item:last-child {
 .rounded{
     border-radius: 10px;
 }
+
+.edit-menu-flags{
+    width: 100%;
+}
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
