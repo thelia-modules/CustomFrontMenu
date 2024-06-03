@@ -140,7 +140,6 @@ ul.menu-item:last-child {
     margin-bottom: 0;
 }
 
-
 .dropdown-menu {
     padding: 15px;
     min-width: 50px;
@@ -152,6 +151,9 @@ ul.menu-item:last-child {
     background-color: #ccc;
 }
 
+.rounded{
+    border-radius: 10px;
+}
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
