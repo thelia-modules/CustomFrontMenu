@@ -104,9 +104,42 @@
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
-                        {loop type="product" name="my_product_loop"}
-                        <option value="{$TITLE} (id:{$ID})">
+                        <datalist>
+                            <option>---Brand---</option>
+                            {loop type="category" name="brand_loop"}
+                            <option value="{$TITLE} (id:{$ID})"></option>
+                                {/loop}
+                        </datalist>
+                        <datalist>
+                            <option>---Cart---</option>
+                            {loop type="category" name="cart_loop"}
+                            <option value="{$TITLE}"></option>
+                                {/loop}
+                        </datalist>
+                        <datalist>
+                            <option>---Category---</option>
+                            {loop type="category" name="category_loop"}
+                                <option value="{$TITLE} (id:{$ID})"></option>
                             {/loop}
+                        </datalist>
+                        <datalist >
+                            <option>---Content---</option>
+                            {loop type="category" name="content_loop"}
+                            <option value="{$TITLE} (id:{$ID})"></option>
+                                {/loop}
+                        </datalist>
+                        <datalist>
+                            <option>---Folder--</option>
+                            {loop type="folder" name="folder_loop"}
+                            <option value="{$TITLE} (id:{$ID})"></option>
+                            {/loop}
+                        </datalist>
+                        <datalist>
+                            <option>---Products---</option>
+                            {loop type="product" name="product_loop"}
+                                <option value="{$TITLE} (id:{$ID})"></option>
+                            {/loop}
+                        </datalist>
                     </datalist>
                 </form>
             </div>
