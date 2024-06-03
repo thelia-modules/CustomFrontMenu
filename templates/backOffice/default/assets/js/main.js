@@ -623,6 +623,7 @@ function toggleTopLevelVisibility() {
 }
 
 function toggleChildren(span, event) {
+
     if (event.target.closest('.priority-over-drop-and-down')) {
         return;
     }
@@ -630,6 +631,10 @@ function toggleChildren(span, event) {
     const listItem = span.closest('.item').parentElement;
     const treeIcon = listItem.querySelector('.tree-icon');
     const childrenUl = listItem.querySelector('ul');
+
+    if (treeIcon === null){
+        return
+    }
 
     if (childrenUl) {
         childrenUl.style.display = childrenUl.style.display === 'none' ? 'block' : 'none';
