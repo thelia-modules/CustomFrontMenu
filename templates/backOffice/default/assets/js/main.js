@@ -4,9 +4,9 @@ var CURRENT_SELECTED_MENU_ID
 var LOCALE
 let CURRENT_ID = null
 let allowUnload = true
-let selectedLanguage;
-let quotePattern = '&280&quote&280&';
-let percentPattern = '&280&percent&280&';
+let selectedLanguage
+let quotePattern = '&280&quote&280&'
+let percentPattern = '&280&percent&280&'
 
 // Get from json
 function getFromJson(json){
@@ -409,6 +409,7 @@ function setEditFields(id) {
         return
     }
     const form = document.getElementById('editMenuItemForm')
+    CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
 }
