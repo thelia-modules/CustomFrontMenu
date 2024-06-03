@@ -160,7 +160,7 @@ class MenuController extends BaseAdminController
                 $data = $cfmLoad->loadTableBrowser($menu);
             } else {
                 $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
-                setcookie('menuId', -1);
+                setcookie('menuId', -1, ['path' => '/admin/module/CustomFrontMenu']);
             }
         }
 
