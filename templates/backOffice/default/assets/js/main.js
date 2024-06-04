@@ -3,7 +3,7 @@ var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
 var LOCALE
 let CURRENT_ID = null
-let allowUnload = true
+let allowUnload = false
 let selectedLanguage
 let quotePattern = '&280&quote&280&'
 let percentPattern = '&280&percent&280&'
@@ -309,7 +309,7 @@ function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
     
     let parentInMenuList = findParentOf(id, MENU_LIST)
-    if (parentInMenuList[1].children.length === 1) {
+    if (parentInMenuList[1].children && parentInMenuList[1].children.length === 1) {
         const parentInHtml = elementToRemove.parentElement.parentElement;
         const treeIcon = parentInHtml.querySelector('.tree-icon')
         treeIcon.classList.remove('fa-caret-up')
@@ -713,7 +713,7 @@ function drop(ev) {
         const insertionBefore = mouseY < rect.height / 2
         const insertAsChild = !insertionBefore && mouseX > rect.width / 6
 
-        // insère elem déplacé avant ou après elem cible en fonction de la position de dépôt
+        // inserts the moved element before or after the target element, depending on the drop position
         const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
         if (problems === 0){
@@ -963,7 +963,8 @@ function searchProducts(query, formId) {
     });
 }
 
-function filterDataList() {
+function filterDataList(element) {
+    console.log(element.parentElement)
     var loopsDictionary = {
         "Brand": brandLoopData,
         "Cart": cartLoopData,
@@ -972,10 +973,9 @@ function filterDataList() {
         "Folder": folderLoopData,
         "Products": productLoopData
     };
-
-    const searchInput = document.getElementById("menuItemUrl");
-    const searchTerm = searchInput.value.toLowerCase();
-    const dataList = document.getElementById("productsListParent");
+    const searchTerm = element.value.toLowerCase();
+    const dataList = element.parentElement.getElementsByClassName("productsListParent")[0]
+    console.log(dataList)
 
     dataList.innerHTML = "";
     dataList.style.display = "none";
@@ -1000,7 +1000,6 @@ function filterDataList() {
                 };
                 dataList.appendChild(itemElement);
             });
-
             hasMatchingItems = true;
         }
     }

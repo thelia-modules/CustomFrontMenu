@@ -21,12 +21,12 @@ class CFMLoadService implements CFMLoadInterface
         $dataArray = [];
         foreach ($descendants as $descendant) {
             $newArray = [];
-            $newArray['id'] = 'menu-selected-'.$descendant->getId();
+            $newArray['id'] = 'menu-selected-' . $descendant->getId();
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
                 ->findByLocale('en_US');
 
-            $newArray['title'] = $content->getColumnValues('title')[0];
+            $newArray['title'] = $content->getColumnValues('title')[0] . ' (id: ' . $descendant->getId() . ')';
             $dataArray[] = $newArray;
         }
         return $dataArray;

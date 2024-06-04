@@ -164,17 +164,17 @@ ul.menu-item:last-child {
 
 /* ------------------------------ Begin add parent modal ------------------------------ */
 
-#productsListParent {
+.productsListParent {
     padding: 0;
     max-height: 250px;
     overflow-y: auto;
     text-align: center;
 }
-#productsListParent li {
+.productsListParent li {
     padding: 4px;
     cursor: pointer;
 }
-#productsListParent li:hover {
+.productsListParent li:hover {
     background-color: #f0f0f0;
 }
 /* ------------------------------ End add parent modal ------------------------------ */
