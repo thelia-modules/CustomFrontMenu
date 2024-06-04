@@ -215,7 +215,7 @@ function addCustomMenuItem(form, id="0") {
             ulElement.innerHTML += newMenu;
             MENU_LIST = addInList(id, newItem, MENU_LIST);
 
-            // Ajout de l'icône de sous-menu si elle n'existe pas déjà
+            // Add sub-menu icon if not already present
             let parentElement = document.getElementById(id).parentNode;
             let titleContainer = parentElement.querySelector('.title-container');
             if (titleContainer && !titleContainer.querySelector('.tree-icon')) {
@@ -223,6 +223,18 @@ function addCustomMenuItem(form, id="0") {
                 if (titleSpan) {
                     titleSpan.insertAdjacentHTML('afterend', '<span> <i class="fas fa-caret-down tree-icon"></i></span>');
                 }
+            }
+
+            // Open the parent menu
+            const treeIcon = parentElement.querySelector('.tree-icon');
+            const childrenUl = parentElement.querySelector('ul');
+            if (treeIcon === null){
+                return
+            }
+            if (childrenUl) {
+                childrenUl.style.display = 'block'
+                treeIcon.classList.remove('fa-caret-up');
+                treeIcon.classList.add('fa-caret-down');
             }
         }
     }
@@ -295,6 +307,14 @@ function getFormItems(formId) {
 // Delete menu
 function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
+    
+    let parentInMenuList = findParentOf(id, MENU_LIST)
+    if (parentInMenuList[1].children.length === 1) {
+        const parentInHtml = elementToRemove.parentElement.parentElement;
+        const treeIcon = parentInHtml.querySelector('.tree-icon')
+        treeIcon.classList.remove('fa-caret-up')
+        treeIcon.classList.remove('fa-caret-down')
+    }
     if (elementToRemove) {
         if (elementToRemove.remove) {
             elementToRemove.remove()
