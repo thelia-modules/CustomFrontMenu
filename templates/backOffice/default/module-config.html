@@ -17,36 +17,31 @@
 
 {loop type="brand" name="brand_loop"}
 <script>
-    var brand = { title: "{$TITLE}", id: "{$ID}" };
-    brandLoopData.push(brand);
+    brandLoopData.push({ title: "{$TITLE}", id: "{$ID}" });
 </script>
 {/loop}
 
 {loop type="category" name="category_loop"}
 <script>
-    var category = { title: "{$TITLE}", id: "{$ID}" };
-    categoryLoopData.push(category);
+    categoryLoopData.push({ title: "{$TITLE}", id: "{$ID}" });
 </script>
 {/loop}
 
 {loop type="content" name="content_loop"}
 <script>
-    var content = { title: "{$TITLE}", id: "{$ID}" };
-    contentLoopData.push(content);
+    contentLoopData.push({ title: "{$TITLE}", id: "{$ID}" });
 </script>
 {/loop}
 
 {loop type="folder" name="folder_loop"}
 <script>
-    var folder = { title: "{$TITLE}", id: "{$ID}" };
-    folderLoopData.push(folder);
+    folderLoopData.push({ title: "{$TITLE}", id: "{$ID}" });
 </script>
 {/loop}
 
 {loop type="product" name="product_loop"}
 <script>
-    var product = { title: "{$TITLE}", id: "{$ID}"};
-    productLoopData.push(product);
+    productLoopData.push({ title: "{$TITLE}", id: "{$ID}"});
 </script>
 {/loop}
 <!--end load datas from loops-->
