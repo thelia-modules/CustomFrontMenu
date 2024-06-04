@@ -972,10 +972,15 @@ function filterDataList() {
             datalistElement.id = key.toLowerCase();
             datalistElement.label = key;
 
+            // Add category key option
+            const categoryOption = document.createElement("option");
+            categoryOption.value = "----"+key+"----";
+            datalistElement.appendChild(categoryOption);
 
             matchingItems.forEach(item => {
                 const optionElement = document.createElement("option");
-                optionElement.value = item.title;
+                // Combine category key and item title
+                optionElement.value = `${key}: ${item.title}`;
                 datalistElement.appendChild(optionElement);
             });
 
