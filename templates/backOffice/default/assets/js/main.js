@@ -309,7 +309,7 @@ function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
     
     let parentInMenuList = findParentOf(id, MENU_LIST)
-    if (parentInMenuList[1].children.length === 1) {
+    if (parentInMenuList[1].children && parentInMenuList[1].children.length === 1) {
         const parentInHtml = elementToRemove.parentElement.parentElement;
         const treeIcon = parentInHtml.querySelector('.tree-icon')
         treeIcon.classList.remove('fa-caret-up')
