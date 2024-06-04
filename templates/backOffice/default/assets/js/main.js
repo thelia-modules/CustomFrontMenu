@@ -938,26 +938,16 @@ function searchProducts(query, formId) {
     });
 }
 
-function displayDictionaryData() {
-    const dataList = document.getElementById("productsListParent");
-    dataList.innerHTML = "";
-
-    for (const [key, data] of Object.entries(loopsDictionary)) {
-        const datalistElement = document.createElement("datalist");
-        datalistElement.id = key.toLowerCase();
-        datalistElement.label = key;
-
-        data.forEach(item => {
-            const optionElement = document.createElement("option");
-            optionElement.value = item.title; // Assuming title is the displayed value
-            datalistElement.appendChild(optionElement);
-        });
-
-        dataList.appendChild(datalistElement);
-    }
-}
-
 function filterDataList() {
+    var loopsDictionary = {
+        "Brand": brandLoopData,
+        "Cart": cartLoopData,
+        "Category": categoryLoopData,
+        "Content": contentLoopData,
+        "Folder": folderLoopData,
+        "Products": productLoopData
+    };
+
     const searchInput = document.getElementById("menuItemUrl");
     const searchTerm = searchInput.value.toLowerCase();
     const dataList = document.getElementById("productsListParent");
@@ -967,25 +957,17 @@ function filterDataList() {
     for (const [key, data] of Object.entries(loopsDictionary)) {
         const matchingItems = data.filter(item => item.title.toLowerCase().includes(searchTerm));
 
-        if (matchingItems.length > 0) {
-            const datalistElement = document.createElement("datalist");
-            datalistElement.id = key.toLowerCase();
-            datalistElement.label = key;
+        // create and add <datalist> for each key(category)
+        const datalistElement = document.createElement("datalist");
+        datalistElement.id = key.toLowerCase();
+        datalistElement.label = key;
 
-            // Add category key option
-            const categoryOption = document.createElement("option");
-            categoryOption.value = "----"+key+"----";
-            datalistElement.appendChild(categoryOption);
-
-            matchingItems.forEach(item => {
-                const optionElement = document.createElement("option");
-                // Combine category key and item title
-                optionElement.value = `${key}: ${item.title}`;
-                datalistElement.appendChild(optionElement);
-            });
-
-            dataList.appendChild(datalistElement);
-        }
+        matchingItems.forEach(item => {
+            const optionElement = document.createElement("option");
+            optionElement.value = `${key} - ${item.title}`;
+            datalistElement.appendChild(optionElement);
+        });
+        dataList.appendChild(datalistElement);
     }
 }
 
