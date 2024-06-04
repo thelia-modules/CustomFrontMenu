@@ -148,9 +148,9 @@
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
                     <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="filterDataList()"><br><br>
-                    <ul id="productsListParent"></ul>
+                    <label for="menuItemUrl2">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
+                    <input type="text" class="menuItemUrl" id="menuItemUrl2" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                    <ul class="productsListParent"></ul>
                 </form>
             </div>
             <div class="modal-footer">
@@ -216,8 +216,7 @@
                         use back quote ( ` )
                     </div>
                     <div class="edit-modal-line">
-                        <label
-                                for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
+                        <label for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemUrl" name="menuItemUrl"/>
                         <button type="button" class="btn btn-success rounded"
                                 onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}
@@ -261,15 +260,9 @@
                          style="color: red; display: none;">{intl l="Cannot use back quote ( ` )"
                         d="customfrontmenu.bo.default"}
                     </div>
-                    <label
-                            for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl"
-                           list="productsListInItem"/><br/><br/>
-                    <datalist id="productsListInItem">
-                        {loop type="product" name="my_product_loop"}
-                        <option value="{$TITLE}">
-                            {/loop}
-                    </datalist>
+                    <label for="menuItemUrl1">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
+                    <input type="text" class="menuItemUrl" id="menuItemUrl1" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                    <ul class="productsListParent"></ul>
                 </form>
             </div>
             <div class="modal-footer">

@@ -963,7 +963,8 @@ function searchProducts(query, formId) {
     });
 }
 
-function filterDataList() {
+function filterDataList(element) {
+    console.log(element.parentElement)
     var loopsDictionary = {
         "Brand": brandLoopData,
         "Cart": cartLoopData,
@@ -972,10 +973,9 @@ function filterDataList() {
         "Folder": folderLoopData,
         "Products": productLoopData
     };
-
-    const searchInput = document.getElementById("menuItemUrl");
-    const searchTerm = searchInput.value.toLowerCase();
-    const dataList = document.getElementById("productsListParent");
+    const searchTerm = element.value.toLowerCase();
+    const dataList = element.parentElement.getElementsByClassName("productsListParent")[0]
+    console.log(dataList)
 
     dataList.innerHTML = "";
     dataList.style.display = "none";
@@ -1000,7 +1000,6 @@ function filterDataList() {
                 };
                 dataList.appendChild(itemElement);
             });
-
             hasMatchingItems = true;
         }
     }
