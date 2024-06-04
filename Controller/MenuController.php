@@ -46,7 +46,7 @@ class MenuController extends BaseAdminController
      * @throws Exception
      */
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSave) : RedirectResponse
+    public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSave, CFMMenuInterface $cfmMenu) : RedirectResponse
     {
         $dataJson = $request->get('menuData');
         $newMenu = json_decode($dataJson, true);
@@ -56,8 +56,16 @@ class MenuController extends BaseAdminController
             throw new Exception('Save failed : the menu id cannot be null or empty');
         }
 
+        $menuToCheck = $cfmMenu->getMenu($menuId);
+        
+        if (!isset($menuToCheck) || $menuToCheck->getLevel() !== 1) {
+            throw new Exception('Save failed : the menu id is invalid');
+        }
+
         // Delete all the items currently in database for the menu to save
         $menu = $cfmSave->deleteSpecificItems($menuId);
+
+        
 
         // Add all new items in database
         $cfmSave->saveTableBrowser($newMenu, $menu, $session);
@@ -114,10 +122,6 @@ class MenuController extends BaseAdminController
             setcookie('menuId', -1);
         }
 
-        if (isset($_COOKIE['menuId'])) {
-            setcookie('menuId', -1);
-        }
-
         return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
     }
 
@@ -156,12 +160,13 @@ class MenuController extends BaseAdminController
         $data = [];
         if(isset($menuId)) {
             $menu = $cfmMenu->getMenu($menuId);
-            if (isset($menu)) {
-                $data = $cfmLoad->loadTableBrowser($menu);
-            } else {
+            if (!isset($menu) || $menu->getLevel() !== 1) {
                 $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
-                setcookie('menuId', -1, ['path' => '/admin/module/CustomFrontMenu']);
+                $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
+                setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);
+                $menu = $cfmMenu->getMenu($menuId);
             }
+            $data = $cfmLoad->loadTableBrowser($menu);
         }
 
         return [

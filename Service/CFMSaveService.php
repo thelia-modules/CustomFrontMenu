@@ -8,6 +8,8 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use Exception;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CFMSaveService implements CFMSaveInterface
@@ -32,7 +34,6 @@ class CFMSaveService implements CFMSaveInterface
      * @throws PropelException
      * @throws Exception
      */
-
     public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session) : void
     {
         foreach ($dataArray as $element) {
