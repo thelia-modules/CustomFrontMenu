@@ -978,21 +978,34 @@ function filterDataList() {
     const dataList = document.getElementById("productsListParent");
 
     dataList.innerHTML = "";
+    dataList.style.display = "none";
+
+    let hasMatchingItems = false;
 
     for (const [key, data] of Object.entries(loopsDictionary)) {
         const matchingItems = data.filter(item => item.title.toLowerCase().includes(searchTerm));
 
-        // create and add <datalist> for each key(category)
-        const datalistElement = document.createElement("datalist");
-        datalistElement.id = key.toLowerCase();
-        datalistElement.label = key;
+        if (matchingItems.length > 0) {
+            const listElement = document.createElement("li");
+            listElement.textContent = "-----" + key + "-----";
+            listElement.style.fontWeight = "bold";
+            dataList.appendChild(listElement);
 
-        matchingItems.forEach(item => {
-            const optionElement = document.createElement("option");
-            optionElement.value = `${key} - ${item.title}`;
-            datalistElement.appendChild(optionElement);
-        });
-        dataList.appendChild(datalistElement);
+            matchingItems.forEach(item => {
+                const itemElement = document.createElement("li");
+                itemElement.textContent = `${item.title} (id:${item.id})`;
+                itemElement.onclick = function() {
+                    searchInput.value = `${item.title}/${key}/${item.id}`;
+                    dataList.style.display = "none";
+                };
+                dataList.appendChild(itemElement);
+            });
+
+            hasMatchingItems = true;
+        }
+    }
+    if (hasMatchingItems) {
+        dataList.style.display = "block";
     }
 }
 

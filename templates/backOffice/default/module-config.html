@@ -15,17 +15,10 @@
     var productLoopData = [];
 </script>
 
-{loop type="category" name="brand_loop"}
+{loop type="brand" name="brand_loop"}
 <script>
     var brand = { title: "{$TITLE}", id: "{$ID}" };
     brandLoopData.push(brand);
-</script>
-{/loop}
-
-{loop type="category" name="cart_loop"}
-<script>
-    var cart = { title: "{$TITLE}" };
-    cartLoopData.push(cart);
 </script>
 {/loop}
 
@@ -36,7 +29,7 @@
 </script>
 {/loop}
 
-{loop type="category" name="content_loop"}
+{loop type="content" name="content_loop"}
 <script>
     var content = { title: "{$TITLE}", id: "{$ID}" };
     contentLoopData.push(content);
@@ -156,8 +149,8 @@
 
                     <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent" oninput="filterDataList()"><br><br>
-                    <datalist id="productsListParent"></datalist>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="filterDataList()"><br><br>
+                    <ul id="productsListParent"></ul>
                 </form>
             </div>
             <div class="modal-footer">
