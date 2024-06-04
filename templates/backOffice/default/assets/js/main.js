@@ -1084,11 +1084,11 @@ window.onload = function() {
     }
 
     // Manage flashes
-    clearFlashMessagesOnServer()
-    document.addEventListener('click', function() {
-        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages()
-        }
-    })
+    if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
+        clearFlashMessagesOnServer()
+        document.addEventListener('click', function() {
+                removeFlashMessages()
+        })
+    }
 }
 // End Initialization
