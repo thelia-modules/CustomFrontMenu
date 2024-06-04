@@ -144,8 +144,7 @@ class MenuController extends BaseAdminController
      */
     public function loadMenuItems(SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, ?int $menuId = null) : array
     {
-        $root = $cfmMenu->getRoot();
-        $menuNames = $cfmLoad->loadSelectMenu($root);
+        $menuNames = $cfmLoad->loadSelectMenu($cfmMenu->getRoot());
 
         if (!isset($menuId)) {
             if(count($menuNames) > 0) {
