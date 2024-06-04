@@ -2,6 +2,7 @@
     {foreach $menuItems as $menuItem}
         <li>
             <a href="{$menuItem.url}">{$menuItem.title}</a>
+            
             <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
                 {if isset($menuItem.children) && $menuItem.children|count > 0}
                     {call name=printMenu menuItems=$menuItem.children}
@@ -20,44 +21,3 @@
         </div>
     </div>
 </nav>
-
-<style>
-    #CustomFrontMenu {
-        z-index: 500;
-        
-        .child>li {
-            list-style-type: none;
-            position: relative;
-            padding: 15px;
-        }
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-        a {
-            text-decoration: none;
-            color: #707070;
-            white-space: nowrap;
-        }
-        .child {
-            display: none;
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(15px);
-        }
-        li:hover {
-            background-color: #f49a17;
-        }
-        li:hover > a {
-            color: white;
-        }
-        .deep {
-            top: 0;
-            left: 100%;
-        }
-        li:hover > .child {
-            display: block;
-        }
-    }
-</style>

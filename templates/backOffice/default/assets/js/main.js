@@ -20,6 +20,7 @@ function getValueByLocaleOf(element, locale) {
         locale = LOCALE
     }
     let found = false
+    let result
     for (const [key, val] of Object.entries(element)) {
         if (key === locale) {
             result = val
@@ -85,7 +86,7 @@ function getAllIdOf(list) {
                 if (!arrayOfIds.includes(child.id)){
                     arrayOfIds.push(child.id)
                 }
-                if (!child.children || child.children === undefined || child.children.length <= 0){
+                if (!child.children || child.children.length <= 0){
                     continue
                 }
                 const result = getAllIdOf(child.children)
@@ -214,7 +215,7 @@ function addCustomMenuItem(form, id="0") {
             ulElement.innerHTML += newMenu;
             MENU_LIST = addInList(id, newItem, MENU_LIST);
 
-            // Ajout de l'icône de sous-menu si elle n'existe pas déjà
+            // Add sub-menu icon if not already present
             let parentElement = document.getElementById(id).parentNode;
             let titleContainer = parentElement.querySelector('.title-container');
             if (titleContainer && !titleContainer.querySelector('.tree-icon')) {
@@ -222,6 +223,18 @@ function addCustomMenuItem(form, id="0") {
                 if (titleSpan) {
                     titleSpan.insertAdjacentHTML('afterend', '<span> <i class="fas fa-caret-down tree-icon"></i></span>');
                 }
+            }
+
+            // Open the parent menu
+            const treeIcon = parentElement.querySelector('.tree-icon');
+            const childrenUl = parentElement.querySelector('ul');
+            if (treeIcon === null){
+                return
+            }
+            if (childrenUl) {
+                childrenUl.style.display = 'block'
+                treeIcon.classList.remove('fa-caret-up');
+                treeIcon.classList.add('fa-caret-down');
             }
         }
     }
@@ -294,6 +307,14 @@ function getFormItems(formId) {
 // Delete menu
 function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
+    
+    let parentInMenuList = findParentOf(id, MENU_LIST)
+    if (parentInMenuList[1].children.length === 1) {
+        const parentInHtml = elementToRemove.parentElement.parentElement;
+        const treeIcon = parentInHtml.querySelector('.tree-icon')
+        treeIcon.classList.remove('fa-caret-up')
+        treeIcon.classList.remove('fa-caret-down')
+    }
     if (elementToRemove) {
         if (elementToRemove.remove) {
             elementToRemove.remove()
@@ -372,6 +393,10 @@ function saveMenuItemName() {
     
     menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
 
+    const titleSpan = document.getElementById(getCurrentId()).parentElement.querySelector('[data-id="titleSpan"]')
+    titleSpan.textContent = getValueByLocaleOf(findMenuInList(getCurrentId(), MENU_LIST).title)
+
+    generatePreviewMenus()
 }
 
 function saveMenuItemUrl() {
@@ -450,8 +475,8 @@ function generateMenu(list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth != 0){
-        if (menuItem.depth%2 == 0){
+    if (menuItem.depth !== 0){
+        if (menuItem.depth%2 === 0){
             depth = "even-depth"
         }
         else {
@@ -877,8 +902,8 @@ function allowDrop(ev) {
         } else { // if the mouse is below the target element => positions bar below
             dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
             if (mouseX > rect.width / 6) { // if the mouse is to the right of the target element
-                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
-                dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
+                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.04) + 'px';
+                dropIndicator.style.width = (targetItem.offsetWidth * 0.96) + 'px';
             }
         }
         dropIndicator.style.display = 'block';
@@ -908,7 +933,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a>` + getValueByLocaleOf(menuItem.title) + `</a>
+            <a href="` + getValueByLocaleOf(menuItem.url) + `" target="_blank">` + getValueByLocaleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
@@ -973,6 +998,38 @@ function filterDataList() {
 
 // End search product
 
+// Flashes
+
+// Function to remove flash messages from the DOM
+function removeFlashMessages() {
+    const flashMessages = document.getElementsByClassName('alert-flash-to-delete')
+    Array.from(flashMessages).forEach(function(message) {
+        message.remove()
+    });
+}
+
+// Function to notify server to clear flash messages
+function clearFlashMessagesOnServer() {
+    let xhr = new XMLHttpRequest()
+    xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status !== 200) {
+                console.error('Network response was not ok:', xhr.statusText)
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error('Error:', xhr.statusText);
+    }
+
+    xhr.send()
+}
+
+// End flashes
+
 // Event Listener
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
@@ -986,63 +1043,39 @@ document.getElementById('selectMenuName').addEventListener('change', function() 
     document.getElementById('menuId').value = selectedOption.id;
     document.getElementById('askedMenu').submit();
 });
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to remove flash messages from the DOM
-    function removeFlashMessages() {
-        const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
-        Array.from(flashMessages).forEach(function(message) {
-            message.remove()
-        });
-    }
-
-    // Function to notify server to clear flash messages
-    function clearFlashMessagesOnServer() {
-        let xhr = new XMLHttpRequest()
-        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status !== 200) {
-                    console.error('Network response was not ok:', xhr.statusText);
-                }
-            }
-        };
-
-        xhr.onerror = function () {
-            console.error('Error:', xhr.statusText);
-        };
-
-        xhr.send()
-    }
-
-    // Add a click event listener to the document
-    document.addEventListener('click', function() {
-        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages()
-            clearFlashMessagesOnServer()
-        }
-    })
-})
 // End Event Listener
 
 // Initialization
 window.onload = function() {
+
+    // Get data
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
     for (let menu of MENU_NAMES){
         menu.title = putQuoteAndPercent(menu.title)
     }
+
+    // Generate elements
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
     document.getElementById('deleteForm').elements['menuNameToDelete'].value = CURRENT_SELECTED_MENU_ID
+
+    // Disable buttons if there aren't any menu
     if (CURRENT_SELECTED_MENU_ID === 'undefined' || CURRENT_SELECTED_MENU_ID === -1 || isNaN(CURRENT_SELECTED_MENU_ID)) {
         let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
         listToDelete.forEach(function (elementToDelete) {
             elementToDelete.disabled = true
         })
     }
+
+    // Manage flashes
+    clearFlashMessagesOnServer()
+    document.addEventListener('click', function() {
+        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
+            removeFlashMessages()
+        }
+    })
 }
 // End Initialization
