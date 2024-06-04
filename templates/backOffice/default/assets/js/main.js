@@ -962,6 +962,40 @@ function searchProducts(query, formId) {
         matchingProducts.appendChild(li);
     });
 }
+
+function filterDataList() {
+    var loopsDictionary = {
+        "Brand": brandLoopData,
+        "Cart": cartLoopData,
+        "Category": categoryLoopData,
+        "Content": contentLoopData,
+        "Folder": folderLoopData,
+        "Products": productLoopData
+    };
+
+    const searchInput = document.getElementById("menuItemUrl");
+    const searchTerm = searchInput.value.toLowerCase();
+    const dataList = document.getElementById("productsListParent");
+
+    dataList.innerHTML = "";
+
+    for (const [key, data] of Object.entries(loopsDictionary)) {
+        const matchingItems = data.filter(item => item.title.toLowerCase().includes(searchTerm));
+
+        // create and add <datalist> for each key(category)
+        const datalistElement = document.createElement("datalist");
+        datalistElement.id = key.toLowerCase();
+        datalistElement.label = key;
+
+        matchingItems.forEach(item => {
+            const optionElement = document.createElement("option");
+            optionElement.value = `${key} - ${item.title}`;
+            datalistElement.appendChild(optionElement);
+        });
+        dataList.appendChild(datalistElement);
+    }
+}
+
 // End search product
 
 // Flashes
