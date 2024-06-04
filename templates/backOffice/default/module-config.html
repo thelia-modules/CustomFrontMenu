@@ -15,17 +15,10 @@
     var productLoopData = [];
 </script>
 
-{loop type="category" name="brand_loop"}
+{loop type="brand" name="brand_loop"}
 <script>
     var brand = { title: "{$TITLE}", id: "{$ID}" };
     brandLoopData.push(brand);
-</script>
-{/loop}
-
-{loop type="category" name="cart_loop"}
-<script>
-    var cart = { title: "{$TITLE}" };
-    cartLoopData.push(cart);
 </script>
 {/loop}
 
@@ -36,7 +29,7 @@
 </script>
 {/loop}
 
-{loop type="category" name="content_loop"}
+{loop type="content" name="content_loop"}
 <script>
     var content = { title: "{$TITLE}", id: "{$ID}" };
     contentLoopData.push(content);
@@ -155,9 +148,9 @@
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
                     <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent" oninput="filterDataList()"><br><br>
-                    <datalist id="productsListParent"></datalist>
+                    <label for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="filterDataList()"><br><br>
+                    <ul id="productsListParent"></ul>
                 </form>
             </div>
             <div class="modal-footer">
@@ -224,7 +217,7 @@
                     </div>
                     <div class="edit-modal-line">
                         <label
-                                for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                                for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
                         <input type="text" id="menuItemUrl" name="menuItemUrl"/>
                         <button type="button" class="btn btn-success rounded"
                                 onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}
@@ -269,7 +262,7 @@
                         d="customfrontmenu.bo.default"}
                     </div>
                     <label
-                            for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                            for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl"
                            list="productsListInItem"/><br/><br/>
                     <datalist id="productsListInItem">

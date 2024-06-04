@@ -36,7 +36,7 @@ return array(
     'Save everything' => 'Tout enregistrer',
     'Show all children' => 'Voir tous les enfants',
     'Submenu name' => 'Nom du sous-menu',
-    'Target product' => 'Produit cible',
+    'Target item' => 'Élément cible',
     'Would you like to delete this menu item ?' => 'Voulez-vous supprimer cet élément du menu ?',
     'Would you like to delete this menu ?' => 'Voulez-vous supprimer ce menu ?',
     'Would you like to discard all changes ?' => 'Voulez-vous annuler les modifications ?',
