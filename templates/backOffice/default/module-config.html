@@ -132,19 +132,29 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal">
+                    &times;
+                </button>
                 <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
                 <p>{intl l="Add a new menu item" d="customfrontmenu.bo.default"}</p>
                 <form id="newParentForm">
-                    <div id="error-message-title" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemName">{intl l="Menu title" d="customfrontmenu.bo.default"}</label>
+                    <div id="error-message-title" style="color: red; display: none;">
+                        {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
+                    </div>
+                    <label for="menuItemName">
+                        {intl l="Menu title" d="customfrontmenu.bo.default"}
+                    </label>
                     <input type="text" id="menuItemName" name="menuItemName"><br><br>
 
-                    <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemUrl2">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" class="menuItemUrl" id="menuItemUrl2" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                    <div id="error-message-url" style="color: red; display: none;">
+                        {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
+                    </div>
+                    <label for="menuItemUrlParent">
+                        {intl l="Target item" d="customfrontmenu.bo.default"}
+                    </label>
+                    <input type="text" id="menuItemUrlParent" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
                     <ul class="productsListParent"></ul>
                 </form>
             </div>
@@ -211,13 +221,14 @@
                         use back quote ( ` )
                     </div>
                     <div class="edit-modal-line">
-                        <label for="menuItemUrl">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
-                        <input type="text" id="menuItemUrl" name="menuItemUrl"/>
-                        <button type="button" class="btn btn-success rounded"
-                                onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}
+                        <label for="menuItemUrlEdit">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
+                        <input type="text" id="menuItemUrlEdit" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                        <button type="button" class="btn btn-success rounded" onclick="saveMenuItemUrl()">
+                            {intl l="Save" d="customfrontmenu.bo.default"}
                         </button>
                         <br/><br/>
                     </div>
+                    <ul class="productsListParent"></ul>
                 </form>
 
             </div>
@@ -235,28 +246,29 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close"
-                        data-dismiss="modal">&times;
+                <button type="button" class="close" data-dismiss="modal">
+                    &times;
                 </button>
                 <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
             </div>
             <div class="modal-body">
                 <p>{intl l="Add a submenu" d="customfrontmenu.bo.default"}</p>
                 <form id="addMenuItemForm">
-                    <div id="error-message-title"
-                         style="color: red; display: none;">{intl l="Cannot use back quote ( ` )"
-                        d="customfrontmenu.bo.default"}
+                    <div id="error-message-title" style="color: red; display: none;">
+                        {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
-                    <label
-                            for="menuItemName">{intl l="Submenu name" d="customfrontmenu.bo.default"}</label>
+                    <label for="menuItemName">
+                        {intl l="Submenu name" d="customfrontmenu.bo.default"}
+                    </label>
                     <input type="text" id="menuItemName" name="menuItemName"/><br/><br/>
 
-                    <div id="error-message-url"
-                         style="color: red; display: none;">{intl l="Cannot use back quote ( ` )"
-                        d="customfrontmenu.bo.default"}
+                    <div id="error-message-url" style="color: red; display: none;">
+                        {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
-                    <label for="menuItemUrl1">{intl l="Target item" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" class="menuItemUrl" id="menuItemUrl1" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                    <label for="menuItemUrlChild">
+                        {intl l="Target item" d="customfrontmenu.bo.default"}
+                    </label>
+                    <input type="text" id="menuItemUrlChild" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
                     <ul class="productsListParent"></ul>
                 </form>
             </div>

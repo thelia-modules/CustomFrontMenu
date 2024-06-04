@@ -964,7 +964,6 @@ function searchProducts(query, formId) {
 }
 
 function filterDataList(element) {
-    console.log(element.parentElement)
     var loopsDictionary = {
         "Brand": brandLoopData,
         "Cart": cartLoopData,
@@ -974,7 +973,7 @@ function filterDataList(element) {
         "Products": productLoopData
     };
     const searchTerm = element.value.toLowerCase();
-    const dataList = element.parentElement.getElementsByClassName("productsListParent")[0]
+    const dataList = element.form.getElementsByClassName("productsListParent")[0]
     console.log(dataList)
 
     dataList.innerHTML = "";
