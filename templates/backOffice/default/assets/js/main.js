@@ -937,6 +937,53 @@ function searchProducts(query, formId) {
         matchingProducts.appendChild(li);
     });
 }
+
+function displayDictionaryData() {
+    const dataList = document.getElementById("productsListParent");
+    dataList.innerHTML = "";
+
+    for (const [key, data] of Object.entries(loopsDictionary)) {
+        const datalistElement = document.createElement("datalist");
+        datalistElement.id = key.toLowerCase();
+        datalistElement.label = key;
+
+        data.forEach(item => {
+            const optionElement = document.createElement("option");
+            optionElement.value = item.title; // Assuming title is the displayed value
+            datalistElement.appendChild(optionElement);
+        });
+
+        dataList.appendChild(datalistElement);
+    }
+}
+
+function filterDataList() {
+    const searchInput = document.getElementById("menuItemUrl");
+    const searchTerm = searchInput.value.toLowerCase();
+    const dataList = document.getElementById("productsListParent");
+
+    dataList.innerHTML = "";
+
+    for (const [key, data] of Object.entries(loopsDictionary)) {
+        const matchingItems = data.filter(item => item.title.toLowerCase().includes(searchTerm));
+
+        if (matchingItems.length > 0) {
+            const datalistElement = document.createElement("datalist");
+            datalistElement.id = key.toLowerCase();
+            datalistElement.label = key;
+
+
+            matchingItems.forEach(item => {
+                const optionElement = document.createElement("option");
+                optionElement.value = item.title;
+                datalistElement.appendChild(optionElement);
+            });
+
+            dataList.appendChild(datalistElement);
+        }
+    }
+}
+
 // End search product
 
 // Event Listener

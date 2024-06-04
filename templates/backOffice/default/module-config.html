@@ -5,6 +5,27 @@
     LOCALE = "{$locale}"
 </script>
 
+<script>
+    var products = [];
+    var brands = [];
+</script>
+    {loop type="product" name="my_product_loop"}
+<script>
+    var temporary = `{$TITLE} ({$REF}) {$URL}`
+    var regex = /(.+) \((\w+)\) (.+)/g;
+    var match;
+    while ((match = regex.exec(temporary)) !== null) {
+        var title = match[1].trim();
+        var ref = match[2].trim();
+        var url = match[3].trim();
+        var product = { title: title, ref: ref, url: url };
+        products.push(product);
+    }
+</script>
+{/loop}
+
+
+
 <div class="general-block-decorator">
     <div class="top">
         <select id="selectMenuName" class="btn top-btn delete-if-no-menu">
@@ -102,6 +123,7 @@
 
                     <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
                     <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                    <!--
                     <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent"><br><br>
                     <datalist id="productsListParent">
                         <datalist>
@@ -141,197 +163,319 @@
                             {/loop}
                         </datalist>
                     </datalist>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('newParentForm', '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('newParentForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                    -->
+                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListParent" oninput="filterDataList()"><br><br>
+                    <datalist id="productsListParent"></datalist>
 
-<!-- Edit Menu Item Modal -->
-<div class="modal fade" id="EditMenu" role="dialog">
-    <div class="modal-dialog">
+                    <script>
+                        var brandLoopData = [];
+                        var cartLoopData = [];
+                        var categoryLoopData = [];
+                        var contentLoopData = [];
+                        var folderLoopData = [];
+                        var productLoopData = [];
+                    </script>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <li class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Edit menu" d="customfrontmenu.bo.default"}</h4>
-            </li>
-            <div class="modal-body">
-                <div class="top-edit">
-                    <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
-                    <div class="dropdown open">
+                    {loop type="category" name="brand_loop"}
+                    <script>
+                        var brand = { title: "{$TITLE}", id: "{$ID}" };
+                        brandLoopData.push(brand);
+                    </script>
+                    {/loop}
 
-                        <div class="dropdown">
-                            <button id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
-                                {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
-                            </button>
-                            <ul class="dropdown-menu" id="flags-list" style="display: none;">
-                                {loop type="lang" name="the-loop-name"}
-                                    <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
-                                    <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
-                                        <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}">
-                                    </li>
-                                {/loop}
-                            </ul>
+                    {loop type="category" name="cart_loop"}
+                    <script>
+                        var cart = { title: "{$TITLE}" };
+                        cartLoopData.push(cart);
+                    </script>
+                    {/loop}
+
+                    {loop type="category" name="category_loop"}
+                    <script>
+                        var category = { title: "{$TITLE}", id: "{$ID}" };
+                        categoryLoopData.push(category);
+                    </script>
+                    {/loop}
+
+                    {loop type="category" name="content_loop"}
+                    <script>
+                        var content = { title: "{$TITLE}", id: "{$ID}" };
+                        contentLoopData.push(content);
+                    </script>
+                    {/loop}
+
+                    {loop type="folder" name="folder_loop"}
+                    <script>
+                        var folder = { title: "{$TITLE}", id: "{$ID}" };
+                        folderLoopData.push(folder);
+                    </script>
+                    {/loop}
+
+                    {loop type="product" name="product_loop"}
+                    <script>
+                        var product = { title: "{$TITLE}", id: "{$ID}"};
+                        productLoopData.push(product);
+                    </script>
+                    {/loop}
+
+                    <script>
+                        var loopsDictionary = {
+                            "Brand": brandLoopData,
+                            "Cart": cartLoopData,
+                            "Category": categoryLoopData,
+                            "Content": contentLoopData,
+                            "Folder": folderLoopData,
+                            "Products": productLoopData
+                        };
+                    </script>
+
+                        </form>
                         </div>
-                    </div>
-                </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success"
+                                    onclick="addCustomMenuItem('newParentForm', '0')"><span
+                                class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}
+                            </button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    onclick="deleteFormField('newParentForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
 
-                <form id="editMenuItemForm">
-                    <input type="hidden" id="menuId" name="menuId" value="">
+                        <!-- Edit Menu Item Modal -->
+                        <div class="modal fade" id="EditMenu" role="dialog">
+                            <div class="modal-dialog">
 
-                    <div id="error-message-title" style="color: red; display: none;">Cannot use back quote ( ` )</div>
-                    <div class="edit-modal-line">
-                        <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
-                        <input type="text" id="menuItemName" name="menuItemName">
-                        <button type="button" class="btn btn-success rounded" onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
-                    </div>
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <li class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">{intl l="Edit menu" d="customfrontmenu.bo.default"}</h4>
+                                    </li>
+                                    <div class="modal-body">
+                                        <div class="top-edit">
+                                            <p>{intl l="Edit a menu item" d="customfrontmenu.bo.default"}</p>
+                                            <div class="dropdown open">
 
-                    <div id="error-message-url" style="color: red; display: none;">Cannot use back quote ( ` )</div>
-                    <div class="edit-modal-line">
-                        <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
-                        <input type="text" id="menuItemUrl" name="menuItemUrl">
-                        <button type="button" class="btn btn-success rounded" onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button><br><br>
-                    </div>
-                </form>
+                                                <div class="dropdown">
+                                                    <button id="selectedLanguageBtn"
+                                                            class="btn top-btn dropdown-toggle"
+                                                            onclick="toggleFlags()">
+                                                        {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
+                                                    </button>
+                                                    <ul class="dropdown-menu" id="flags-list"
+                                                        style="display: none;">
+                                                        {loop type="lang" name="the-loop-name"}
+                                                        <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
+                                                        <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
+                                                            <img class="flags edit-menu-flags"
+                                                                 src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg"
+                                                                 alt="{$LOCALE}"/>
+                                                        </li>
+                                                        {/loop}
+                                                            </ul>
+                                                            </div>
+                                                            </div>
+                                                            </div>
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())"><span class="glyphicon glyphicon-check"></span>  {intl l="Save everything" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('editMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                                                            <form id="editMenuItemForm">
+                                                            <input type="hidden" id="menuId" name="menuId" value="">
 
-<!-- Add and edit Menu Item Modal from a child -->
-<div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
-    <div class="modal-dialog">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
-            </div>
-            <div class="modal-body">
-                <p>{intl l="Add a submenu" d="customfrontmenu.bo.default"}</p>
-                <form id="addMenuItemForm">
-                    <div id="error-message-title" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemName">{intl l="Submenu name" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemName" name="menuItemName"><br><br>
+                                                            <div id="error-message-title" style="color: red; display: none;">Cannot use back quote ( ` )</div>
+                                                            <div class="edit-modal-line">
+                                                            <label for="menuItemName">{intl l="Menu name" d="customfrontmenu.bo.default"}
+                                                    </label>
+                                                    <input type="text" id="menuItemName" name="menuItemName"/>
+                                                    <button type="button" class="btn btn-success rounded"
+                                                            onclick="saveMenuItemName()">{intl l="Save" d="customfrontmenu.bo.default"}</button>
+                                                    <br/><br/>
+                                                </div>
 
-                    <div id="error-message-url" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem"><br><br>
-                    <datalist id="productsListInItem">
-                        {loop type="product" name="my_product_loop"}
-                        <option value="{$TITLE}">
-                            {/loop}
-                    </datalist>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteFormField('addMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                                                <div id="error-message-url"
+                                                     style="color: red; display: none;">Cannot
+                                                    use back quote ( ` )
+                                                </div>
+                                                <div class="edit-modal-line">
+                                                    <label
+                                                        for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                                                    <input type="text" id="menuItemUrl" name="menuItemUrl"/>
+                                                    <button type="button" class="btn btn-success rounded"
+                                                            onclick="saveMenuItemUrl()">{intl l="Save" d="customfrontmenu.bo.default"}</button>
+                                                    <br/><br/>
+                                                </div>
+                                            </form>
 
-<!-- Delete Menu Item Modal -->
-<div class="modal fade" id="DeleteMenu" role="dialog">
-    <div class="modal-dialog">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-success"
+                                                    onclick="changeParameters(getCurrentId())"><span
+                                                class="glyphicon glyphicon-check"></span> {intl l="Save everything" d="customfrontmenu.bo.default"}
+                                            </button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                                    onclick="deleteFormField('editMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
-            </div>
-            <div class="modal-body">
-                <p>{intl l="Would you like to delete this menu item ?" d="customfrontmenu.bo.default"}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenuItem(getCurrentId())"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Add and edit Menu Item Modal from a child -->
+                            <div class="modal fade" id="AddAndEditSecondaryMenu" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{intl l="Add a menu" d="customfrontmenu.bo.default"}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>{intl l="Add a submenu" d="customfrontmenu.bo.default"}</p>
+                                            <form id="addMenuItemForm">
+                                                <div id="error-message-title"
+                                                     style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
+                                                <label
+                                                    for="menuItemName">{intl l="Submenu name" d="customfrontmenu.bo.default"}</label>
+                                                <input type="text" id="menuItemName" name="menuItemName"/><br/><br/>
 
-<!-- Confirm discard changes -->
-<div class="modal fade" id="ConfirmDiscard" role="dialog">
-    <div class="modal-dialog">
+                                                <div id="error-message-url"
+                                                     style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
+                                                <label
+                                                    for="menuItemUrl">{intl l="Target product" d="customfrontmenu.bo.default"}</label>
+                                                <input type="text" id="menuItemUrl" name="menuItemUrl"
+                                                       list="productsListInItem"/><br/><br/>
+                                                <datalist id="productsListInItem">
+                                                    {loop type="product" name="my_product_loop"}
+                                                    <option value="{$TITLE}">
+                                                        {/loop}
+                                                            </datalist>
+                                                            </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                            <button type="button" class="btn btn-success" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                                                    <button type="button" class="btn btn-default"
+                                                            data-dismiss="modal"
+                                                            onclick="deleteFormField('addMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Discard changes" d="customfrontmenu.bo.default"}</h4>
-            </div>
-            <div class="modal-body">
-                <p>{intl l="Would you like to discard all changes ?" d="customfrontmenu.bo.default"}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="allowUnload = true ; location.reload()"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Delete Menu Item Modal -->
+                            <div class="modal fade" id="DeleteMenu" role="dialog">
+                                <div class="modal-dialog">
 
-<!-- Add a menu -->
-<div class="modal fade" id="ConfirmAddMenu" role="dialog">
-    <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>{intl l="Would you like to delete this menu item ?" d="customfrontmenu.bo.default"}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                                    onclick="deleteMenuItem(getCurrentId())"><span
+                                                class="glyphicon glyphicon-trash"></span> {intl l="Delete" d="customfrontmenu.bo.default"}
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Add a new menu" d="customfrontmenu.bo.default"}</h4>
-            </div>
-            <div class="modal-body">
-                <p>{intl l="Add a new menu" d="customfrontmenu.bo.default"}</p>
-                <form id="addMenuForm" action="{url path="/admin/module/CustomFrontMenu/add"}" method="POST">
-                    <div id="error-message-empty" style="color: red; display: none;">{intl l="Menu name cannot be empty" d="customfrontmenu.bo.default"}</div>
-                    <div id="error-message-back-quote" style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
-                    <label for="menuName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
-                    <input type="text" id="menuName" name="menuName"><br><br>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addMenu()"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Confirm discard changes -->
+                            <div class="modal fade" id="ConfirmDiscard" role="dialog">
+                                <div class="modal-dialog">
 
-<!-- Delete the current menu -->
-<div class="modal fade" id="ConfirmDeleteMenu" role="dialog">
-    <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{intl l="Discard changes" d="customfrontmenu.bo.default"}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>{intl l="Would you like to discard all changes ?" d="customfrontmenu.bo.default"}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                                    onclick="allowUnload = true ; location.reload()"><span
+                                                class="glyphicon glyphicon-trash"></span> {intl l="Delete" d="customfrontmenu.bo.default"}
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
-            </div>
-            <div class="modal-body">
-                <p>{intl l="Would you like to delete this menu ?" d="customfrontmenu.bo.default"}</p>
-                <form id="deleteForm" action="{url path="/admin/module/CustomFrontMenu/delete"}" method="POST">
-                    <input type="hidden" name="menuId" id="menuNameToDelete">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteMenu()"><span class="glyphicon glyphicon-trash"></span>  {intl l="Delete" d="customfrontmenu.bo.default"}</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Add a menu -->
+                            <div class="modal fade" id="ConfirmAddMenu" role="dialog">
+                                <div class="modal-dialog">
+
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{intl l="Add a new menu" d="customfrontmenu.bo.default"}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>{intl l="Add a new menu" d="customfrontmenu.bo.default"}</p>
+                                            <form id="addMenuForm"
+                                                  action="{url path="/admin/module/CustomFrontMenu/add"}"
+                                                  method="POST">
+                                                <div id="error-message-empty"
+                                                     style="color: red; display: none;">{intl l="Menu name cannot be empty" d="customfrontmenu.bo.default"}</div>
+                                                <div id="error-message-back-quote"
+                                                     style="color: red; display: none;">{intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}</div>
+                                                <label
+                                                    for="menuName">{intl l="Menu name" d="customfrontmenu.bo.default"}</label>
+                                                <input type="text" id="menuName" name="menuName"/><br/><br/>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-success" onclick="addMenu()"><span
+                                                class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delete the current menu -->
+                            <div class="modal fade" id="ConfirmDeleteMenu" role="dialog">
+                                <div class="modal-dialog">
+
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{intl l="Delete menu" d="customfrontmenu.bo.default"}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>{intl l="Would you like to delete this menu ?" d="customfrontmenu.bo.default"}</p>
+                                            <form id="deleteForm"
+                                                  action="{url path="/admin/module/CustomFrontMenu/delete"}"
+                                                  method="POST">
+                                                <input type="hidden" name="menuId" id="menuNameToDelete"/>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                                    onclick="deleteMenu()"><span
+                                                class="glyphicon glyphicon-trash"></span> {intl l="Delete" d="customfrontmenu.bo.default"}
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    data-dismiss="modal">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
