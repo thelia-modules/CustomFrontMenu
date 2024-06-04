@@ -6,6 +6,10 @@ This module lets you create dynamic menus.
 
 ## Installation
 
+### Prerequisites
+
+The OpenApi module must be activated to enable CustomFrontMenu.
+
 ### Manually
 
 * Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is CustomFrontMenu.
@@ -48,6 +52,10 @@ _________________
 Ce module vous permet de créer des menus dynamiques.
 
 ## Installation
+
+### Prérequis
+
+Le module OpenApi doit être activé pour utiliser CustomFrontMenu.
 
 ### Manuellement
 
