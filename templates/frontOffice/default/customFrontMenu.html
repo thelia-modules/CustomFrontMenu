@@ -1,13 +1,7 @@
 {function name=printMenu}
     {foreach $menuItems as $menuItem}
         <li>
-            {if isset($menuItem.url.{$locale})}
-                <a href="{$menuItem.url.{$locale}}">{$menuItem.title.{$locale}}</a>
-            {elseif {$locale} != "en_US" && isset($menuItem.url.en_US)}
-                <a href="{$menuItem.url.en_US}">{$menuItem.title.en_US}</a>
-            {else}
-                <a href="{$menuItem.url|reset}">{$menuItem.title|reset}</a>
-            {/if}
+            <a href="{$menuItem.url}">{$menuItem.title}</a>
             
             <ul class="{if $menuItem.depth eq 0}child{else}child deep{/if}">
                 {if isset($menuItem.children) && $menuItem.children|count > 0}

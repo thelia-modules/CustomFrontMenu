@@ -5,11 +5,12 @@ use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Interface\CFMMenuInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
+use Thelia\Core\HttpFoundation\Session\Session;
 
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
-    public function __construct(private CFMLoadInterface $CFMLoadService, private CFMMenuInterface $cfmMenu)
+    public function __construct(private CFMLoadInterface $CFMLoadService, private CFMMenuInterface $cfmMenu, private Session $session)
     {
     }
 
@@ -36,8 +37,9 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
             throw new \InvalidArgumentException('The menu does not exist', 2);
         }
 
-        $menuItems = $this->CFMLoadService->loadTableBrowser($menu);
+        $menuItems = $this->CFMLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
+        
 
         $templatePath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
         $smarty->display($templatePath);
