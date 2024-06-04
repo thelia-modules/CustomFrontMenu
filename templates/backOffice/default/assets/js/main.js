@@ -944,6 +944,38 @@ function searchProducts(query, formId) {
 }
 // End search product
 
+// Flashes
+
+// Function to remove flash messages from the DOM
+function removeFlashMessages() {
+    const flashMessages = document.getElementsByClassName('alert-flash-to-delete')
+    Array.from(flashMessages).forEach(function(message) {
+        message.remove()
+    });
+}
+
+// Function to notify server to clear flash messages
+function clearFlashMessagesOnServer() {
+    let xhr = new XMLHttpRequest()
+    xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status !== 200) {
+                console.error('Network response was not ok:', xhr.statusText)
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error('Error:', xhr.statusText);
+    }
+
+    xhr.send()
+}
+
+// End flashes
+
 // Event Listener
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
@@ -957,63 +989,39 @@ document.getElementById('selectMenuName').addEventListener('change', function() 
     document.getElementById('menuId').value = selectedOption.id;
     document.getElementById('askedMenu').submit();
 });
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to remove flash messages from the DOM
-    function removeFlashMessages() {
-        const flashMessages = document.getElementsByClassName('alert-flash-to-delete');
-        Array.from(flashMessages).forEach(function(message) {
-            message.remove()
-        });
-    }
-
-    // Function to notify server to clear flash messages
-    function clearFlashMessagesOnServer() {
-        let xhr = new XMLHttpRequest()
-        xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status !== 200) {
-                    console.error('Network response was not ok:', xhr.statusText);
-                }
-            }
-        };
-
-        xhr.onerror = function () {
-            console.error('Error:', xhr.statusText);
-        };
-
-        xhr.send()
-    }
-
-    // Add a click event listener to the document
-    document.addEventListener('click', function() {
-        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages()
-            clearFlashMessagesOnServer()
-        }
-    })
-})
 // End Event Listener
 
 // Initialization
 window.onload = function() {
+
+    // Get data
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
     for (let menu of MENU_NAMES){
         menu.title = putQuoteAndPercent(menu.title)
     }
+
+    // Generate elements
     generateSelect(MENU_NAMES)
     generateMenu(MENU_LIST)
     generatePreviewMenus()
     document.getElementById('deleteForm').elements['menuNameToDelete'].value = CURRENT_SELECTED_MENU_ID
+
+    // Disable buttons if there aren't any menu
     if (CURRENT_SELECTED_MENU_ID === 'undefined' || CURRENT_SELECTED_MENU_ID === -1 || isNaN(CURRENT_SELECTED_MENU_ID)) {
         let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
         listToDelete.forEach(function (elementToDelete) {
             elementToDelete.disabled = true
         })
     }
+
+    // Manage flashes
+    clearFlashMessagesOnServer()
+    document.addEventListener('click', function() {
+        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
+            removeFlashMessages()
+        }
+    })
 }
 // End Initialization
