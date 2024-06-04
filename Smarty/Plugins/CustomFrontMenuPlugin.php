@@ -41,6 +41,8 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
         $smarty->assign('menuItems', $menuItems);
         
 
+        $cssPath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/assets/css/customFrontMenu.css.html';
+        $smarty->display($cssPath);
         $templatePath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
         $smarty->display($templatePath);
     }
