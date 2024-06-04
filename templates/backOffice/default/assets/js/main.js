@@ -20,6 +20,7 @@ function getValueByLocaleOf(element, locale) {
         locale = LOCALE
     }
     let found = false
+    let result
     for (const [key, val] of Object.entries(element)) {
         if (key === locale) {
             result = val
@@ -85,7 +86,7 @@ function getAllIdOf(list) {
                 if (!arrayOfIds.includes(child.id)){
                     arrayOfIds.push(child.id)
                 }
-                if (!child.children || child.children === undefined || child.children.length <= 0){
+                if (!child.children || child.children.length <= 0){
                     continue
                 }
                 const result = getAllIdOf(child.children)
@@ -372,6 +373,10 @@ function saveMenuItemName() {
     
     menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
 
+    const titleSpan = document.getElementById(getCurrentId()).parentElement.querySelector('[data-id="titleSpan"]')
+    titleSpan.textContent = getValueByLocaleOf(findMenuInList(getCurrentId(), MENU_LIST).title)
+
+    generatePreviewMenus()
 }
 
 function saveMenuItemUrl() {
@@ -450,8 +455,8 @@ function generateMenu(list) {
 
 function generateMenuRecursive(menuItem){
     let depth = "zero-depth"
-    if (menuItem.depth != 0){
-        if (menuItem.depth%2 == 0){
+    if (menuItem.depth !== 0){
+        if (menuItem.depth%2 === 0){
             depth = "even-depth"
         }
         else {
