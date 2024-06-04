@@ -3,7 +3,7 @@ var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
 var LOCALE
 let CURRENT_ID = null
-let allowUnload = true
+let allowUnload = false
 let selectedLanguage
 let quotePattern = '&280&quote&280&'
 let percentPattern = '&280&percent&280&'
