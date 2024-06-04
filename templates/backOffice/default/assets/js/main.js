@@ -902,8 +902,8 @@ function allowDrop(ev) {
         } else { // if the mouse is below the target element => positions bar below
             dropIndicator.style.top = (targetItem.offsetTop + targetItem.offsetHeight) + 'px';
             if (mouseX > rect.width / 6) { // if the mouse is to the right of the target element
-                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.17) + 'px';
-                dropIndicator.style.width = (targetItem.offsetWidth * 0.83) + 'px';
+                dropIndicator.style.left = (targetItem.offsetLeft + targetItem.offsetWidth * 0.04) + 'px';
+                dropIndicator.style.width = (targetItem.offsetWidth * 0.96) + 'px';
             }
         }
         dropIndicator.style.display = 'block';
