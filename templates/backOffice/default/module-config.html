@@ -210,9 +210,9 @@
                         <div class="dropdown open">
 
                             <div class="dropdown">
-                                <button id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
+                                <a id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
                                     {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
-                                </button>
+                                </a>
                                 <ul class="dropdown-menu" id="flags-list" style="display: none;">
                                     {loop type="lang" name="the-loop-name"}
                                         <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
