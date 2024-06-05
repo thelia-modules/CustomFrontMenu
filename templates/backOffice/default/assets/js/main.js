@@ -974,7 +974,6 @@ function filterDataList(element) {
     };
     const searchTerm = element.value.toLowerCase();
     const dataList = element.form.getElementsByClassName("productsListParent")[0]
-    console.log(dataList)
 
     dataList.innerHTML = "";
     dataList.style.display = "none";
