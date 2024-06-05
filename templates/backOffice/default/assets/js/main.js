@@ -989,7 +989,7 @@ function updateDataList(selectedKey) {
     if (loopsDictionary[selectedKey]) {
         loopsDictionary[selectedKey].forEach(item => {
             const option = document.createElement('option');
-            option.value = `${item.title} (id:${item.id})`;
+            option.value = `${item.title}-${item.id}`;
             dataList.appendChild(option);
         });
     }
