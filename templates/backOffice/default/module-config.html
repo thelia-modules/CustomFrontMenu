@@ -154,11 +154,11 @@
                     {intl l="Add a menu" d="customfrontmenu.bo.default"}
                 </h4>
             </div>
-            <div class="modal-body">
-                <p>
-                    {intl l="Add a new menu item" d="customfrontmenu.bo.default"}
-                </p>
-                <form id="newParentForm">
+            <form id="newParentForm">
+                <div class="modal-body">
+                    <p>
+                        {intl l="Add a new menu item" d="customfrontmenu.bo.default"}
+                    </p>
                     <div id="error-message-title" style="color: red; display: none;">
                         {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
@@ -170,22 +170,17 @@
                     <div id="error-message-url" style="color: red; display: none;">
                         {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
-                    <label for="menuItemUrl">
+                    <label for="menuItemUrlParent">
                         {intl l="Target item" d="customfrontmenu.bo.default"}
                     </label>
                     <input type="text" id="menuItemUrl" name="menuItemUrl" oninput="filterDataList()" /><br />
-                    <ul id="productsListParent"></ul>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('newParentForm', '0')">
-                    <span class="glyphicon glyphicon-check"></span>
-                    {intl l="Create" d="customfrontmenu.bo.default"}
-                </button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('newParentForm')">
-                    {intl l="Close" d="customfrontmenu.bo.default"}
-                </button>
-            </div>
+                    <ul class="productsListParent"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('newParentForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -286,11 +281,11 @@
                     {intl l="Add a menu" d="customfrontmenu.bo.default"}
                 </h4>
             </div>
-            <div class="modal-body">
-                <p>
-                    {intl l="Add a submenu" d="customfrontmenu.bo.default"}
-                </p>
-                <form id="addMenuItemForm">
+            <form id="addMenuItemForm">
+                <div class="modal-body">
+                    <p>
+                        {intl l="Add a submenu" d="customfrontmenu.bo.default"}
+                    </p>
                     <div id="error-message-title" style="color: red; display: none;">
                         {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
@@ -305,22 +300,14 @@
                     <label for="menuItemUrl">
                         {intl l="Target item" d="customfrontmenu.bo.default"}
                     </label>
-                    <input type="text" id="menuItemUrl" name="menuItemUrl" list="productsListInItem" /><br /><br />
-                    <datalist id="productsListInItem">
-                        {loop type="product" name="my_product_loop"}
-                            <option value="{$TITLE}" />
-                        {/loop}
-                    </datalist>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addCustomMenuItem('addMenuItemForm', getCurrentId())">
-                    <span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}
-                </button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('addMenuItemForm')">
-                    {intl l="Close" d="customfrontmenu.bo.default"}
-                </button>
-            </div>
+                    <input type="text" id="menuItemUrlChild" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                    <ul class="productsListParent"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('addMenuItemForm')">{intl l="Close" d="customfrontmenu.bo.default"}</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
