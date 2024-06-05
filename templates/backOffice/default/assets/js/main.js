@@ -985,17 +985,19 @@ var loopsDictionary = {
 };
 
 function addOptionsOfSelectedCategory() {
-    const menuTypeSelect = document.getElementById('menuType');
-    for (const key in loopsDictionary) {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = key;
-        menuTypeSelect.appendChild(option);
+    const menuTypeSelect = document.getElementsByClassName('menuType');
+    for (const category of menuTypeSelect){
+        for (const key in loopsDictionary) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            category.appendChild(option);
+        }
     }
 }
 
-function updateDataList(selectedKey) {
-    const dataList = document.getElementById('itemList');
+function updateDataList(selectedKey, parentDiv) {
+    const dataList = parentDiv.querySelector('.itemList');
     dataList.innerHTML = "";
 
     if (loopsDictionary[selectedKey]) {
@@ -1007,25 +1009,30 @@ function updateDataList(selectedKey) {
     }
 }
 
-function updateInputOrDatalist() {
-    const menuTypeSelect = document.getElementById('menuType');
-    const selectedKey = menuTypeSelect.value;
-    const inputElement = document.getElementById('menuItemUrlParent');
-    const datalistElement = document.getElementById('itemList');
+function updateInputOrDatalist(selectElement) {
+    const selectedKey = selectElement.value;
+    const parentDiv = selectElement.closest('.edit-modal-line');
+    const inputElement = selectElement.form['menuItemId']
+    const urlInputElement = selectElement.form['menuItemUrl']
+    const datalistElement = parentDiv.querySelector('.itemList');
 
     if (selectedKey === "select a category") {
         inputElement.style.display = "none";
+        urlInputElement.style.display = "none"
         datalistElement.style.display = "none";
-    } else if (selectedKey === "personal url") {
-        inputElement.style.display = "block";
+    } else if (selectedKey === "url") {
+        urlInputElement.style.display = "block";
+        inputElement.style.display = "none";
         datalistElement.style.display = "none";
         inputElement.value = "";
     } else {
+        urlInputElement.style.display = "none"
         inputElement.style.display = "block";
         inputElement.value = "";
-        updateDataList(selectedKey);
+        updateDataList(selectedKey, parentDiv);
     }
 }
+
 
 
 function filterDataList(element) {
@@ -1148,6 +1155,5 @@ window.onload = function() {
     }
 
     addOptionsOfSelectedCategory();
-    updateInputOrDatalist();
 }
 // End Initialization

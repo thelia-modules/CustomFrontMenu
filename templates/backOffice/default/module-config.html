@@ -164,17 +164,17 @@
                     <div id="error-message-url" style="color: red; display: none;">
                         {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
-                        <div class="edit-modal-line">
-                        <label for="menuItemUrlParent">
+                    <div class="edit-modal-line">
+                        <label for="menuItemUrlParentAdd">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select id="menuType" name="menuType" onchange="updateInputOrDatalist()">
+                        <select class="menuType" name="menuType" onchange="updateInputOrDatalist(this)">
                             <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
-                            <option value="personal url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
+                            <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
-                        <input id="datalistInput" style="display:none"/>
-                        <input list="itemList" type="text" id="menuItemUrlParent" name="menuItemUrl" style="display:none">
-                        <datalist id="itemList"></datalist>
+                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
+                        <input list="itemListAdd" type="text" id="menuItemUrlParentAdd" name="menuItemId" style="display:none">
+                        <datalist id="itemListAdd" class="itemList"></datalist>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -200,30 +200,30 @@
                     {intl l="Edit menu" d="customfrontmenu.bo.default"}
                 </h4>
             </li>
-            <div class="modal-body">
-                <div class="top-edit">
-                    <p>
-                        {intl l="Edit a menu item" d="customfrontmenu.bo.default"}
-                    </p>
-                    <div class="dropdown open">
 
-                        <div class="dropdown">
-                            <button id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
-                                {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
-                            </button>
-                            <ul class="dropdown-menu" id="flags-list" style="display: none;">
-                                {loop type="lang" name="the-loop-name"}
-                                    <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
-                                    <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
-                                        <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}" />
-                                    </li>
-                                {/loop}
-                            </ul>
+            <form id="editMenuItemForm">
+                <div class="modal-body">
+                    <div class="top-edit">
+                        <p>
+                            {intl l="Edit a menu item" d="customfrontmenu.bo.default"}
+                        </p>
+                        <div class="dropdown open">
+
+                            <div class="dropdown">
+                                <button id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
+                                    {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
+                                </button>
+                                <ul class="dropdown-menu" id="flags-list" style="display: none;">
+                                    {loop type="lang" name="the-loop-name"}
+                                        <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
+                                        <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
+                                            <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}" />
+                                        </li>
+                                    {/loop}
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <form id="editMenuItemForm">
                     <input type="hidden" id="menuId" name="menuId" value="" />
 
                     <div id="error-message-title" style="color: red; display: none;">
@@ -243,29 +243,33 @@
                     <div id="error-message-url" style="color: red; display: none;">
                         Cannot use back quote ( ` )
                     </div>
+
                     <div class="edit-modal-line">
-                        <label for="menuItemUrl">
+                        <label for="menuItemUrlEdit">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <input type="text" id="menuItemUrl" name="menuItemUrl" />
+                        <select class="menuType" name="menuType" onchange="updateInputOrDatalist(this)">
+                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
+                        </select>
+                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
+                        <input list="itemListEdit" type="text" id="menuItemUrlEdit" name="menuItemId" style="display:none">
+                        <datalist id="itemListEdit" class="itemList"></datalist>
                         <button type="button" class="btn btn-success rounded" onclick="saveMenuItemUrl()">
                             {intl l="Save" d="customfrontmenu.bo.default"}
                         </button>
-                        <br /><br />
                     </div>
-                    <ul class="productsListParent"></ul>
-                </form>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
-                    <span class="glyphicon glyphicon-check"></span>
-                    {intl l="Save everything" d="customfrontmenu.bo.default"}
-                </button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('editMenuItemForm')">
-                    {intl l="Close" d="customfrontmenu.bo.default"}
-                </button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
+                        <span class="glyphicon glyphicon-check"></span>
+                        {intl l="Save everything" d="customfrontmenu.bo.default"}
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('editMenuItemForm')">
+                        {intl l="Close" d="customfrontmenu.bo.default"}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -299,11 +303,18 @@
                     <div id="error-message-url" style="color: red; display: none;">
                         {intl l="Cannot use back quote ( ` )" d="customfrontmenu.bo.default"}
                     </div>
-                    <label for="menuItemUrl">
-                        {intl l="Target item" d="customfrontmenu.bo.default"}
-                    </label>
-                    <input type="text" id="menuItemUrlChild" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
-                    <ul class="productsListParent"></ul>
+                    <div class="edit-modal-line">
+                        <label for="menuItemUrlChildAdd">
+                            {intl l="Target item" d="customfrontmenu.bo.default"}
+                        </label>
+                        <select class="menuType" name="menuType" onchange="updateInputOrDatalist(this)">
+                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
+                        </select>
+                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
+                        <input list="itemListAddChild" type="text" id="menuItemUrlChildAdd" name="menuItemId" style="display:none">
+                        <datalist id="itemListAddChild" class="itemList"></datalist>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
