@@ -44,9 +44,9 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      *    ),
      * )
      */
-    public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu) : JsonResponse
+    public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, string $locale) : JsonResponse
     {
-        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id));
+        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $locale);
         if ($menu === null) {
             return OpenApiService::jsonResponse('Menu not found', Response::HTTP_NOT_FOUND);
         }
