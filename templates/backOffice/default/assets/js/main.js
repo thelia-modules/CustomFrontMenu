@@ -183,7 +183,7 @@ function addCustomMenuItem(element, id="0") {
         return
     }
     
-    let [menuItemName, menuItemUrl] = getFormItems(form)
+    let [menuItemName, menuItemType, menuItemUrl] = getFormItems(form)
     let menu = findMenuInList(id, MENU_LIST)
     let depthToAdd = 0
     if (menu !== null) {
@@ -192,12 +192,19 @@ function addCustomMenuItem(element, id="0") {
     let newItem = {
         id: getNextId(),
         title: {},
+        type: menuItemType,
         url: {},
         depth: depthToAdd,
         children: []
     };
     newItem.title[LOCALE] = menuItemName
-    newItem.url[LOCALE] = menuItemUrl
+    console.log(menuItemType)
+    if (menuItemType.toLowerCase() !== "url") {
+        newItem.url["en_US"] = menuItemUrl
+    }
+    else {
+        newItem.url[LOCALE] = menuItemUrl
+    }
 
     let newMenu = generateMenuRecursive(newItem)
     if (menu === null) {
@@ -297,11 +304,15 @@ function getFormItems(form) {
     if (menuItemName === null || menuItemName === '') {
         menuItemName = 'New menu item'
     }
+    let menuItemType = form.elements['menuType'].value.trim()
+    if (menuItemType === null || menuItemType === '') {
+        menuItemType = 'url'
+    }
     let menuItemUrl = form.elements['menuItemUrl'].value.trim()
     if (menuItemUrl === null) {
         menuItemUrl = ''
     }
-    return [menuItemName, menuItemUrl]
+    return [menuItemName, menuItemType, menuItemUrl]
 }
 // End edit menu
 
@@ -417,12 +428,12 @@ function saveMenuItemUrl() {
     menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value;
 }
 
-function saveTitleAndUrl(id, title, url) {
+function saveTitleTypeAndUrl(id, title, type, url) {
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     const menuToModify = findMenuInList(id, MENU_LIST)
 
     if (menuToModify === null) {
-        console.error("The id given in saveTitleAndUrl doesn't exist")
+        console.error("The id given in saveTitleTypeAndUrl doesn't exist")
         return
     }
 
@@ -935,7 +946,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a href="` + getValueByLocaleOf(menuItem.url) + `" target="_blank">` + getValueByLocaleOf(menuItem.title) + `</a>
+            <a>` + getValueByLocaleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
