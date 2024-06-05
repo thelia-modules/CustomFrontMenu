@@ -57,15 +57,13 @@ class MenuController extends BaseAdminController
         }
 
         $menuToCheck = $cfmMenu->getMenu($menuId);
-        
+
         if (!isset($menuToCheck) || $menuToCheck->getLevel() !== 1) {
             throw new Exception('Save failed : the menu id is invalid');
         }
 
         // Delete all the items currently in database for the menu to save
         $menu = $cfmSave->deleteSpecificItems($menuId);
-
-        
 
         // Add all new items in database
         $cfmSave->saveTableBrowser($newMenu, $menu, $session);

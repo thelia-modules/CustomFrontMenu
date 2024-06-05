@@ -3,6 +3,7 @@
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Interface\CFMSaveInterface;
+use CustomFrontMenu\Interface\CFMMenuInterface;
 use CustomFrontMenu\Service\Validator;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
@@ -43,17 +44,34 @@ class CFMSaveService implements CFMSaveInterface
 
             $item->save();
 
+            if(strtolower($element['type']) === 'url') {
+                foreach ($element['url'] as $locale => $url) {
+                    //if (filter_var($url, FILTER_VALIDATE_URL))
+                    $content = new CustomFrontMenuItemI18n();
+                    $content->setId($item->getId());
+                    $content->setLocale($locale);
+                    $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
+                    $content->save();
+                }
+            } else {
+                $item->setView(ucfirst(Validator::viewIsValid($element['type'])));
+                $item->setViewId(intval($element['url'][$session->get('thelia.current.lang')->getLocale()]));
+                $item->save();
+            }
+
             foreach ($element['title'] as $locale => $title) {
-                $content = new CustomFrontMenuItemI18n();
+                $content = CustomFrontMenuItemI18nQuery::create()
+                    ->filterById($item->getId())
+                    ->findOneByLocale($locale);
+
+                if ($content === null) {
+                    $content = new CustomFrontMenuItemI18n();
+                    $content->setId($item->getId());
+                    $content->setLocale($locale);
+                    $content->setTitle(Validator::completeValidation($title, $session));
+                }
+
                 $content->setTitle(Validator::completeValidation($title, $session));
-                if (isset($element['url']) && isset($element['url'][$locale])) {
-                    $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$locale], $session), FilterType::URL));
-                }
-                else{
-                    $content->setUrl("");
-                }
-                $content->setId($item->getId());
-                $content->setLocale($locale);
                 $content->save();
             }
 
