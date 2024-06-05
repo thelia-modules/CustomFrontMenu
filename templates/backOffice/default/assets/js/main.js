@@ -963,17 +963,62 @@ function searchProducts(query, formId) {
     });
 }
 
+var loopsDictionary = {
+    "Brand": brandLoopData,
+    "Cart": cartLoopData,
+    "Category": categoryLoopData,
+    "Content": contentLoopData,
+    "Folder": folderLoopData,
+    "Products": productLoopData
+};
+
+function addOptionsOfSelectedCategory() {
+    const menuTypeSelect = document.getElementById('menuType');
+    for (const key in loopsDictionary) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        menuTypeSelect.appendChild(option);
+    }
+}
+
+function updateDataList(selectedKey) {
+    const dataList = document.getElementById('itemList');
+    dataList.innerHTML = "";
+
+    if (loopsDictionary[selectedKey]) {
+        loopsDictionary[selectedKey].forEach(item => {
+            const option = document.createElement('option');
+            option.value = `${item.title} (id:${item.id})`;
+            dataList.appendChild(option);
+        });
+    }
+}
+
+function updateInputOrDatalist() {
+    const menuTypeSelect = document.getElementById('menuType');
+    const selectedKey = menuTypeSelect.value;
+    const inputElement = document.getElementById('menuItemUrlParent');
+    const datalistElement = document.getElementById('itemList');
+
+    if (selectedKey === "select a category") {
+        inputElement.style.display = "none";
+        datalistElement.style.display = "none";
+    } else if (selectedKey === "personal url") {
+        inputElement.style.display = "block";
+        datalistElement.style.display = "none";
+        inputElement.value = "";
+    } else {
+        inputElement.style.display = "block";
+        inputElement.value = "";
+        updateDataList(selectedKey);
+    }
+}
+
+
 function filterDataList(element) {
-    var loopsDictionary = {
-        "Brand": brandLoopData,
-        "Cart": cartLoopData,
-        "Category": categoryLoopData,
-        "Content": contentLoopData,
-        "Folder": folderLoopData,
-        "Products": productLoopData
-    };
     const searchTerm = element.value.toLowerCase();
-    const dataList = element.form.getElementsByClassName("productsListParent")[0]
+    const dataList = element.form.getElementsByClassName("productsListParent")[0];
 
     dataList.innerHTML = "";
     dataList.style.display = "none";
@@ -1089,5 +1134,8 @@ window.onload = function() {
             removeFlashMessages()
         }
     })
+
+    addOptionsOfSelectedCategory();
+    updateInputOrDatalist();
 }
 // End Initialization

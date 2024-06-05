@@ -155,19 +155,14 @@
                         <label for="menuItemUrlParent">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select id="menuType" name="menuType">
-                            <option value="">{intl l="Select a type" d="customfrontmenu.bo.default"}</option>
-                            <option value="brand">{intl l="Brand" d="customfrontmenu.bo.default"}</option>
-                            <option value="cart">{intl l="Cart" d="customfrontmenu.bo.default"}</option>
-                            <option value="category">{intl l="Category" d="customfrontmenu.bo.default"}</option>
-                            <option value="content">{intl l="Content" d="customfrontmenu.bo.default"}</option>
-                            <option value="folder">{intl l="Folder" d="customfrontmenu.bo.default"}</option>
-                            <option value="product">{intl l="Product" d="customfrontmenu.bo.default"}</option>
-                            <option value="url">{intl l="URL" d="customfrontmenu.bo.default"}</option>
+                        <select id="menuType" name="menuType" onchange="updateInputOrDatalist()">
+                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="personal url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
-                        <input type="text" id="menuItemUrlParent" name="menuItemUrl" oninput="filterDataList(this)"><br><br>
+                        <input id="datalistInput" style="display:none"/>
+                        <input list="itemList" type="text" id="menuItemUrlParent" name="menuItemUrl" style="display:none">
+                        <datalist id="itemList"></datalist>
                     </div>
-                    <ul class="productsListParent"></ul>
                 </form>
             </div>
             <div class="modal-footer">

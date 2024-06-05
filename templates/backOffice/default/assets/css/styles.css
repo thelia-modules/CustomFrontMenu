@@ -162,23 +162,6 @@ ul.menu-item:last-child {
 
 /* ------------------------------ End edit modal ------------------------------ */
 
-/* ------------------------------ Begin add parent modal ------------------------------ */
-
-.productsListParent {
-    padding: 0;
-    max-height: 250px;
-    overflow-y: auto;
-    text-align: center;
-}
-.productsListParent li {
-    padding: 4px;
-    cursor: pointer;
-}
-.productsListParent li:hover {
-    background-color: #f0f0f0;
-}
-/* ------------------------------ End add parent modal ------------------------------ */
-
 /* ------------------------------ Begin drop down ------------------------------ */
 
 .drop-indicator {
