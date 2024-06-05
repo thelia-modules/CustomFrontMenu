@@ -946,7 +946,7 @@ function generatePreviewMenuRecursive(menuItem){
     let classes = (menuItem.depth >= 1) ? "parent deep" : "parent"
     return `
         <li>
-            <a href="` + getValueByLocaleOf(menuItem.url) + `" target="_blank">` + getValueByLocaleOf(menuItem.title) + `</a>
+            <a>` + getValueByLocaleOf(menuItem.title) + `</a>
             <ul class="` + classes + `">
                 ` + children + `
             </ul>
