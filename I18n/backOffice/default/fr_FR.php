@@ -24,6 +24,8 @@ return array(
     'Edit a menu item' => 'Modifier un élément du menu',
     'Edit menu' => 'Modifier le menu',
     'Hide all children' => 'Masquer les enfants',
+    'Item name' => 'Nom de l\'élément',
+    'Item title' => 'Titre de l\'élément',
     'Menu' => 'Menu',
     'Menu name' => 'Nom du menu',
     'Menu title' => "Titre du menu",
