@@ -78,6 +78,9 @@ class CFMLoadService implements CFMLoadInterface
             }
 
             $view = $descendant->getView();
+            if (!isset($view) || $view === ""){
+                $view = 'url';
+            }
             $newArray['type'] = $view;
             $viewId = $descendant->getViewId();
 
