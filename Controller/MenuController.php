@@ -163,7 +163,8 @@ class MenuController extends BaseAdminController
                 setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);
                 $menu = $cfmMenu->getMenu($menuId);
             }
-            $data = $cfmLoad->loadTableBrowser($menu);
+            $data = $cfmLoad->loadTableBrowser($menu, $session->get('thelia.current.admin_lang')->getLocale());
+            echo $session->get('thelia.current.admin_lang')->getLocale();
         }
 
         return [

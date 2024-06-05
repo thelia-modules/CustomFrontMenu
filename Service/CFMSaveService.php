@@ -53,9 +53,10 @@ class CFMSaveService implements CFMSaveInterface
                     $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
                     $content->save();
                 }
-            } else {
+            } elseif ($element['type'] !== '') {
                 $item->setView(ucfirst(Validator::viewIsValid($element['type'])));
-                $item->setViewId(intval($element['url'][$session->get('thelia.current.lang')->getLocale()]));
+                $viewIdExploded = explode('-', $element['url']['en_US']);
+                $item->setViewId(intval(end($viewIdExploded)));
                 $item->save();
             }
 
