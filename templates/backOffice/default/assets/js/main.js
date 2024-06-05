@@ -177,16 +177,17 @@ function addInList(id, item, list) {
     return list
 }
 
-function addCustomMenuItem(form, id="0") {
+function addCustomMenuItem(element, id="0") {
+    const form = element.form
     if (!isValid(form)) {
         return
     }
     
-    let [menuItemName, menuItemUrl] = getFormItems(form);
-    let element = findMenuInList(id, MENU_LIST);
-    let depthToAdd = 0;
-    if (element !== null) {
-        depthToAdd = element.depth + 1;
+    let [menuItemName, menuItemUrl] = getFormItems(form)
+    let menu = findMenuInList(id, MENU_LIST)
+    let depthToAdd = 0
+    if (menu !== null) {
+        depthToAdd = menu.depth + 1
     }
     let newItem = {
         id: getNextId(),
@@ -195,11 +196,11 @@ function addCustomMenuItem(form, id="0") {
         depth: depthToAdd,
         children: []
     };
-    newItem.title[LOCALE] = menuItemName;
-    newItem.url[LOCALE] = menuItemUrl;
+    newItem.title[LOCALE] = menuItemName
+    newItem.url[LOCALE] = menuItemUrl
 
-    let newMenu = generateMenuRecursive(newItem);
-    if (element === null) {
+    let newMenu = generateMenuRecursive(newItem)
+    if (menu === null) {
         document.getElementById('menu-item-list').innerHTML += newMenu;
         MENU_LIST.push(newItem);
     } else {
@@ -238,11 +239,11 @@ function addCustomMenuItem(form, id="0") {
             }
         }
     }
-    deleteEditField(form);
+    deleteEditField(form.id);
     generatePreviewMenus();
     updateArrowStyles();
 
-    closeClosestModal(document.getElementById(form));
+    closeClosestModal(form);
 }
 // End add menu
 
@@ -268,11 +269,12 @@ function findMenuInList(id, list) {
 
 // Edit menu
 function changeParameters(id) {
-    if (!isValid('editMenuItemForm')) {
+    const form = document.getElementById('editMenuItemForm')
+    if (!isValid(form)) {
         return
     }
 
-    const [title, url] = getFormItems('editMenuItemForm')
+    const [title, url] = getFormItems(form)
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
@@ -287,11 +289,10 @@ function changeParameters(id) {
     deleteEditField('editMenuItemForm')
     generatePreviewMenus()
 
-    closeClosestModal(document.getElementById('editMenuItemForm'));
+    closeClosestModal(form);
 }
 
-function getFormItems(formId) {
-    let form = document.getElementById(formId)
+function getFormItems(form) {
     let menuItemName = form.elements['menuItemName'].value.trim()
     if (menuItemName === null || menuItemName === '') {
         menuItemName = 'New menu item'
@@ -344,8 +345,7 @@ function deleteMenu() {
 // End delete menu
 
 // Validation
-function isValid(formId) {
-    let form = document.getElementById(formId)
+function isValid(form) {
     let menuItemName = form.elements['menuItemName'].value.trim()
     let menuItemUrl = form.elements['menuItemUrl'].value.trim()
     let errorMessageTitle = form.querySelector('#error-message-title');
@@ -379,7 +379,8 @@ function saveData() {
 }
 
 function saveMenuItemName() {
-    if (!isValid('editMenuItemForm')) {
+    const editForm = document.getElementById('editMenuItemForm')
+    if (!isValid(editForm)) {
         return
     }
 
@@ -391,7 +392,7 @@ function saveMenuItemName() {
         return
     }
     
-    menuToModify.title[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemName"].value;
+    menuToModify.title[modifiedLocal] = editForm["menuItemName"].value;
 
     const titleSpan = document.getElementById(getCurrentId()).parentElement.querySelector('[data-id="titleSpan"]')
     titleSpan.textContent = getValueByLocaleOf(findMenuInList(getCurrentId(), MENU_LIST).title)
@@ -400,7 +401,8 @@ function saveMenuItemName() {
 }
 
 function saveMenuItemUrl() {
-    if (!isValid('editMenuItemForm')) {
+    const editForm = document.getElementById('editMenuItemForm')
+    if (!isValid(editForm)) {
         return
     }
 
@@ -412,7 +414,7 @@ function saveMenuItemUrl() {
         return
     }
 
-    menuToModify.url[modifiedLocal] = document.forms["editMenuItemForm"]["menuItemUrl"].value;
+    menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value;
 }
 
 function saveTitleAndUrl(id, title, url) {
@@ -1127,12 +1129,12 @@ window.onload = function() {
     }
 
     // Manage flashes
-    clearFlashMessagesOnServer()
-    document.addEventListener('click', function() {
-        if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-            removeFlashMessages()
-        }
-    })
+    if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
+        clearFlashMessagesOnServer()
+        document.addEventListener('click', function() {
+                removeFlashMessages()
+        })
+    }
 
     addOptionsOfSelectedCategory();
     updateInputOrDatalist();
