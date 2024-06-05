@@ -428,12 +428,12 @@ function saveMenuItemUrl() {
     menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value;
 }
 
-function saveTitleAndUrl(id, title, url) {
+function saveTitleTypeAndUrl(id, title, type, url) {
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     const menuToModify = findMenuInList(id, MENU_LIST)
 
     if (menuToModify === null) {
-        console.error("The id given in saveTitleAndUrl doesn't exist")
+        console.error("The id given in saveTitleTypeAndUrl doesn't exist")
         return
     }
 
