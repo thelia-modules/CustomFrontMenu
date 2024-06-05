@@ -160,6 +160,10 @@ ul.menu-item:last-child {
     margin: 1em 0 1em 0;
 }
 
+.edit-modal-line select{
+    margin-right: 10px;
+}
+
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
