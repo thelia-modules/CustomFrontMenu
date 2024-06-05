@@ -993,10 +993,12 @@ function filterDataList(element) {
             matchingItems.forEach(item => {
                 const itemElement = document.createElement("li");
                 itemElement.textContent = `${item.title} (id:${item.id})`;
+
                 itemElement.onclick = function() {
-                    searchInput.value = `${item.title}/${key}/${item.id}`;
+                    element.value = `${item.title}/${key}/${item.id}`;
                     dataList.style.display = "none";
                 };
+
                 dataList.appendChild(itemElement);
             });
             hasMatchingItems = true;
