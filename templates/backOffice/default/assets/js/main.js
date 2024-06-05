@@ -965,7 +965,6 @@ function searchProducts(query, formId) {
 
 var loopsDictionary = {
     "Brand": brandLoopData,
-    "Cart": cartLoopData,
     "Category": categoryLoopData,
     "Content": contentLoopData,
     "Folder": folderLoopData,
