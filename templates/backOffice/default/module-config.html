@@ -97,7 +97,7 @@
         <button id="toggle-all-children" class="btn top-btn delete-if-no-menu" onclick="toggleTopLevelVisibility()">
             {intl l="Hide all children" d="customfrontmenu.bo.default"}
         </button>
-        <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn delete-if-no-menu" data-toggle="modal" data-target="#AddAndEditMenu">
+        <button title="Add a new parent" class="btn btn-primary btn-responsive action-btn add-parent-btn delete-if-no-menu" data-toggle="modal" data-target="#AddAndEditMenu" onclick="resetSelect('AddAndEditMenu')">
             {intl l="Add a new parent" d="customfrontmenu.bo.default"}
             <i class="glyphicon glyphicon-plus-sign"></i>
         </button>
@@ -169,7 +169,8 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="" selected>{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>
@@ -249,7 +250,8 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="" selected>{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>
@@ -308,7 +310,8 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="" selected>{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>

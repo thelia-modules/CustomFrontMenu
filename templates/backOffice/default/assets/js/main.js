@@ -9,9 +9,10 @@ let quotePattern = '&280&quote&280&'
 let percentPattern = '&280&percent&280&'
 
 // Get from json
-function getFromJson(json){
+function getFromJson(json) {
     return JSON.parse(decodeURIComponent(replaceQuoteAndPercent(json)))
 }
+
 // End get from json
 
 // Get value by locale
@@ -26,8 +27,7 @@ function getValueByLocaleOf(element, locale) {
             result = val
             found = true
             break
-        }
-        else if (key === 'en_US') {
+        } else if (key === 'en_US') {
             result = val
             found = true
         }
@@ -37,6 +37,7 @@ function getValueByLocaleOf(element, locale) {
     }
     return result
 }
+
 // End get value by locale
 
 // Close closest modal
@@ -47,6 +48,7 @@ function closeClosestModal(element) {
         $(`#${modalId}`).modal('hide');
     }
 }
+
 // End close closest modal
 
 // Current id
@@ -60,6 +62,7 @@ function getCurrentId() {
 function setCurrentId(id) {
     CURRENT_ID = id
 }
+
 // End current id
 
 // Get next id
@@ -67,8 +70,8 @@ function getNextId() {
     let nextId = 1
     let arrayOfIds = getAllIdOf(MENU_LIST)
     arrayOfIds.sort((a, b) => a - b)
-    for (const id of arrayOfIds){
-        if (id !== nextId){
+    for (const id of arrayOfIds) {
+        if (id !== nextId) {
             break
         }
         nextId++
@@ -78,21 +81,21 @@ function getNextId() {
 
 function getAllIdOf(list) {
     let arrayOfIds = []
-    for (const menuItem of list){
+    for (const menuItem of list) {
         arrayOfIds.push(menuItem.id)
-        if (menuItem.children && menuItem.children.length > 0){
+        if (menuItem.children && menuItem.children.length > 0) {
             let children = menuItem.children
-            for (const child of children){
-                if (!arrayOfIds.includes(child.id)){
+            for (const child of children) {
+                if (!arrayOfIds.includes(child.id)) {
                     arrayOfIds.push(child.id)
                 }
-                if (!child.children || child.children.length <= 0){
+                if (!child.children || child.children.length <= 0) {
                     continue
                 }
                 const result = getAllIdOf(child.children)
 
-                for (const id of result){
-                    if (!arrayOfIds.includes(id)){
+                for (const id of result) {
+                    if (!arrayOfIds.includes(id)) {
                         arrayOfIds.push(id)
                     }
                 }
@@ -101,10 +104,11 @@ function getAllIdOf(list) {
     }
     return arrayOfIds
 }
+
 // End get next id
 
 // Replace annoying characters
-function replaceQuoteAndPercent(string){
+function replaceQuoteAndPercent(string) {
     while (string.includes("\\'") || string.includes("%")) {
         string = string
             .replace("\\'", quotePattern)
@@ -113,7 +117,7 @@ function replaceQuoteAndPercent(string){
     return string
 }
 
-function putQuoteAndPercent(string){
+function putQuoteAndPercent(string) {
     while (string.includes(quotePattern) || string.includes(percentPattern)) {
         string = string
             .replace(quotePattern, "'")
@@ -121,24 +125,26 @@ function putQuoteAndPercent(string){
     }
     return string
 }
-function replaceAllQuotesAndPercent(MenuList){
-    for (const val of MenuList){
+
+function replaceAllQuotesAndPercent(MenuList) {
+    for (const val of MenuList) {
         replaceAllQuotesAndPercentRec(val)
     }
 }
 
-function replaceAllQuotesAndPercentRec(MenuList){
-    for (const [lang, title] of Object.entries(MenuList.title)){
+function replaceAllQuotesAndPercentRec(MenuList) {
+    for (const [lang, title] of Object.entries(MenuList.title)) {
         MenuList.title[lang] = putQuoteAndPercent(title)
     }
-    
-    if (!MenuList.children || MenuList.children.length <= 0){
+
+    if (!MenuList.children || MenuList.children.length <= 0) {
         return
     }
-    for (let child of MenuList.children){
+    for (let child of MenuList.children) {
         replaceAllQuotesAndPercentRec(child)
     }
 }
+
 // End replace annoying characters
 
 // Add menu
@@ -162,7 +168,7 @@ function addMenu() {
 }
 
 function addInList(id, item, list) {
-    list = list.map(function(element) {
+    list = list.map(function (element) {
         if (element.id === id) {
             if (!Array.isArray(element.children)) {
                 element.children = []
@@ -177,12 +183,12 @@ function addInList(id, item, list) {
     return list
 }
 
-function addCustomMenuItem(element, id="0") {
+function addCustomMenuItem(element, id = "0") {
     const form = element.form
     if (!isValid(form)) {
         return
     }
-    
+
     let [menuItemName, menuItemType, menuItemUrl] = getFormItems(form)
     let menu = findMenuInList(id, MENU_LIST)
     let depthToAdd = 0
@@ -201,8 +207,7 @@ function addCustomMenuItem(element, id="0") {
     console.log(menuItemType)
     if (menuItemType.toLowerCase() !== "url") {
         newItem.url["en_US"] = menuItemUrl
-    }
-    else {
+    } else {
         newItem.url[LOCALE] = menuItemUrl
     }
 
@@ -236,7 +241,7 @@ function addCustomMenuItem(element, id="0") {
             // Open the parent menu
             const treeIcon = parentElement.querySelector('.tree-icon');
             const childrenUl = parentElement.querySelector('ul');
-            if (treeIcon === null){
+            if (treeIcon === null) {
                 return
             }
             if (childrenUl) {
@@ -252,19 +257,20 @@ function addCustomMenuItem(element, id="0") {
 
     closeClosestModal(form);
 }
+
 // End add menu
 
 // Find menu
 function findMenuInList(id, list) {
-    for (const menuItem of list){
-        if (menuItem.id === id){
+    for (const menuItem of list) {
+        if (menuItem.id === id) {
             return menuItem
         }
-        if (menuItem.children && menuItem.children.length > 0){
+        if (menuItem.children && menuItem.children.length > 0) {
             let children = menuItem.children
-            for (const child of children){
+            for (const child of children) {
                 let result = findMenuInList(id, children)
-                if (result){
+                if (result) {
                     return result
                 }
             }
@@ -272,6 +278,7 @@ function findMenuInList(id, list) {
     }
     return null
 }
+
 // End find menu
 
 // Edit menu
@@ -287,7 +294,7 @@ function changeParameters(id) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
-    
+
     saveTitleAndUrl(id, title, url)
 
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
@@ -314,12 +321,13 @@ function getFormItems(form) {
     }
     return [menuItemName, menuItemType, menuItemUrl]
 }
+
 // End edit menu
 
 // Delete menu
 function deleteMenuItem(id) {
     let elementToRemove = document.getElementById(id).parentElement;
-    
+
     let parentInMenuList = findParentOf(id, MENU_LIST)
     if (parentInMenuList[1].children && parentInMenuList[1].children.length === 1) {
         const parentInHtml = elementToRemove.parentElement.parentElement;
@@ -341,7 +349,7 @@ function deleteMenuItem(id) {
 }
 
 function deleteFromList(id, list) {
-    list = list.filter(function(element) {
+    list = list.filter(function (element) {
         if (element.children && element.children.length > 0) {
             element.children = deleteFromList(id, element.children)
         }
@@ -353,6 +361,7 @@ function deleteFromList(id, list) {
 function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
+
 // End delete menu
 
 // Validation
@@ -362,7 +371,7 @@ function isValid(form) {
     let errorMessageTitle = form.querySelector('#error-message-title');
     let errorMessageUrl = form.querySelector('#error-message-url');
     let noError = true
-    
+
     if (menuItemName.includes("`")) {
         errorMessageTitle.style.display = 'block';
         noError = false
@@ -379,6 +388,7 @@ function isValid(form) {
 
     return noError
 }
+
 // End validation
 
 // Save data
@@ -397,12 +407,12 @@ function saveMenuItemName() {
 
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
-    
+
     if (menuToModify === null) {
         console.error("The id given in saveMenuItemName doesn't exist")
         return
     }
-    
+
     menuToModify.title[modifiedLocal] = editForm["menuItemName"].value;
 
     const titleSpan = document.getElementById(getCurrentId()).parentElement.querySelector('[data-id="titleSpan"]')
@@ -419,7 +429,7 @@ function saveMenuItemUrl() {
 
     const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
-    
+
     if (menuToModify === null) {
         console.error("The id given in saveMenuItemUrl doesn't exist")
         return
@@ -440,6 +450,7 @@ function saveTitleTypeAndUrl(id, title, type, url) {
     menuToModify.title[modifiedLocal] = title
     menuToModify.url[modifiedLocal] = url
 }
+
 // End save data
 
 // Form edit field
@@ -460,13 +471,14 @@ function deleteEditField(formId) {
     form.elements['menuItemName'].value = ""
     form.elements['menuItemUrl'].value = ""
 }
+
 // End form edit field
 
 // Generate menu
 function generateSelect(list) {
     let menu = document.getElementById('selectMenuName')
     menu.innerHTML = ""
-    for (const menuName of list){
+    for (const menuName of list) {
         let option = document.createElement('option');
         option.text = menuName.title;
         option.id = menuName.id;
@@ -480,26 +492,25 @@ function generateSelect(list) {
 function generateMenu(list) {
     let menu = document.getElementById('menu-item-list')
     menu.innerHTML = ""
-    for (const menuItem of list){
+    for (const menuItem of list) {
         menu.innerHTML += generateMenuRecursive(menuItem)
     }
     updateArrowStyles();
 }
 
-function generateMenuRecursive(menuItem){
+function generateMenuRecursive(menuItem) {
     let depth = "zero-depth"
-    if (menuItem.depth !== 0){
-        if (menuItem.depth%2 === 0){
+    if (menuItem.depth !== 0) {
+        if (menuItem.depth % 2 === 0) {
             depth = "even-depth"
-        }
-        else {
+        } else {
             depth = ""
         }
     }
 
     let children = ""
-    if (menuItem.children && menuItem.children.length > 0){
-        for (const child of menuItem.children){
+    if (menuItem.children && menuItem.children.length > 0) {
+        for (const child of menuItem.children) {
             children += generateMenuRecursive(child)
         }
     }
@@ -511,43 +522,44 @@ function generateMenuRecursive(menuItem){
 
     let newMenu = `
     <li draggable="true" ondragstart="drag(event)" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="item `+depth+`" id="`+menuItem.id+`" onclick="toggleChildren(this,event)">
+        <div class="item ` + depth + `" id="` + menuItem.id + `" onclick="toggleChildren(this,event)">
             <a class="drag-and-drop-icon">
                 <i class="fas fa-bars"></i>
             </a>
             <div class="title-container">
-                <span data-id="titleSpan">`+ getValueByLocaleOf(menuItem.title) +`</span>` + arrowSpan + `
+                <span data-id="titleSpan">` + getValueByLocaleOf(menuItem.title) + `</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(`+menuItem.id+`)">
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(` + menuItem.id + `)">
                     <i class="glyphicon glyphicon-edit"></i>
                 </a>
-                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(`+menuItem.id+`)">
+                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
                     <i class="glyphicon glyphicon-plus-sign"></i>
                 </a>
-                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-toggle="modal" data-target="#DeleteMenu" onclick="setCurrentId(`+menuItem.id+`)">
+                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-toggle="modal" data-target="#DeleteMenu" onclick="setCurrentId(` + menuItem.id + `)">
                     <i class="glyphicon glyphicon-trash"></i>
                 </a>
             </div>
             <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(`+menuItem.id+`)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
+                <a class="leftArrow"  onclick="moveMenuUp(` + menuItem.id + `)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(` + menuItem.id + `)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
             </span>
         </div>
-        <ul class="menu-item" style="`+ ((children) ? "display: block;" : "display: none;") +`">
-            `+children+`
+        <ul class="menu-item" style="` + ((children) ? "display: block;" : "display: none;") + `">
+            ` + children + `
         </ul>
     </li>`
 
     updateArrowStyles();
     return newMenu;
 }
+
 // End generate menu
 
 // Move menu
 function moveMenuUp(id) {
     menuToMove = document.getElementById(id).parentNode
-    if (menuToMove.previousElementSibling){
+    if (menuToMove.previousElementSibling) {
         menuToMove.parentElement.insertBefore(menuToMove, menuToMove.previousElementSibling)
     }
 
@@ -559,7 +571,7 @@ function moveMenuUp(id) {
 
 function moveMenuDown(id) {
     menuToMove = document.getElementById(id).parentElement
-    if (menuToMove.nextElementSibling){
+    if (menuToMove.nextElementSibling) {
         menuToMove.parentElement.insertBefore(menuToMove.nextElementSibling, menuToMove)
     }
 
@@ -569,16 +581,16 @@ function moveMenuDown(id) {
 }
 
 function moveMenuUpInList(id, list) { // recursive
-    for (let i = 0; i < list.length; i++){
-        if (list[i].id === id){
-            if (i > 0){
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+            if (i > 0) {
                 let temp = list[i]
-                list[i] = list[i-1]
-                list[i-1] = temp
+                list[i] = list[i - 1]
+                list[i - 1] = temp
             }
             return list
         }
-        if (list[i].children && list[i].children.length > 0){
+        if (list[i].children && list[i].children.length > 0) {
             list[i].children = moveMenuUpInList(id, list[i].children)
         }
     }
@@ -586,16 +598,16 @@ function moveMenuUpInList(id, list) { // recursive
 }
 
 function moveMenuDownInList(id, list) {
-    for (let i = 0; i < list.length; i++){
-        if (list[i].id === id){
-            if (i < list.length - 1){
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+            if (i < list.length - 1) {
                 let temp = list[i]
-                list[i] = list[i+1]
-                list[i+1] = temp
+                list[i] = list[i + 1]
+                list[i + 1] = temp
             }
             return list
         }
-        if (list[i].children && list[i].children.length > 0){
+        if (list[i].children && list[i].children.length > 0) {
             list[i].children = moveMenuDownInList(id, list[i].children)
         }
     }
@@ -627,6 +639,7 @@ function updateArrowStyles() {
         });
     });
 }
+
 // End move menu
 
 // Drop down
@@ -665,7 +678,7 @@ function toggleChildren(span, event) {
     const treeIcon = listItem.querySelector('.tree-icon');
     const childrenUl = listItem.querySelector('ul');
 
-    if (treeIcon === null){
+    if (treeIcon === null) {
         return
     }
 
@@ -698,6 +711,7 @@ function selectLanguage(languageElement) {
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
+
 // End drop down
 
 // Drag and drop
@@ -729,16 +743,13 @@ function drop(ev) {
         // inserts the moved element before or after the target element, depending on the drop position
         const problems = insertMenuItem(draggedItemId, targetItemId, insertionBefore, insertAsChild)
 
-        if (problems === 0){
+        if (problems === 0) {
             console.log("success")
-        }
-        else if (problems === 1){
+        } else if (problems === 1) {
             console.log("OSKOUR: element not found in list")
-        }
-        else if (problems === 2) {
+        } else if (problems === 2) {
             console.log("is parent")
-        }
-        else if (problems === 3) {
+        } else if (problems === 3) {
             console.log("same element")
         }
 
@@ -762,59 +773,56 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
     }
 
     if (draggedItemId >= 0) {
-        if (isParentOf(draggedItemId, positionToInsert)){
+        if (isParentOf(draggedItemId, positionToInsert)) {
             let [root, parentOfDragged] = findParentOf(draggedItemId, MENU_LIST)
-            if (root === 0){
+            if (root === 0) {
                 parentOfDragged = MENU_LIST
             }
-            if (!parentOfDragged){
+            if (!parentOfDragged) {
                 return 1
             }
 
             let draggedItem = findMenuInList(draggedItemId, MENU_LIST)
-            while (draggedItem.children.length > 0){
+            while (draggedItem.children.length > 0) {
                 let popedChild = draggedItem.children.pop()
-                if (root === 0){
-                    MENU_LIST.splice(MENU_LIST.indexOf(draggedItem)+1, 0, popedChild)
-                }
-                else {
-                    parentOfDragged.children.splice(parentOfDragged.children.indexOf(draggedItem)+1, 0, popedChild)
+                if (root === 0) {
+                    MENU_LIST.splice(MENU_LIST.indexOf(draggedItem) + 1, 0, popedChild)
+                } else {
+                    parentOfDragged.children.splice(parentOfDragged.children.indexOf(draggedItem) + 1, 0, popedChild)
                 }
                 popedChild.depth = (root === 0) ? 0 : parentOfDragged.depth + 1
                 updateDepth(popedChild, popedChild.depth)
             }
         }
-        if (insertAsChild){
+        if (insertAsChild) {
             let newParent = findMenuInList(positionToInsert, MENU_LIST)
-            if (newParent === null){
+            if (newParent === null) {
                 return 1
             }
 
             const draggedItem = popFromMenuList(draggedItemId, MENU_LIST)
 
-            if (newParent.children == null){
+            if (newParent.children == null) {
                 newParent.children = [draggedItem]
-            }
-            else {
+            } else {
                 newParent.children.push(draggedItem)
             }
             draggedItem.depth = newParent.depth + 1
             updateDepth(draggedItem, draggedItem.depth)
             return 0
         }
-            
+
         let [root, parent] = findParentOf(positionToInsert, MENU_LIST)
 
         let menuToMove = popFromMenuList(draggedItemId, MENU_LIST)
-        if (menuToMove == null){
+        if (menuToMove == null) {
             return 1
         }
-        if (root === 0){
-            insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent)+1, 0, menuToMove)
+        if (root === 0) {
+            insertionBefore ? MENU_LIST.splice(MENU_LIST.indexOf(parent), 0, menuToMove) : MENU_LIST.splice(MENU_LIST.indexOf(parent) + 1, 0, menuToMove)
             menuToMove.depth = 0
-        }
-        else {
-            insertionBefore ? parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST))+1, 0, menuToMove)
+        } else {
+            insertionBefore ? parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST)), 0, menuToMove) : parent.children.splice(parent.children.indexOf(findMenuInList(positionToInsert, MENU_LIST)) + 1, 0, menuToMove)
             menuToMove.depth = parent.depth + 1
         }
 
@@ -824,10 +832,10 @@ function insertMenuItem(draggedItemId, positionToInsert, insertionBefore, insert
     return null
 }
 
-function isParentOf(parent, child){
+function isParentOf(parent, child) {
     let parentElement = findMenuInList(parent, MENU_LIST)
-    if (parentElement.children && parentElement.children.length > 0){
-        for (const childElement of parentElement.children){
+    if (parentElement.children && parentElement.children.length > 0) {
+        for (const childElement of parentElement.children) {
             if (childElement.id === child || isParentOf(childElement.id, child)) {
                 return true
             }
@@ -836,9 +844,9 @@ function isParentOf(parent, child){
     return false
 }
 
-function updateDepth(menuItem, depth){
-    if (menuItem.children && menuItem.children.length > 0){
-        for (const child of menuItem.children){
+function updateDepth(menuItem, depth) {
+    if (menuItem.children && menuItem.children.length > 0) {
+        for (const child of menuItem.children) {
             child.depth = depth + 1
             updateDepth(child, child.depth)
         }
@@ -850,12 +858,12 @@ function findParentOf(id, list) {
         if (menuItem.id === id) {
             return [0, menuItem]
         }
-        if (menuItem.children && menuItem.children.length > 0){
+        if (menuItem.children && menuItem.children.length > 0) {
             let children = menuItem.children
-            for (const _ of children){
+            for (const _ of children) {
                 let result = findParentOf(id, children)
-                if (result){
-                    if (result[0] === 0){
+                if (result) {
+                    if (result[0] === 0) {
                         return [1, menuItem]
                     }
                     return result
@@ -866,20 +874,20 @@ function findParentOf(id, list) {
     return null
 }
 
-function popFromMenuList(id, list){
-    for (const menuItem of list){
-        if (menuItem.id === id){
-            if (menuItem.depth < 1){
+function popFromMenuList(id, list) {
+    for (const menuItem of list) {
+        if (menuItem.id === id) {
+            if (menuItem.depth < 1) {
                 return list.splice(list.indexOf(menuItem), 1)[0]
             }
             return menuItem
         }
-        if (menuItem.children && menuItem.children.length > 0){
+        if (menuItem.children && menuItem.children.length > 0) {
             let children = menuItem.children
-            for (const child of children){
+            for (const child of children) {
                 let result = popFromMenuList(id, children)
                 if (result) {
-                    if (children.indexOf(result) !== -1){
+                    if (children.indexOf(result) !== -1) {
                         return children.splice(children.indexOf(result), 1)[0]
                     }
                     return result
@@ -898,7 +906,7 @@ function allowDrop(ev) {
     ev.preventDefault();
     const dropIndicator = document.querySelector('.drop-indicator');
 
-    try{
+    try {
         // retrieve mouse position relative to the target element
         const rect = ev.target.closest("div.item").getBoundingClientRect();
         const mouseY = ev.clientY - rect.top;
@@ -920,26 +928,26 @@ function allowDrop(ev) {
             }
         }
         dropIndicator.style.display = 'block';
-    }
-    catch{
+    } catch {
         dropIndicator.style.display = 'none';
     }
 }
+
 // End drag and drop
 
 // Preview
 function generatePreviewMenus() {
     const previewUl = document.getElementById('menus')
     previewUl.innerHTML = ""
-    for (const menuItem of MENU_LIST){
+    for (const menuItem of MENU_LIST) {
         previewUl.innerHTML += generatePreviewMenuRecursive(menuItem, 1)
     }
 }
 
-function generatePreviewMenuRecursive(menuItem){
+function generatePreviewMenuRecursive(menuItem) {
     let children = ""
-    if (menuItem.children && menuItem.children.length > 0){
-        for (const child of menuItem.children){
+    if (menuItem.children && menuItem.children.length > 0) {
+        for (const child of menuItem.children) {
             children += generatePreviewMenuRecursive(child)
         }
     }
@@ -953,6 +961,7 @@ function generatePreviewMenuRecursive(menuItem){
         </li>
     `;
 }
+
 // End Preview
 
 // Search product
@@ -986,7 +995,7 @@ var loopsDictionary = {
 
 function addOptionsOfSelectedCategory() {
     const menuTypeSelect = document.getElementsByClassName('menuType');
-    for (const category of menuTypeSelect){
+    for (const category of menuTypeSelect) {
         for (const key in loopsDictionary) {
             const option = document.createElement('option');
             option.value = key;
@@ -1016,7 +1025,7 @@ function updateInputOrDatalist(selectElement) {
     const urlInputElement = selectElement.form['menuItemUrl']
     const datalistElement = parentDiv.querySelector('.itemList');
 
-    if (selectedKey === "select a category") {
+    if (selectedKey === "" || selectedKey === "empty") {
         inputElement.style.display = "none";
         urlInputElement.style.display = "none"
         datalistElement.style.display = "none";
@@ -1032,6 +1041,22 @@ function updateInputOrDatalist(selectElement) {
         updateDataList(selectedKey, parentDiv);
     }
 }
+
+function resetSelect(modalId) {
+    const modal = document.getElementById(modalId)
+    const selectElement = modal.getElementsByTagName("form")[0]['menuType']
+    modal.getElementsByTagName("form")[0].reset()
+    var options = selectElement.getElementsByTagName('option')
+
+    for (var i = 0; i < options.length; i++) {
+        var option = options[i];
+        if (option.value === "") {
+            selectElement.insertBefore(option, options[0]);
+            option.disabled = true;
+            break;
+        }
+    }
+}
 // End search product
 
 // Flashes
@@ -1039,7 +1064,7 @@ function updateInputOrDatalist(selectElement) {
 // Function to remove flash messages from the DOM
 function removeFlashMessages() {
     const flashMessages = document.getElementsByClassName('alert-flash-to-delete')
-    Array.from(flashMessages).forEach(function(message) {
+    Array.from(flashMessages).forEach(function (message) {
         message.remove()
     });
 }
@@ -1067,13 +1092,13 @@ function clearFlashMessagesOnServer() {
 // End flashes
 
 // Event Listener
-window.addEventListener('beforeunload', function(event) {
+window.addEventListener('beforeunload', function (event) {
     if (!allowUnload) {
         event.preventDefault();
     }
-}, { capture: true });
+}, {capture: true});
 
-document.getElementById('selectMenuName').addEventListener('change', function() {
+document.getElementById('selectMenuName').addEventListener('change', function () {
     const selectedOption = this.options[this.selectedIndex];
 
     document.getElementById('menuId').value = selectedOption.id;
@@ -1082,13 +1107,13 @@ document.getElementById('selectMenuName').addEventListener('change', function() 
 // End Event Listener
 
 // Initialization
-window.onload = function() {
+window.onload = function () {
 
     // Get data
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
-    for (let menu of MENU_NAMES){
+    for (let menu of MENU_NAMES) {
         menu.title = putQuoteAndPercent(menu.title)
     }
 
@@ -1109,8 +1134,8 @@ window.onload = function() {
     // Manage flashes
     if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
         clearFlashMessagesOnServer()
-        document.addEventListener('click', function() {
-                removeFlashMessages()
+        document.addEventListener('click', function () {
+            removeFlashMessages()
         })
     }
 
