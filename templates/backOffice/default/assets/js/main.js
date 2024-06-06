@@ -523,7 +523,11 @@ function setEditFields(id) {
     CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuType'].value = element.type.toLowerCase()
-    if (element.type.toLowerCase() !== "url"){
+    if (element.type.toLowerCase() === "empty"){
+        form.elements['menuItemId'].style.display = "none"
+        form.elements['menuItemUrl'].style.display = "none"
+    }
+    else if (element.type.toLowerCase() !== "url"){
         form.elements['menuItemId'].value = element.url['en_US']
         form.elements['menuItemId'].style.display = "block"
         form.elements['menuItemUrl'].style.display = "none"
