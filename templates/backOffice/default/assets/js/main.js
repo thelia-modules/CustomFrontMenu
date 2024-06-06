@@ -2,6 +2,13 @@ var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
 var LOCALE
+var loopsDictionary = {
+    "brand": brandLoopData,
+    "category": categoryLoopData,
+    "content": contentLoopData,
+    "folder": folderLoopData,
+    "product": productLoopData
+};
 let CURRENT_ID = null
 let allowUnload = false
 let selectedLanguage
@@ -37,7 +44,6 @@ function getValueByLocaleOf(element, locale) {
     }
     return result
 }
-
 // End get value by locale
 
 // Close closest modal
@@ -48,7 +54,6 @@ function closeClosestModal(element) {
         $(`#${modalId}`).modal('hide');
     }
 }
-
 // End close closest modal
 
 // Current id
@@ -62,7 +67,6 @@ function getCurrentId() {
 function setCurrentId(id) {
     CURRENT_ID = id
 }
-
 // End current id
 
 // Get next id
@@ -104,7 +108,6 @@ function getAllIdOf(list) {
     }
     return arrayOfIds
 }
-
 // End get next id
 
 // Replace annoying characters
@@ -144,7 +147,6 @@ function replaceAllQuotesAndPercentRec(MenuList) {
         replaceAllQuotesAndPercentRec(child)
     }
 }
-
 // End replace annoying characters
 
 // Add menu
@@ -257,7 +259,6 @@ function addCustomMenuItem(element, id = "0") {
 
     closeClosestModal(form);
 }
-
 // End add menu
 
 // Find menu
@@ -278,7 +279,6 @@ function findMenuInList(id, list) {
     }
     return null
 }
-
 // End find menu
 
 // Edit menu
@@ -288,14 +288,14 @@ function changeParameters(id) {
         return
     }
 
-    const [title, url] = getFormItems(form)
+    const [title, type, url] = getFormItems(form)
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
-
-    saveTitleAndUrl(id, title, url)
+    
+    saveTitleTypeAndUrl(id, title, type, url)
 
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
     titleSpan.textContent = getValueByLocaleOf(findMenuInList(id, MENU_LIST).title)
@@ -315,13 +315,19 @@ function getFormItems(form) {
     if (menuItemType === null || menuItemType === '') {
         menuItemType = 'url'
     }
-    let menuItemUrl = form.elements['menuItemUrl'].value.trim()
-    if (menuItemUrl === null) {
-        menuItemUrl = ''
-    }
-    return [menuItemName, menuItemType, menuItemUrl]
-}
 
+    let selectedKey
+    if (menuItemType.toLowerCase() !== "url") {
+         selectedKey = form.elements['menuItemId'].value;
+    }
+    else{
+        selectedKey = form.elements['menuItemUrl'].value;
+    }
+    if (selectedKey === null) {
+        selectedKey = ''
+    }
+    return [menuItemName, menuItemType, selectedKey]
+}
 // End edit menu
 
 // Delete menu
@@ -361,34 +367,68 @@ function deleteFromList(id, list) {
 function deleteMenu() {
     document.getElementById('deleteForm').submit();
 }
-
 // End delete menu
 
 // Validation
 function isValid(form) {
-    let menuItemName = form.elements['menuItemName'].value.trim()
-    let menuItemUrl = form.elements['menuItemUrl'].value.trim()
-    let errorMessageTitle = form.querySelector('#error-message-title');
-    let errorMessageUrl = form.querySelector('#error-message-url');
-    let noError = true
+    const menuItemName = form.elements['menuItemName'].value.trim()
+    const menuItemType = form.elements['menuType'].value.trim()
+    const errorType = form.getElementsByClassName("error")[0]
+    const errorMessageTitle = form.querySelector('#error-message-title');
+    const errorMessageUrl = form.querySelector('#error-message-url');
 
+    let menuItemUrl
+    errorType.innerText = ""
+    if (menuItemType === ""){
+        errorType.innerText = "Choose a category"
+        return false
+    }
+    else if (!(menuItemType in loopsDictionary) && menuItemType !== "url"){
+        errorType.innerText = "Invalid selection"
+        return false
+    }
+    else if (menuItemType === "url"){
+        menuItemUrl = form.elements['menuItemUrl'].value.trim()
+    }
+    else{
+        menuItemUrl = form.elements['menuItemId'].value.trim()
+    }
+
+    if (menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined){
+        errorType.innerText = "A value must be filled"
+        return false
+    }
+    else if (menuItemType !== "url"){
+        let found = false
+        for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
+            if (value.title + "-" + value.id === menuItemUrl){
+                found = true
+                break
+            }
+        }
+        if (!found){
+            errorType.innerText = "Invalid " + menuItemType
+            return false
+        }
+    }
+
+    
     if (menuItemName.includes("`")) {
         errorMessageTitle.style.display = 'block';
-        noError = false
+        return false
     } else {
         errorMessageTitle.style.display = 'none';
     }
 
     if (menuItemUrl.includes("`")) {
         errorMessageUrl.style.display = 'block';
-        noError = false
+        return false
     } else {
         errorMessageUrl.style.display = 'none';
     }
 
-    return noError
+    return true
 }
-
 // End validation
 
 // Save data
@@ -450,7 +490,6 @@ function saveTitleTypeAndUrl(id, title, type, url) {
     menuToModify.title[modifiedLocal] = title
     menuToModify.url[modifiedLocal] = url
 }
-
 // End save data
 
 // Form edit field
@@ -471,7 +510,6 @@ function deleteEditField(formId) {
     form.elements['menuItemName'].value = ""
     form.elements['menuItemUrl'].value = ""
 }
-
 // End form edit field
 
 // Generate menu
@@ -553,7 +591,6 @@ function generateMenuRecursive(menuItem) {
     updateArrowStyles();
     return newMenu;
 }
-
 // End generate menu
 
 // Move menu
@@ -639,7 +676,6 @@ function updateArrowStyles() {
         });
     });
 }
-
 // End move menu
 
 // Drop down
@@ -932,7 +968,6 @@ function allowDrop(ev) {
         dropIndicator.style.display = 'none';
     }
 }
-
 // End drag and drop
 
 // Preview
@@ -961,7 +996,6 @@ function generatePreviewMenuRecursive(menuItem) {
         </li>
     `;
 }
-
 // End Preview
 
 // Search product
@@ -984,14 +1018,6 @@ function searchProducts(query, formId) {
         matchingProducts.appendChild(li);
     });
 }
-
-var loopsDictionary = {
-    "Brand": brandLoopData,
-    "Category": categoryLoopData,
-    "Content": contentLoopData,
-    "Folder": folderLoopData,
-    "Products": productLoopData
-};
 
 function addOptionsOfSelectedCategory() {
     const menuTypeSelect = document.getElementsByClassName('menuType');
@@ -1092,13 +1118,13 @@ function clearFlashMessagesOnServer() {
 // End flashes
 
 // Event Listener
-window.addEventListener('beforeunload', function (event) {
+window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
         event.preventDefault();
     }
-}, {capture: true});
+}, { capture: true });
 
-document.getElementById('selectMenuName').addEventListener('change', function () {
+document.getElementById('selectMenuName').addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
 
     document.getElementById('menuId').value = selectedOption.id;
@@ -1107,13 +1133,13 @@ document.getElementById('selectMenuName').addEventListener('change', function ()
 // End Event Listener
 
 // Initialization
-window.onload = function () {
+window.onload = function() {
 
     // Get data
     MENU_NAMES = getFromJson(menuNames)
     MENU_LIST = getFromJson(menuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
-    for (let menu of MENU_NAMES) {
+    for (let menu of MENU_NAMES){
         menu.title = putQuoteAndPercent(menu.title)
     }
 
@@ -1134,8 +1160,8 @@ window.onload = function () {
     // Manage flashes
     if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
         clearFlashMessagesOnServer()
-        document.addEventListener('click', function () {
-            removeFlashMessages()
+        document.addEventListener('click', function() {
+                removeFlashMessages()
         })
     }
 

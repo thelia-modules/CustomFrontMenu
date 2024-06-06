@@ -177,6 +177,7 @@
                         <input list="itemListAdd" type="text" id="menuItemUrlParentAdd" name="menuItemId" style="display:none">
                         <datalist id="itemListAdd" class="itemList"></datalist>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
@@ -261,6 +262,7 @@
                             {intl l="Save" d="customfrontmenu.bo.default"}
                         </button>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
@@ -318,6 +320,7 @@
                         <input list="itemListAddChild" type="text" id="menuItemUrlChildAdd" name="menuItemId" style="display:none">
                         <datalist id="itemListAddChild" class="itemList"></datalist>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
