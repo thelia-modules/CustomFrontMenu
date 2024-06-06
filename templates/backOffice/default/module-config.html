@@ -173,8 +173,7 @@
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
-                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
-                        <input list="itemListAdd" type="text" id="menuItemUrlParentAdd" name="menuItemId" style="display:none">
+                        <input list="itemListAdd" type="text" id="menuItemUrlParentAdd" name="menuItem" style="display:none">
                         <datalist id="itemListAdd" class="itemList"></datalist>
                     </div>
                     <p class="error"></p>
@@ -217,7 +216,6 @@
                                 </a>
                                 <ul class="dropdown-menu" id="flags-list" style="display: none;">
                                     {loop type="lang" name="the-loop-name"}
-                                        <!--<li data-locale="{$LOCALE}" onclick="selectLanguage(this)">{$LOCALE}</li>-->
                                         <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
                                             <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}" />
                                         </li>
@@ -247,7 +245,7 @@
                     </div>
 
                     <div class="edit-modal-line">
-                        <label for="menuItemUrlEdit">
+                        <label for="menuItemEdit">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this)">
@@ -255,8 +253,7 @@
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
-                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
-                        <input list="itemListEdit" type="text" id="menuItemUrlEdit" name="menuItemId" style="display:none">
+                        <input list="itemListEdit" type="text" id="menuItemEdit" name="menuItem" style="display:none">
                         <datalist id="itemListEdit" class="itemList"></datalist>
                         <button type="button" class="btn btn-success rounded" name="saveUrl" onclick="saveMenuItemUrl()">
                             {intl l="Save" d="customfrontmenu.bo.default"}
@@ -316,8 +313,7 @@
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
-                        <input class="datalistInput" style="display:none" name="menuItemUrl"/>
-                        <input list="itemListAddChild" type="text" id="menuItemUrlChildAdd" name="menuItemId" style="display:none">
+                        <input list="itemListAddChild" type="text" id="menuItemUrlChildAdd" name="menuItem" style="display:none">
                         <datalist id="itemListAddChild" class="itemList"></datalist>
                     </div>
                     <p class="error"></p>

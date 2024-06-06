@@ -171,6 +171,10 @@ ul.menu-item:last-child {
 #selectedLanguageBtn:hover{
     color: black;
 }
+
+.itemList option {
+    display: none;
+}
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */

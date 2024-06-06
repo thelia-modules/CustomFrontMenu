@@ -315,13 +315,7 @@ function getFormItems(form) {
         menuItemType = 'url'
     }
 
-    let selectedKey
-    if (menuItemType.toLowerCase() !== "url") {
-         selectedKey = form.elements['menuItemId'].value;
-    }
-    else{
-        selectedKey = form.elements['menuItemUrl'].value;
-    }
+    let selectedKey = form.elements['menuItem'].value
     if (selectedKey === null) {
         selectedKey = ''
     }
@@ -376,7 +370,6 @@ function isValid(form) {
     const errorMessageTitle = form.querySelector('#error-message-title');
     const errorMessageUrl = form.querySelector('#error-message-url');
 
-    let menuItemUrl
     errorType.innerText = ""
     if (menuItemType === ""){
         errorType.innerText = "Choose a category"
@@ -386,12 +379,8 @@ function isValid(form) {
         errorType.innerText = "Invalid selection"
         return false
     }
-    else if (menuItemType === "url"){
-        menuItemUrl = form.elements['menuItemUrl'].value.trim()
-    }
-    else{
-        menuItemUrl = form.elements['menuItemId'].value.trim()
-    }
+
+    const menuItemUrl = form.elements['menuItem'].value.trim()
 
     if ((menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined) && menuItemType !== "empty"){
         errorType.innerText = "A value must be filled"
@@ -484,12 +473,7 @@ function saveMenuItemUrl() {
 
     menuToModify.type = itemType
 
-    if (itemType === "url") {
-        menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value
-    }
-    else {
-        menuToModify.url[modifiedLocal] = editForm["menuItemId"].value
-    }
+    menuToModify.url[modifiedLocal] = editForm["menuItem"].value
 }
 
 function saveTitleTypeAndUrl(id, title, type, url) {
@@ -524,25 +508,26 @@ function setEditFields(id) {
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuType'].value = element.type.toLowerCase()
     if (element.type.toLowerCase() === "empty"){
-        form.elements['menuItemId'].style.display = "none"
-        form.elements['menuItemUrl'].style.display = "none"
+        //form.elements['menuItemId'].style.display = "none"
+        //form.elements['menuItemUrl'].style.display = "none"
+        form.elements['menuItem'].style.display = "none"
     }
     else if (element.type.toLowerCase() !== "url"){
-        form.elements['menuItemId'].value = element.url['en_US']
-        form.elements['menuItemId'].style.display = "block"
-        form.elements['menuItemUrl'].style.display = "none"
+        form.elements['menuItem'].value = element.url['en_US']
+        form.elements['menuItem'].style.display = "block"
+        //form.elements['menuItemUrl'].style.display = "none"
     }
     else {
-        form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
-        form.elements['menuItemUrl'].style.display = "block"
-        form.elements['menuItemId'].style.display = "none"
+        form.elements['menuItem'].value = getValueByLocaleOf(element.url)
+        form.elements['menuItem'].style.display = "block"
+        //form.elements['menuItemId'].style.display = "none"
     }
 }
 
 function deleteEditField(formId) {
     const form = document.getElementById(formId)
     form.elements['menuItemName'].value = ""
-    form.elements['menuItemUrl'].value = ""
+    form.elements['menuItem'].value = ""
 }
 // End form edit field
 
@@ -780,28 +765,26 @@ function selectLanguage(languageElement) {
     currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
     if (selectedLanguage !== LOCALE){
         currentForm["menuType"].disabled = true
-        currentForm["menuItemId"].disabled = true
         if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
-            currentForm["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
-            currentForm["menuItemUrl"].disabled = true
+            currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+            currentForm["menuItem"].disabled = true
             currentForm["saveUrl"].disabled = true
         }
         else{
-            currentForm["menuItemId"].value = currentMenu.url["en_US"]
-            currentForm["menuItemId"].disabled = false
+            currentForm["menuItem"].value = currentMenu.url["en_US"]
+            currentForm["menuItem"].disabled = false
             currentForm["saveUrl"].disabled = false
         }
     }
     else {
         if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"] !== "url"){
-            currentForm["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+            currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
         }
         else{
-            currentForm["menuItemId"].value = currentMenu.url["en_US"]
+            currentForm["menuItem"].value = currentMenu.url["en_US"]
         }
         currentForm["menuType"].disabled = false
-        currentForm["menuItemId"].disabled = false
-        currentForm["menuItemUrl"].disabled = false
+        currentForm["menuItem"].disabled = false
         currentForm["saveUrl"].disabled = false
     }
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
@@ -1073,7 +1056,7 @@ function searchProducts(query, formId) {
         const li = document.createElement('li');
         li.textContent = `${product.title} (${product.ref})`;
         li.addEventListener('click', () => {
-            document.querySelector(`#${formId} input[name="menuItemUrl"]`).value = product.url;
+            document.querySelector(`#${formId} input[name="menuItem"]`).value = product.url;
         });
         matchingProducts.appendChild(li);
     });
@@ -1107,23 +1090,22 @@ function updateDataList(selectedKey, parentDiv) {
 function updateInputOrDatalist(selectElement) {
     const selectedKey = selectElement.value;
     const parentDiv = selectElement.closest('.edit-modal-line');
-    const inputElement = selectElement.form['menuItemId']
-    const urlInputElement = selectElement.form['menuItemUrl']
+    const inputElement = selectElement.form["menuItem"]
     const datalistElement = parentDiv.querySelector('.itemList');
 
     if (selectedKey === "" || selectedKey === "empty") {
         inputElement.style.display = "none";
-        urlInputElement.style.display = "none"
+        inputElement.value = "";
         datalistElement.style.display = "none";
     } else if (selectedKey === "url") {
-        urlInputElement.style.display = "block";
-        inputElement.style.display = "none";
-        datalistElement.style.display = "none";
-        inputElement.value = "";
-    } else {
-        urlInputElement.style.display = "none"
         inputElement.style.display = "block";
         inputElement.value = "";
+        datalistElement.style.display = "none";
+        datalistElement.innerHTML = "";
+    } else {
+        inputElement.style.display = "block";
+        inputElement.value = "";
+        datalistElement.style.display = "block";
         updateDataList(selectedKey, parentDiv);
     }
 }
