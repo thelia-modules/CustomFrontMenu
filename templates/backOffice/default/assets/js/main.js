@@ -383,7 +383,7 @@ function isValid(form) {
         errorType.innerText = "Choose a category"
         return false
     }
-    else if (!(menuItemType in loopsDictionary) && menuItemType !== "url"){
+    else if (!(menuItemType in loopsDictionary) && menuItemType !== "url" && menuItemType !== "empty"){
         errorType.innerText = "Invalid selection"
         return false
     }
@@ -394,11 +394,11 @@ function isValid(form) {
         menuItemUrl = form.elements['menuItemId'].value.trim()
     }
 
-    if (menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined){
+    if ((menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined) && menuItemType !== "empty"){
         errorType.innerText = "A value must be filled"
         return false
     }
-    else if (menuItemType !== "url"){
+    else if (menuItemType !== "url" && menuItemType !== "empty"){
         let found = false
         for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
             if (value.title + "-" + value.id === menuItemUrl){

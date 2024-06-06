@@ -168,7 +168,7 @@ class CFMLoadService implements CFMLoadInterface
             $newArray['title'] = $title;
             $newArray['url'] = $url;
 
-            if (!isset($url)) {
+            if (!isset($url) && Validator::viewIsValid($descendant->getView(), false)) {
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
                 if (isset($view) && isset($viewId)) {
