@@ -205,7 +205,6 @@ function addCustomMenuItem(element, id="0") {
         children: []
     };
     newItem.title[LOCALE] = menuItemName
-    console.log(menuItemType)
     if (menuItemType.toLowerCase() !== "url") {
         newItem.url["en_US"] = menuItemUrl
     }
@@ -467,15 +466,30 @@ function saveMenuItemUrl() {
         return
     }
 
-    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
-    menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
+    const menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
     
     if (menuToModify === null) {
         console.error("The id given in saveMenuItemUrl doesn't exist")
         return
     }
 
-    menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value;
+    const itemType = editForm["menuType"].value
+    let modifiedLocal
+    if (selectedLanguage && itemType.toLowerCase() === 'url') {
+        modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE
+    }
+    else{
+        modifiedLocal = "en_US"
+    }
+
+    menuToModify.type = itemType
+
+    if (itemType === "url") {
+        menuToModify.url[modifiedLocal] = editForm["menuItemUrl"].value
+    }
+    else {
+        menuToModify.url[modifiedLocal] = editForm["menuItemId"].value
+    }
 }
 
 function saveTitleTypeAndUrl(id, title, type, url) {
@@ -488,7 +502,13 @@ function saveTitleTypeAndUrl(id, title, type, url) {
     }
 
     menuToModify.title[modifiedLocal] = title
-    menuToModify.url[modifiedLocal] = url
+    menuToModify.type = type
+    if (type.toLowerCase() !== "url") {
+        menuToModify.url["en_US"] = url
+    }
+    else {
+        menuToModify.url[modifiedLocal] = url
+    }
 }
 // End save data
 
@@ -502,7 +522,17 @@ function setEditFields(id) {
     const form = document.getElementById('editMenuItemForm')
     CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
-    form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
+    form.elements['menuType'].value = element.type.toLowerCase()
+    if (element.type.toLowerCase() !== "url"){
+        form.elements['menuItemId'].value = element.url['en_US']
+        form.elements['menuItemId'].style.display = "block"
+        form.elements['menuItemUrl'].style.display = "none"
+    }
+    else {
+        form.elements['menuItemUrl'].value = getValueByLocaleOf(element.url)
+        form.elements['menuItemUrl'].style.display = "block"
+        form.elements['menuItemId'].style.display = "none"
+    }
 }
 
 function deleteEditField(formId) {
@@ -741,10 +771,36 @@ function toggleFlags() {
 }
 
 function selectLanguage(languageElement) {
+    const currentForm = document.forms["editMenuItemForm"]
     selectedLanguage = languageElement.getAttribute('data-locale');
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
-    document.forms["editMenuItemForm"]["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
-    document.forms["editMenuItemForm"]["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+    currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
+    if (selectedLanguage !== LOCALE){
+        currentForm["menuType"].disabled = true
+        currentForm["menuItemId"].disabled = true
+        if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
+            currentForm["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+            currentForm["menuItemUrl"].disabled = true
+            currentForm["saveUrl"].disabled = true
+        }
+        else{
+            currentForm["menuItemId"].value = currentMenu.url["en_US"]
+            currentForm["menuItemId"].disabled = false
+            currentForm["saveUrl"].disabled = false
+        }
+    }
+    else {
+        if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"] !== "url"){
+            currentForm["menuItemUrl"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+        }
+        else{
+            currentForm["menuItemId"].value = currentMenu.url["en_US"]
+        }
+        currentForm["menuType"].disabled = false
+        currentForm["menuItemId"].disabled = false
+        currentForm["menuItemUrl"].disabled = false
+        currentForm["saveUrl"].disabled = false
+    }
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
