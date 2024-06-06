@@ -164,6 +164,13 @@ ul.menu-item:last-child {
     margin-right: 10px;
 }
 
+#selectedLanguageBtn{
+    color: #646464;
+}
+
+#selectedLanguageBtn:hover{
+    color: black;
+}
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
