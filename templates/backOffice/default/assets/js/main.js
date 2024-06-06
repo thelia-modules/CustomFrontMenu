@@ -1032,46 +1032,6 @@ function updateInputOrDatalist(selectElement) {
         updateDataList(selectedKey, parentDiv);
     }
 }
-
-
-
-function filterDataList(element) {
-    const searchTerm = element.value.toLowerCase();
-    const dataList = element.form.getElementsByClassName("productsListParent")[0];
-
-    dataList.innerHTML = "";
-    dataList.style.display = "none";
-
-    let hasMatchingItems = false;
-
-    for (const [key, data] of Object.entries(loopsDictionary)) {
-        const matchingItems = data.filter(item => item.title.toLowerCase().includes(searchTerm));
-
-        if (matchingItems.length > 0) {
-            const listElement = document.createElement("li");
-            listElement.textContent = "-----" + key + "-----";
-            listElement.style.fontWeight = "bold";
-            dataList.appendChild(listElement);
-
-            matchingItems.forEach(item => {
-                const itemElement = document.createElement("li");
-                itemElement.textContent = `${item.title} (id:${item.id})`;
-
-                itemElement.onclick = function() {
-                    element.value = `${item.title}/${key}/${item.id}`;
-                    dataList.style.display = "none";
-                };
-
-                dataList.appendChild(itemElement);
-            });
-            hasMatchingItems = true;
-        }
-    }
-    if (hasMatchingItems) {
-        dataList.style.display = "block";
-    }
-}
-
 // End search product
 
 // Flashes
