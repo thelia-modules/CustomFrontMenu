@@ -163,7 +163,12 @@ class MenuController extends BaseAdminController
                 setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);
                 $menu = $cfmMenu->getMenu($menuId);
             }
-            $data = $cfmLoad->loadTableBrowser($menu, $session->get('thelia.current.admin_lang')->getLocale());
+
+            $nbInvalidUrl = 0;
+            $data = $cfmLoad->loadTableBrowser($menu, $session, $nbInvalidUrl);
+            if($nbInvalidUrl > 0) {
+                $session->getFlashBag()->add('warning', $nbInvalidUrl . Translator::getInstance()->trans(' url are invalid', [], CustomFrontMenu::DOMAIN_NAME));
+            }
         }
 
         return [

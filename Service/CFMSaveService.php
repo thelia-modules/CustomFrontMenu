@@ -46,7 +46,6 @@ class CFMSaveService implements CFMSaveInterface
 
             if(strtolower($element['type']) === 'url') {
                 foreach ($element['url'] as $locale => $url) {
-                    //if (filter_var($url, FILTER_VALIDATE_URL))
                     $content = new CustomFrontMenuItemI18n();
                     $content->setId($item->getId());
                     $content->setLocale($locale);
@@ -56,7 +55,7 @@ class CFMSaveService implements CFMSaveInterface
                     $content->save();
                 }
             } elseif ($element['type'] !== '') {
-                $item->setView(ucfirst(Validator::viewIsValid($element['type'])));
+                $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])));
                 $viewIdExploded = explode('-', $element['url']['en_US']);
                 $item->setViewId(intval(end($viewIdExploded)));
                 $item->save();

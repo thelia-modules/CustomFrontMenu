@@ -32,5 +32,6 @@ return array(
     'An error occurred when saving in database' => 'Une erreur est survenue lors de la sauvegarde en base de données ',
     'Failed to add a new menu' => "Echec de l'ajout du nouveau menu",
     'An error occurred when saving in database. Cannot save if no menu is selected' => "Une erreur est survenue lors de la sauvegarde en base de données. Impossible de sauvegarder si aucun menu n'est sélectionné",
+    ' url are invalid' => ' url sont invalides',
 
 );

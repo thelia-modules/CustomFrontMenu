@@ -6,6 +6,7 @@ use CustomFrontMenu\Interface\CFMMenuInterface;
 use CustomFrontMenu\Interface\CFMLoadInterface;
 use OpenAPI\Controller\Front\BaseFrontOpenApiController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpFoundation\Response as ResponseAlias;
 use Thelia\Core\HttpFoundation\JsonResponse;
@@ -44,9 +45,10 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      *    ),
      * )
      */
-    public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, string $locale) : JsonResponse
+    public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, SessionInterface $session) : JsonResponse
     {
-        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $locale);
+        $nbInvalidUrl = 0; // Not exploited here, but used by loadTableBrowser to count the invalid url number.
+        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $session, $nbInvalidUrl);
         if ($menu === null) {
             return OpenApiService::jsonResponse('Menu not found', Response::HTTP_NOT_FOUND);
         }
