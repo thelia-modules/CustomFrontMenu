@@ -2,6 +2,13 @@ var MENU_NAMES
 var MENU_LIST
 var CURRENT_SELECTED_MENU_ID
 var LOCALE
+var loopsDictionary = {
+    "brand": brandLoopData,
+    "category": categoryLoopData,
+    "content": contentLoopData,
+    "folder": folderLoopData,
+    "product": productLoopData
+};
 let CURRENT_ID = null
 let allowUnload = false
 let selectedLanguage
@@ -975,14 +982,6 @@ function searchProducts(query, formId) {
         matchingProducts.appendChild(li);
     });
 }
-
-var loopsDictionary = {
-    "Brand": brandLoopData,
-    "Category": categoryLoopData,
-    "Content": contentLoopData,
-    "Folder": folderLoopData,
-    "Products": productLoopData
-};
 
 function addOptionsOfSelectedCategory() {
     const menuTypeSelect = document.getElementsByClassName('menuType');
