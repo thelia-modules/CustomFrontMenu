@@ -34,7 +34,7 @@ function getValueByLocaleOf(element, locale) {
             result = val
             found = true
             break
-        } else if (key === 'en_US') {
+        } else if (key === LOCALE) {
             result = val
             found = true
         }
