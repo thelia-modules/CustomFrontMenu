@@ -30,6 +30,7 @@ return array(
     'Menu name' => 'Nom du menu',
     'Menu title' => "Titre du menu",
     'No parent' => 'Aucun parent',
+    'No target item' => 'Pas de produit cible',
     'Parent' => 'Parent',
     'Personal url' => 'Url personnelle',
     'Position' => 'Position',

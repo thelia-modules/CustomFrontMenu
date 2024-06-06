@@ -2,12 +2,15 @@
 
 namespace CustomFrontMenu\Service;
 
+use CustomFrontMenu\CustomFrontMenu;
 use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
+use Exception;
 use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Propel\Runtime\Exception\PropelException;
+use Thelia\Core\Translation\Translator;
 
 class CFMLoadService implements CFMLoadInterface
 {
@@ -58,8 +61,9 @@ class CFMLoadService implements CFMLoadInterface
 
     /**
      * @throws PropelException
+     * @throws Exception
      */
-    public function loadTableBrowser(CustomFrontMenuItem $parent, string $locale) : array
+    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session, int & $nbInvalidUrl) : array
     {
         $dataArray = [];
         $descendants = $parent->getChildren();
@@ -75,6 +79,9 @@ class CFMLoadService implements CFMLoadInterface
             foreach ($I18nMenus as $I18nMenu) {
                 $newArray['title'][$I18nMenu->getLocale()] = $I18nMenu->getTitle();
                 $newArray['url'][$I18nMenu->getLocale()] = $I18nMenu->getUrl();
+                if ($descendant->getView() === '' && !filter_var($newArray['url'][$I18nMenu->getLocale()], FILTER_VALIDATE_URL)) {
+                    ++$nbInvalidUrl;
+                }
             }
 
             $view = $descendant->getView();
@@ -84,7 +91,7 @@ class CFMLoadService implements CFMLoadInterface
             $newArray['type'] = $view;
             $viewId = $descendant->getViewId();
 
-            if(isset($view) && isset($viewId) && Validator::viewIsValid($view)) {
+            if(isset($view) && isset($viewId) && Validator::viewIsValid($view, false)) {
                 $con = Propel::getConnection();
 
                 $table = strtolower($newArray['type']).'_i18n';
@@ -96,7 +103,7 @@ class CFMLoadService implements CFMLoadInterface
 
                 $found = false;
                 foreach ($results as $arrayContent) {
-                    if($arrayContent['locale'] === $locale) {
+                    if($arrayContent['locale'] === $session->get('thelia.current.admin_lang')->getLocale()) {
                         $newArray['url']['en_US'] = $arrayContent['title'].'-'.$viewId;
                         $found = true;
                     }
@@ -115,7 +122,7 @@ class CFMLoadService implements CFMLoadInterface
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArray['children'] = $this->loadTableBrowser($descendant, $locale);
+                $newArray['children'] = $this->loadTableBrowser($descendant, $session,$nbInvalidUrl);
             }
             $dataArray[] = $newArray;
         }
@@ -161,7 +168,7 @@ class CFMLoadService implements CFMLoadInterface
             $newArray['title'] = $title;
             $newArray['url'] = $url;
 
-            if (!isset($url)) {
+            if (!isset($url) && Validator::viewIsValid($descendant->getView(), false)) {
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
                 if (isset($view) && isset($viewId)) {
