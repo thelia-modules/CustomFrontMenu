@@ -288,14 +288,14 @@ function changeParameters(id) {
         return
     }
 
-    const [title, url] = getFormItems(form)
+    const [title, type, url] = getFormItems(form)
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
     
-    saveTitleAndUrl(id, title, url)
+    saveTitleTypeAndUrl(id, title, type, url)
 
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
     titleSpan.textContent = getValueByLocaleOf(findMenuInList(id, MENU_LIST).title)
@@ -315,11 +315,18 @@ function getFormItems(form) {
     if (menuItemType === null || menuItemType === '') {
         menuItemType = 'url'
     }
-    let menuItemUrl = form.elements['menuItemUrl'].value.trim()
-    if (menuItemUrl === null) {
-        menuItemUrl = ''
+
+    let selectedKey
+    if (menuItemType.toLowerCase() !== "url") {
+         selectedKey = form.elements['menuItemId'].value;
     }
-    return [menuItemName, menuItemType, menuItemUrl]
+    else{
+        selectedKey = form.elements['menuItemUrl'].value;
+    }
+    if (selectedKey === null) {
+        selectedKey = ''
+    }
+    return [menuItemName, menuItemType, selectedKey]
 }
 // End edit menu
 
@@ -364,27 +371,63 @@ function deleteMenu() {
 
 // Validation
 function isValid(form) {
-    let menuItemName = form.elements['menuItemName'].value.trim()
-    let menuItemUrl = form.elements['menuItemUrl'].value.trim()
-    let errorMessageTitle = form.querySelector('#error-message-title');
-    let errorMessageUrl = form.querySelector('#error-message-url');
-    let noError = true
+    const menuItemName = form.elements['menuItemName'].value.trim()
+    const menuItemType = form.elements['menuType'].value.trim()
+    const errorType = form.getElementsByClassName("error")[0]
+    const errorMessageTitle = form.querySelector('#error-message-title');
+    const errorMessageUrl = form.querySelector('#error-message-url');
+
+    let menuItemUrl
+    errorType.innerText = ""
+    if (menuItemType === ""){
+        errorType.innerText = "Choose a category"
+        return false
+    }
+    else if (!(menuItemType in loopsDictionary) && menuItemType !== "url"){
+        errorType.innerText = "Invalid selection"
+        return false
+    }
+    else if (menuItemType === "url"){
+        menuItemUrl = form.elements['menuItemUrl'].value.trim()
+    }
+    else{
+        menuItemUrl = form.elements['menuItemId'].value.trim()
+    }
+
+    if (menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined){
+        errorType.innerText = "A value must be filled"
+        return false
+    }
+    else if (menuItemType !== "url"){
+        let found = false
+        for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
+            if (value.title + "-" + value.id === menuItemUrl){
+                found = true
+                break
+            }
+        }
+        if (!found){
+            errorType.innerText = "Invalid " + menuItemType
+            return false
+        }
+    }
+
     
     if (menuItemName.includes("`")) {
         errorMessageTitle.style.display = 'block';
-        noError = false
+        return false
     } else {
         errorMessageTitle.style.display = 'none';
     }
 
     if (menuItemUrl.includes("`")) {
         errorMessageUrl.style.display = 'block';
-        noError = false
+        return false
     } else {
         errorMessageUrl.style.display = 'none';
     }
 
-    return noError
+    return true
 }
 // End validation
 
@@ -1015,7 +1058,7 @@ function updateInputOrDatalist(selectElement) {
     const urlInputElement = selectElement.form['menuItemUrl']
     const datalistElement = parentDiv.querySelector('.itemList');
 
-    if (selectedKey === "select a category") {
+    if (selectedKey === "") {
         inputElement.style.display = "none";
         urlInputElement.style.display = "none"
         datalistElement.style.display = "none";

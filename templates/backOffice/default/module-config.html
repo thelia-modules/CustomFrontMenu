@@ -169,13 +169,14 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>
                         <input list="itemListAdd" type="text" id="menuItemUrlParentAdd" name="menuItemId" style="display:none">
                         <datalist id="itemListAdd" class="itemList"></datalist>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, '0')"><span class="glyphicon glyphicon-check"></span>  {intl l="Create" d="customfrontmenu.bo.default"}</button>
@@ -249,7 +250,7 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>
@@ -259,6 +260,7 @@
                             {intl l="Save" d="customfrontmenu.bo.default"}
                         </button>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
@@ -308,13 +310,14 @@
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
                         <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
-                            <option value="select a category">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
+                            <option value="">{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
                         <input class="datalistInput" style="display:none" name="menuItemUrl"/>
                         <input list="itemListAddChild" type="text" id="menuItemUrlChildAdd" name="menuItemId" style="display:none">
                         <datalist id="itemListAddChild" class="itemList"></datalist>
                     </div>
+                    <p class="error"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, getCurrentId())"><span class="glyphicon glyphicon-check"></span> {intl l="Create" d="customfrontmenu.bo.default"}</button>
