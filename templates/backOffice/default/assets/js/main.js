@@ -780,9 +780,11 @@ function toggleFlags() {
 
 function selectLanguage(languageElement) {
     const currentForm = document.forms["editMenuItemForm"]
-    selectedLanguage = languageElement.getAttribute('data-locale');
+    selectedLanguage = languageElement.getAttribute('data-locale')
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
     currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
+    const select = document.getElementById('select-edit-type')
+    select.value = currentMenu.type
     if(currentMenu.type.toLowerCase() === 'url') {
         currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
     }
