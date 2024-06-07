@@ -166,7 +166,7 @@
                         <label for="menuItemUrlParentAdd">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
+                        <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this), resetTargetField(this)">
                             <option value="" selected>{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
@@ -246,7 +246,7 @@
                         <label for="menuItemEdit">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this)">
+                        <select id="select-edit-type" class="menuType btn top-btn mr" name="menuType" onchange="resetTargetField(this)">
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
@@ -305,7 +305,7 @@
                         <label for="menuItemUrlChildAdd">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this)">
+                        <select class="menuType btn top-btn" name="menuType" onchange="updateInputOrDatalist(this), resetTargetField(this)">
                             <option value="" selected>{intl l="Select a category" d="customfrontmenu.bo.default"}</option>
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
