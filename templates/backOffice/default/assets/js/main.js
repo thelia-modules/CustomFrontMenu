@@ -540,6 +540,8 @@ function setEditFields(id) {
         form["menuItem"].disabled = true
         form["saveUrl"].disabled = true
     }
+    const select = document.getElementById('select-edit-type')
+    updateInputOrDatalist(select)
 }
 
 function deleteEditField(formId) {
@@ -1115,12 +1117,10 @@ function updateInputOrDatalist(selectElement) {
         datalistElement.style.display = "none";
     } else if (selectedKey === "url") {
         inputElement.style.display = "block";
-        inputElement.value = "";
         datalistElement.style.display = "none";
         datalistElement.innerHTML = "";
     } else {
         inputElement.style.display = "block";
-        inputElement.value = "";
         datalistElement.style.display = "block";
         updateDataList(selectedKey, parentDiv);
     }
