@@ -321,6 +321,29 @@ function getFormItems(form) {
     }
     return [menuItemName, menuItemType, selectedKey]
 }
+
+function compareWithMenuList(element) {
+    let form = element.closest('form');
+    if (!form) {
+        console.error("Le formulaire parent n'a pas été trouvé.");
+        return;
+    }
+
+    let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
+
+    var menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
+    console.log("Menu item:", menuItem);
+
+    if (menuItem) {
+        var menuListNameValue = getValueByLocaleOf(menuItem.title, LOCALE);
+        var menuListUrlValue = getValueByLocaleOf(menuItem.url, LOCALE);
+
+        if (currentNameValue !== menuListNameValue || currentUrlValue !== menuListUrlValue) {
+            alert(translations.unsavedChanges);
+        }
+    }
+    toggleFlags();
+}
 // End edit menu
 
 // Delete menu

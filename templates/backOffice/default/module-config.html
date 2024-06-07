@@ -12,6 +12,14 @@
     var contentLoopData = [];
     var folderLoopData = [];
     var productLoopData = [];
+    //------ translation of JS elements------
+    var translations = {
+        hideAllChildren: '{intl l="Hide all children" d="customfrontmenu.bo.default"}',
+        showAllChildren: '{intl l="Show all children" d="customfrontmenu.bo.default"}',
+        unsavedChanges: '{intl l="Warning: You have unsaved changes!" d="customfrontmenu.bo.default"}',
+    };
+    //------ state of 'hide childrens' button ------
+    var buttonState = 'hide';
 </script>
 
 {loop type="brand" name="brand_loop"}
@@ -122,16 +130,6 @@
             {intl l="Discard changes" d="customfrontmenu.bo.default"}
         </button>
     </div>
-
-    <script>
-        var translations = {
-            hideAllChildren: '{intl l="Hide all children" d="customfrontmenu.bo.default"}',
-            showAllChildren: '{intl l="Show all children" d="customfrontmenu.bo.default"}'
-        };
-
-        var buttonState = 'hide';
-    </script>
-
 </div>
 
 <!-- Modal -->
@@ -211,7 +209,7 @@
                         <div class="dropdown open">
 
                             <div class="dropdown">
-                                <a id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
+                                <a id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="compareWithMenuList(this)">
                                     {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
                                 </a>
                                 <ul class="dropdown-menu" id="flags-list" style="display: none;">

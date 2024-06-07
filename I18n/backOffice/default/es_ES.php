@@ -39,6 +39,7 @@ return array(
     'Save everything' => 'Guardar todo',
     'Show all children' => 'Mostrar todos los hijos',
     'Submenu name' => 'Nombre del submenú',
+    'Warning: You have unsaved changes!' => 'Advertencia: ¡Tienes cambios sin guardar!',
     'Target item' => 'Elemento objetivo',
     'Would you like to delete this menu item ?' => '¿Le gustaría eliminar este elemento del menú?',
     'Would you like to delete this menu ?' => '¿Le gustaría eliminar este menú?',

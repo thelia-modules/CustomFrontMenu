@@ -40,6 +40,7 @@ return array(
     'Show all children' => 'Voir tous les enfants',
     'Submenu name' => 'Nom du sous-menu',
     'Target item' => 'Élément cible',
+    'Warning: You have unsaved changes!' => 'Attention : vous avez des modifications non enregistrées !',
     'Would you like to delete this menu item ?' => 'Voulez-vous supprimer cet élément du menu ?',
     'Would you like to delete this menu ?' => 'Voulez-vous supprimer ce menu ?',
     'Would you like to discard all changes ?' => 'Voulez-vous annuler les modifications ?',
