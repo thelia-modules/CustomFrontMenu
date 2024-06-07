@@ -47,8 +47,7 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      */
     public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, SessionInterface $session) : JsonResponse
     {
-        $nbInvalidUrl = 0; // Not exploited here, but used by loadTableBrowser to count the invalid url number.
-        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $session, $nbInvalidUrl);
+        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $session);
         if ($menu === null) {
             return OpenApiService::jsonResponse('Menu not found', Response::HTTP_NOT_FOUND);
         }

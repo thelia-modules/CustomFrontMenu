@@ -164,12 +164,7 @@ class MenuController extends BaseAdminController
                 $menu = $cfmMenu->getMenu($menuId);
             }
 
-            $nbInvalidUrl = 0;
-            $data = $cfmLoad->loadTableBrowser($menu, $session, $nbInvalidUrl);
-
-            if($nbInvalidUrl > 0) {
-                $session->getFlashBag()->add('warning', $nbInvalidUrl . Translator::getInstance()->trans(' url are invalid', [], CustomFrontMenu::DOMAIN_NAME));
-            }
+            $data = $cfmLoad->loadTableBrowser($menu, $session);
         }
 
         return [

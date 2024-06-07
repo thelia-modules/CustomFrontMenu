@@ -63,7 +63,7 @@ class CFMLoadService implements CFMLoadInterface
      * @throws PropelException
      * @throws Exception
      */
-    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session, int & $nbInvalidUrl) : array
+    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session) : array
     {
         $dataArray = [];
         $descendants = $parent->getChildren();
@@ -79,9 +79,6 @@ class CFMLoadService implements CFMLoadInterface
             foreach ($I18nMenus as $I18nMenu) {
                 $newArray['title'][$I18nMenu->getLocale()] = $I18nMenu->getTitle();
                 $newArray['url'][$I18nMenu->getLocale()] = $I18nMenu->getUrl();
-                if ($descendant->getView() === '' && !filter_var($newArray['url'][$I18nMenu->getLocale()], FILTER_VALIDATE_URL)) {
-                    ++$nbInvalidUrl;
-                }
             }
 
             $view = $descendant->getView();
@@ -122,7 +119,7 @@ class CFMLoadService implements CFMLoadInterface
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArray['children'] = $this->loadTableBrowser($descendant, $session,$nbInvalidUrl);
+                $newArray['children'] = $this->loadTableBrowser($descendant, $session);
             }
             $dataArray[] = $newArray;
         }
