@@ -507,8 +507,12 @@ function setEditFields(id) {
     CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuType'].value = element.type.toLowerCase()
-    form.elements['menuItem'].value = getValueByLocaleOf(element.url)
-
+    if(element.type.toLowerCase() === 'url') {
+        form.elements['menuItem'].value = getValueByLocaleOf(element.url)
+    }
+    else {
+        form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
+    }
     
     if (!selectedLanguage || selectedLanguage === LOCALE){
         if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
@@ -777,7 +781,12 @@ function selectLanguage(languageElement) {
     selectedLanguage = languageElement.getAttribute('data-locale');
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
     currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
-    currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+    if(currentMenu.type.toLowerCase() === 'url') {
+        currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
+    }
+    else {
+        currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, 'en_US')
+    }
     if (selectedLanguage !== LOCALE){
         currentForm["menuType"].disabled = true
         if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
