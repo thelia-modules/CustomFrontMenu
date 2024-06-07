@@ -19,8 +19,6 @@ return array(
     'Delete menu' => 'Supprimer un menu',
     'Delete this menu' => 'Supprimer ce menu',
     'Discard changes' => 'Annuler les modifications',
-    'Do you really want to delete this link ?' => 'Voulez-vous vraiment supprimer ce lien ?',
-    'Do you really want to delete this menu ?' => 'Voulez-vous vraiment supprimer ce menu ?',
     'Edit a menu item' => 'Modifier un élément du menu',
     'Edit menu' => 'Modifier le menu',
     'Hide all children' => 'Masquer les enfants',
