@@ -1141,6 +1141,11 @@ function resetSelect(modalId) {
         }
     }
 }
+
+function resetTargetField(select) {
+    const inputElement = select.form["menuItem"]
+    inputElement.value = "";
+}
 // End search product
 
 // Flashes
