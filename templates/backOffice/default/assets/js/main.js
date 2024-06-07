@@ -507,20 +507,34 @@ function setEditFields(id) {
     CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuType'].value = element.type.toLowerCase()
-    if (element.type.toLowerCase() === "empty"){
-        //form.elements['menuItemId'].style.display = "none"
-        //form.elements['menuItemUrl'].style.display = "none"
-        form.elements['menuItem'].style.display = "none"
-    }
-    else if (element.type.toLowerCase() !== "url"){
-        form.elements['menuItem'].value = element.url['en_US']
-        form.elements['menuItem'].style.display = "block"
-        //form.elements['menuItemUrl'].style.display = "none"
+    form.elements['menuItem'].value = getValueByLocaleOf(element.url)
+
+    
+    if (!selectedLanguage || selectedLanguage === LOCALE){
+        if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
+            form['menuItem'].style.display = "block"
+            form["menuItem"].disabled = false
+            form["saveUrl"].disabled = false
+        }
+        else if (element.type.toLowerCase() === 'empty') {
+            form['menuItem'].style.display = "none"
+        }
+        else {
+            form['menuItem'].style.display = "block"
+            form["menuItem"].disabled = false
+            form["saveUrl"].disabled = false
+        }
     }
     else {
-        form.elements['menuItem'].value = getValueByLocaleOf(element.url)
-        form.elements['menuItem'].style.display = "block"
-        //form.elements['menuItemId'].style.display = "none"
+        if (element.type.toLowerCase() === 'empty') {
+            form['menuItem'].style.display = "none"
+        }
+        else{
+            form['menuItem'].style.display = "block"
+        }
+        form["menuType"].disabled = true
+        form["menuItem"].disabled = true
+        form["saveUrl"].disabled = true
     }
 }
 
@@ -763,26 +777,19 @@ function selectLanguage(languageElement) {
     selectedLanguage = languageElement.getAttribute('data-locale');
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
     currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
+    currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
     if (selectedLanguage !== LOCALE){
         currentForm["menuType"].disabled = true
         if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
-            currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
             currentForm["menuItem"].disabled = true
             currentForm["saveUrl"].disabled = true
-        }
-        else{
-            currentForm["menuItem"].value = currentMenu.url["en_US"]
+            }
+            else{
             currentForm["menuItem"].disabled = false
             currentForm["saveUrl"].disabled = false
         }
     }
     else {
-        if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"] !== "url"){
-            currentForm["menuItem"].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
-        }
-        else{
-            currentForm["menuItem"].value = currentMenu.url["en_US"]
-        }
         currentForm["menuType"].disabled = false
         currentForm["menuItem"].disabled = false
         currentForm["saveUrl"].disabled = false
