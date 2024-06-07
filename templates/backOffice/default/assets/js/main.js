@@ -325,14 +325,12 @@ function getFormItems(form) {
 function compareWithMenuList(element) {
     let form = element.closest('form');
     if (!form) {
-        console.error("Le formulaire parent n'a pas été trouvé.");
+        console.error("Form hasn't been found");
         return;
     }
 
     let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
-
-    var menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
-    console.log("Menu item:", menuItem);
+    let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
 
     if (menuItem) {
         var menuListNameValue = getValueByLocaleOf(menuItem.title, LOCALE);
