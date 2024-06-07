@@ -332,7 +332,6 @@ function compareWithMenuList(element) {
     let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
 
     var menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
-    console.log("Menu item:", menuItem);
 
     if (menuItem) {
         var menuListNameValue = getValueByLocaleOf(menuItem.title, LOCALE);
@@ -806,8 +805,6 @@ function selectLanguage(languageElement) {
     selectedLanguage = languageElement.getAttribute('data-locale')
     currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
     currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
-    const select = document.getElementById('select-edit-type')
-    select.value = currentMenu.type
     if(currentMenu.type.toLowerCase() === 'url') {
         currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
     }
@@ -830,6 +827,11 @@ function selectLanguage(languageElement) {
         currentForm["menuItem"].disabled = false
         currentForm["saveUrl"].disabled = false
     }
+    Array.from(currentForm["menuType"].options).forEach(option => {
+        if (option.value.toLowerCase() === currentMenu.type.toLowerCase()) {
+            option.selected = true;
+        }
+    });
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
     toggleFlags();
 }
