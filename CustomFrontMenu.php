@@ -49,6 +49,8 @@ class CustomFrontMenu extends BaseModule
         if ($deleteModuleData) {
             $database->insertSql(null, [__DIR__.'/Config/sql/destroy.sql']);
         }
+
+        setcookie('menuId', '', time() - 3600, '/admin/module/CustomFrontMenu');
     }
 
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
