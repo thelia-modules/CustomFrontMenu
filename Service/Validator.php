@@ -2,6 +2,7 @@
 
 namespace CustomFrontMenu\Service;
 
+use Exception;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Validator
@@ -74,6 +75,45 @@ class Validator
         $string = self::stringValidation($string, $session);
         $string = self::htmlSafeValidation($string, $session, true);
         return self::sqlSafeValidation($string, $session, true);
+    }
+
+    /**
+     * /**
+     *  Check if the string is a valid view for the url generation.
+     *
+     *  Valid strings : 'brand', 'category', 'content', 'folder', 'product'.
+     *  (case-insensitive)
+     * @param string $string
+     * @param bool $stringReturn True : return the valid string | False : return a boolean
+     * @return string|bool Return the valid string if $stringReturn is true, else a boolean
+     * @throws Exception
+     */
+    public static function viewIsValid(string $string, bool $stringReturn) : string|bool
+    {
+        $type = strtolower($string);
+        $validTypes = ['brand', 'category', 'content', 'folder', 'product'];
+        if (!in_array($type, $validTypes)) {
+            if (!$stringReturn) {
+                return false;
+            }
+            throw new Exception('Invalid view type : '.$string);
+        }
+        if (!$stringReturn) {
+            return true;
+        }
+        return $string;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function viewIsValidOrEmpty(string $string) : string
+    {
+        $type = strtolower($string);
+        if (self::viewIsValid($type, false) || $type === 'empty') {
+            return $string;
+        }
+        throw new Exception('Invalid view type : '.$string);
     }
 }
 

@@ -3,6 +3,7 @@
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Interface\CFMSaveInterface;
+use CustomFrontMenu\Interface\CFMMenuInterface;
 use CustomFrontMenu\Service\Validator;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
@@ -43,19 +44,78 @@ class CFMSaveService implements CFMSaveInterface
 
             $item->save();
 
+            if(strtolower($element['type']) === 'url') {
+                foreach ($element['url'] as $locale => $url) {
+                    $content = new CustomFrontMenuItemI18n();
+                    $content->setId($item->getId());
+                    $content->setLocale($locale);
+                    if (isset($url)) {
+                        $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
+                    }
+                    $content->save();
+                    if(!isset($element['title'][$locale])) {
+                        $langLocale = $session->get('thelia.current.admin_lang')->getLocale();
+                        if (isset($element['title'][$langLocale])) {
+                            $element['title'][$locale] = $element['title'][$langLocale];
+                        } else {
+                            $found = false;
+                            foreach ($element['title'] as $value) {
+                                if (!$found && !is_null($value)) {
+                                    $element['title'][$locale] = $value;
+                                    $found = true;
+                                }
+                            }
+                            if (!$found) {
+                                $element['title'][$locale] = 'Empty string';
+                            }
+                        }
+                    }
+                }
+            } elseif ($element['type'] !== '') {
+                $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])));
+                $viewIdExploded = explode('-', $element['url']['en_US']);
+                $item->setViewId(intval(end($viewIdExploded)));
+                $item->save();
+            }
+
+            if($element['title'])
+
             foreach ($element['title'] as $locale => $title) {
-                $content = new CustomFrontMenuItemI18n();
+                $content = CustomFrontMenuItemI18nQuery::create()
+                    ->filterById($item->getId())
+                    ->findOneByLocale($locale);
+
+                if ($content === null) {
+                    $content = new CustomFrontMenuItemI18n();
+                    $content->setId($item->getId());
+                    $content->setLocale($locale);
+                }
+
+                if(strtolower($element['type']) === 'url' && !isset($element['url'][$locale])) {
+                    $langLocale = $session->get('thelia.current.admin_lang')->getLocale();
+                    if (isset($element['url'][$langLocale])) {
+                        $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$langLocale], $session), FilterType::URL));
+                    } else {
+                        $found = false;
+                        foreach ($element['url'] as $value) {
+                            if (!$found && !is_null($value)) {
+                                $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($value, $session), FilterType::URL));
+                                $found = true;
+                            }
+                        }
+                        if (!$found) {
+                            $item->setView('Empty');
+                            $item->setViewId('');
+                            $item->save();
+                        }
+                    }
+                }
+
                 $content->setTitle(Validator::completeValidation($title, $session));
-                if (isset($element['url']) && isset($element['url'][$locale])) {
-                    $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$locale], $session), FilterType::URL));
-                }
-                else{
-                    $content->setUrl("");
-                }
-                $content->setId($item->getId());
-                $content->setLocale($locale);
                 $content->save();
             }
+
+
 
             if (isset($element['children']) && $element['children'] !== []) {
                 $this->saveTableBrowser($element['children'], $item, $session);

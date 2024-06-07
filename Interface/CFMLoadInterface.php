@@ -3,6 +3,7 @@
 namespace CustomFrontMenu\Interface;
 
 use CustomFrontMenu\Model\CustomFrontMenuItem;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 interface CFMLoadInterface
 {
@@ -14,11 +15,17 @@ interface CFMLoadInterface
     public function loadSelectMenu(CustomFrontMenuItem $root) : array;
 
     /**
+     * Generate an url basis on a view type and an id to get the associated content page.
+     */
+    public function generateUrl(string $type, int $id, string $lang = null): string;
+
+    /**
      * Load all elements from the database recursively to parse them in an array
      * @param CustomFrontMenuItem $parent
+     * @param SessionInterface $session
      * @return array All the descendants items of the menu root given in parameter
      */
-    public function loadTableBrowser(CustomFrontMenuItem $parent) : array;
+    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session) : array;
 
     /**
      * Load all elements from the database recursively to parse them in an array with a lang

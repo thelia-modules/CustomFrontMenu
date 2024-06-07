@@ -2,10 +2,15 @@
 
 namespace CustomFrontMenu\Service;
 
+use CustomFrontMenu\CustomFrontMenu;
 use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
+use Exception;
+use Propel\Runtime\Propel;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Propel\Runtime\Exception\PropelException;
+use Thelia\Core\Translation\Translator;
 
 class CFMLoadService implements CFMLoadInterface
 {
@@ -32,10 +37,33 @@ class CFMLoadService implements CFMLoadInterface
         return $dataArray;
     }
 
+    public function generateUrl(string $type, int $id, string $lang = null): string
+    {
+        // url of type http://cfm.th/?view=product&product_id=21&lang=en_US
+
+        $url = $_SERVER['REQUEST_SCHEME']
+                .'://'
+                .$_SERVER['SERVER_NAME']
+                .'/?view='
+                .strtolower($type)
+                .'&'
+                .strtolower($type)
+                .'_id='
+                .$id;
+
+        if(isset($lang)) {
+            $url .= '&lang='
+                .$lang;
+        }
+
+        return $url;
+    }
+
     /**
      * @throws PropelException
+     * @throws Exception
      */
-    public function loadTableBrowser(CustomFrontMenuItem $parent) : array
+    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session) : array
     {
         $dataArray = [];
         $descendants = $parent->getChildren();
@@ -53,13 +81,45 @@ class CFMLoadService implements CFMLoadInterface
                 $newArray['url'][$I18nMenu->getLocale()] = $I18nMenu->getUrl();
             }
 
+            $view = $descendant->getView();
+            if (!isset($view) || $view === ""){
+                $view = 'url';
+            }
+            $newArray['type'] = $view;
+            $viewId = $descendant->getViewId();
+
+            if(isset($view) && isset($viewId) && Validator::viewIsValid($view, false)) {
+                $con = Propel::getConnection();
+
+                $table = strtolower($newArray['type']).'_i18n';
+                $stmt = $con->prepare("SELECT locale, title FROM $table WHERE id = :id;");
+                $stmt->bindValue(':id', $viewId, \PDO::PARAM_INT);
+                $stmt->execute();
+
+                $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+                $found = false;
+                foreach ($results as $arrayContent) {
+                    if($arrayContent['locale'] === $session->get('thelia.current.admin_lang')->getLocale()) {
+                        $newArray['url']['en_US'] = $arrayContent['title'].'-'.$viewId;
+                        $found = true;
+                    }
+                }
+                if(!$found) {
+                    $newArray['url']['en_US'] = "";
+                    if (isset($results[0]) && isset($results[0]['title'])) {
+                        $newArray['url']['en_US'] = $results[0]['title'].'-'.$viewId;
+                    }
+                }
+
+            }
 
             $newArray['depth'] = $descendant->getLevel() - 2;
             $newArray['id'] = $this->COUNT_ID;
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArray['children'] = $this->loadTableBrowser($descendant);
+                $newArray['children'] = $this->loadTableBrowser($descendant, $session);
             }
             $dataArray[] = $newArray;
         }
@@ -104,6 +164,14 @@ class CFMLoadService implements CFMLoadInterface
 
             $newArray['title'] = $title;
             $newArray['url'] = $url;
+
+            if (!isset($url) && Validator::viewIsValid($descendant->getView(), false)) {
+                $view = $descendant->getView();
+                $viewId = $descendant->getViewId();
+                if (isset($view) && isset($viewId)) {
+                    $newArray['url'] = $this->generateUrl($view, $viewId, $lang);
+                }
+            }
 
             $newArray['depth'] = $descendant->getLevel() - 2;
             $newArray['id'] = $this
