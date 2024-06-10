@@ -2,8 +2,8 @@
 
 namespace CustomFrontMenu\Controller\Front;
 
-use CustomFrontMenu\Interface\CFMMenuInterface;
-use CustomFrontMenu\Interface\CFMLoadInterface;
+use CustomFrontMenu\Service\CustomFrontMenuService;
+use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use OpenAPI\Controller\Front\BaseFrontOpenApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -45,9 +45,9 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      *    ),
      * )
      */
-    public function getMenuAndChildrenById(int $id, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, SessionInterface $session) : JsonResponse
+    public function getMenuAndChildrenById(int $id, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFornMenuService, SessionInterface $session) : JsonResponse
     {
-        $menu = $cfmLoad->loadTableBrowser($cfmMenu->getMenu($id), $session);
+        $menu = $customFrontMenuLoadService->loadTableBrowser($customFornMenuService->getMenu($id), $session);
         if ($menu === null) {
             return OpenApiService::jsonResponse('Menu not found', Response::HTTP_NOT_FOUND);
         }

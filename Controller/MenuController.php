@@ -3,9 +3,9 @@
 namespace CustomFrontMenu\Controller;
 
 use CustomFrontMenu\CustomFrontMenu;
-use CustomFrontMenu\Interface\CFMLoadInterface;
-use CustomFrontMenu\Interface\CFMSaveInterface;
-use CustomFrontMenu\Interface\CFMMenuInterface;
+use CustomFrontMenu\Service\CustomFrontMenuLoadService;
+use CustomFrontMenu\Service\CustomFrontMenuSaveService;
+use CustomFrontMenu\Service\CustomFrontMenuService;
 use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -41,12 +41,13 @@ class MenuController extends BaseAdminController
      * Save the selected menu items in database.
      * @param Request $request The user request with the menu items and the selected menu id
      * @param SessionInterface $session The user session, used to get locale and to display flashes
-     * @param CFMSaveInterface $cfmSave The saving service
+     * @param CustomFrontMenuSaveService $customFrontMenuSave The saving service
+     * @param CustomFrontMenuService $customFrontMenuService
      * @throws PropelException
      * @throws Exception
      */
     #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request, SessionInterface $session, CFMSaveInterface $cfmSave, CFMMenuInterface $cfmMenu) : RedirectResponse
+    public function saveMenuItems(Request $request, SessionInterface $session, CustomFrontMenuSaveService $customFrontMenuSave, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
     {
         $dataJson = $request->get('menuData');
         $newMenu = json_decode($dataJson, true);
@@ -56,17 +57,17 @@ class MenuController extends BaseAdminController
             throw new Exception('Save failed : the menu id cannot be null or empty');
         }
 
-        $menuToCheck = $cfmMenu->getMenu($menuId);
+        $menuToCheck = $customFrontMenuService->getMenu($menuId);
 
         if (!isset($menuToCheck) || $menuToCheck->getLevel() !== 1) {
             throw new Exception('Save failed : the menu id is invalid');
         }
 
         // Delete all the items currently in database for the menu to save
-        $menu = $cfmSave->deleteSpecificItems($menuId);
+        $menu = $customFrontMenuSave->deleteSpecificItems($menuId);
 
         // Add all new items in database
-        $cfmSave->saveTableBrowser($newMenu, $menu, $session);
+        $customFrontMenuSave->saveTableBrowser($newMenu, $menu, $session);
 
         $session->getFlashBag()->add('success', Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
 
@@ -78,17 +79,17 @@ class MenuController extends BaseAdminController
      * The user is redirected in this new menu.
      * @param Request $request The user request with the menu name
      * @param SessionInterface $session The user session, used to display flashes
-     * @param CFMLoadInterface $cfmLoad The loading service
-     * @param CFMMenuInterface $cfmMenu The menu service
+     * @param CustomFrontMenuLoadService $customFrontMenuLoadService The loading service
+     * @param CustomFrontMenuService $customFrontMenuService The menu service
      * @throws Exception
      */
     #[Route("/admin/module/CustomFrontMenu/add", name: "admin.customfrontmenu.addmenu", methods: ["POST"])]
-    public function addMenu(Request $request, SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu) : RedirectResponse
+    public function addMenu(Request $request, SessionInterface $session, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
     {
         $menuName = $request->get('menuName');
-        $root = $cfmMenu->getRoot();
-        $itemId = $cfmMenu->addMenu($root, $menuName, $session);
-        $this->loadMenuItems($session, $cfmLoad, $cfmMenu, $itemId);
+        $root = $customFrontMenuService->getRoot();
+        $itemId = $customFrontMenuService->addMenu($root, $menuName, $session);
+        $this->loadMenuItems($session, $customFrontMenuLoadService, $customFrontMenuService, $itemId);
         setcookie('menuId', $itemId);
         $session->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
 
@@ -100,11 +101,11 @@ class MenuController extends BaseAdminController
      * The user is redirected in the first menu if it exists.
      * @param Request $request The user request with the menu id
      * @param SessionInterface $session The user session, used to display flashes
-     * @param CFMMenuInterface $cfmMenu The menu service
+     * @param CustomFrontMenuService $customFrontMenuService The menu service
      * @throws Exception
      */
     #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
-    public function deleteMenu(Request $request, SessionInterface $session, CFMMenuInterface $cfmMenu) : RedirectResponse
+    public function deleteMenu(Request $request, SessionInterface $session, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
     {
         $firstCurrentMenuId = $request->get('menuId');
         if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
@@ -113,7 +114,7 @@ class MenuController extends BaseAdminController
 
         $currentMenuId = intval(str_replace("menu-selected-", "", $firstCurrentMenuId));
 
-        $cfmMenu->deleteMenu($currentMenuId);
+        $customFrontMenuService->deleteMenu($currentMenuId);
         $session->getFlashBag()->add('success', Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME));
 
         if (isset($_COOKIE['menuId'])) {
@@ -138,15 +139,15 @@ class MenuController extends BaseAdminController
     /**
      * Load the menu items
      * @param SessionInterface $session The user session, used to get locale and to display flashes
-     * @param CFMLoadInterface $cfmLoad The loading service
-     * @param CFMMenuInterface $cfmMenu The menu service
+     * @param CustomFrontMenuLoadService $customFrontMenuLoadService The loading service
+     * @param CustomFrontMenuService $customFrontMenuService The menu service
      * @param int|null $menuId The id of the menu to load
      * @return array All the data necessary to load the page content : Menu names,  menu items and the current menu id.
      * @throws PropelException
      */
-    public function loadMenuItems(SessionInterface $session, CFMLoadInterface $cfmLoad, CFMMenuInterface $cfmMenu, ?int $menuId = null) : array
+    public function loadMenuItems(SessionInterface $session, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFrontMenuService, ?int $menuId = null) : array
     {
-        $menuNames = $cfmLoad->loadSelectMenu($cfmMenu->getRoot());
+        $menuNames = $customFrontMenuLoadService->loadSelectMenu($customFrontMenuService->getRoot());
 
         if (!isset($menuId)) {
             if(count($menuNames) > 0) {
@@ -156,15 +157,15 @@ class MenuController extends BaseAdminController
 
         $data = [];
         if(isset($menuId)) {
-            $menu = $cfmMenu->getMenu($menuId);
+            $menu = $customFrontMenuService->getMenu($menuId);
             if (!isset($menu) || $menu->getLevel() !== 1) {
                 $session->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
                 $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
                 setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);
-                $menu = $cfmMenu->getMenu($menuId);
+                $menu = $customFrontMenuService->getMenu($menuId);
             }
 
-            $data = $cfmLoad->loadTableBrowser($menu, $session);
+            $data = $customFrontMenuLoadService->loadTableBrowser($menu, $session);
         }
 
         return [

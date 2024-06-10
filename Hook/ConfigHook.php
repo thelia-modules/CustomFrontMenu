@@ -3,9 +3,8 @@
 namespace CustomFrontMenu\Hook;
 
 use CustomFrontMenu\Controller\MenuController;
-use CustomFrontMenu\Service\CFMSaveService;
-use CustomFrontMenu\Service\CFMLoadService;
-use CustomFrontMenu\Service\CFMMenuService;
+use CustomFrontMenu\Service\CustomFrontMenuLoadService;
+use CustomFrontMenu\Service\CustomFrontMenuService;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Hook\BaseHook;
@@ -18,13 +17,12 @@ use TheliaSmarty\Template\SmartyParser;
 class ConfigHook extends BaseHook
 {
     public function __construct(
-        protected CFMSaveService $cfmSave,
-        protected CFMLoadService $cfmLoad,
-        protected CFMMenuService $cfmMenu,
-        protected MenuController $menuController,
-        SmartyParser $parser,
-        AssetResolverInterface $resolver,
-        EventDispatcherInterface $eventDispatcher)
+        protected CustomFrontMenuLoadService $customFrontMenuLoadService,
+        protected CustomFrontMenuService     $customFrontMenuService,
+        protected MenuController             $menuController,
+        SmartyParser                         $parser,
+        AssetResolverInterface               $resolver,
+        EventDispatcherInterface             $eventDispatcher)
     {
         parent::__construct($parser, $resolver, $eventDispatcher);
 
@@ -71,9 +69,9 @@ class ConfigHook extends BaseHook
     {
         $session = $this->getRequest()->getSession();
         if (isset($_COOKIE['menuId']) && $_COOKIE['menuId'] != -1) {
-            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu, $_COOKIE['menuId']);
+            $data = $this->menuController->loadMenuItems($session, $this->customFrontMenuLoadService, $this->customFrontMenuService, $_COOKIE['menuId']);
         } else {
-            $data = $this->menuController->loadMenuItems($session, $this->cfmLoad, $this->cfmMenu);
+            $data = $this->menuController->loadMenuItems($session, $this->customFrontMenuLoadService, $this->customFrontMenuService);
         }
 
         $event->add($this->render("module-config.html", $data));

@@ -1,8 +1,8 @@
 <?php
 namespace CustomFrontMenu\Smarty\Plugins;
 
-use CustomFrontMenu\Interface\CFMLoadInterface;
-use CustomFrontMenu\Interface\CFMMenuInterface;
+use CustomFrontMenu\Service\CustomFrontMenuLoadService;
+use CustomFrontMenu\Service\CustomFrontMenuService;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -10,7 +10,10 @@ use Thelia\Core\HttpFoundation\Session\Session;
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
-    public function __construct(private CFMLoadInterface $CFMLoadService, private CFMMenuInterface $cfmMenu, private Session $session)
+    public function __construct(
+        private CustomFrontMenuLoadService $CustomFrontMenuLoadService,
+        private CustomFrontMenuService $customFrontMenuService,
+        private Session $session)
     {
     }
 
@@ -32,12 +35,12 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
             throw new \InvalidArgumentException('The menu_id parameter is required', 1);
         }
 
-        $menu = $this->cfmMenu->getMenu($params['menu_id']);
+        $menu = $this->customFrontMenuService->getMenu($params['menu_id']);
         if (!isset($menu)) {
             throw new \InvalidArgumentException('The menu does not exist', 2);
         }
 
-        $menuItems = $this->CFMLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
+        $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
         
 

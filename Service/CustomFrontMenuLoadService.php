@@ -2,8 +2,6 @@
 
 namespace CustomFrontMenu\Service;
 
-use CustomFrontMenu\CustomFrontMenu;
-use CustomFrontMenu\Interface\CFMLoadInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Exception;
@@ -12,7 +10,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Translation\Translator;
 
-class CFMLoadService implements CFMLoadInterface
+class CustomFrontMenuLoadService
 {
     public function __construct(private int $COUNT_ID = 1)
     {}

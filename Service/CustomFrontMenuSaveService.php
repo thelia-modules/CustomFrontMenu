@@ -2,8 +2,6 @@
 
 namespace CustomFrontMenu\Service;
 
-use CustomFrontMenu\Interface\CFMSaveInterface;
-use CustomFrontMenu\Interface\CFMMenuInterface;
 use CustomFrontMenu\Service\Validator;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
@@ -13,7 +11,7 @@ use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-class CFMSaveService implements CFMSaveInterface
+class CustomFrontMenuSaveService
 {
     public function deleteSpecificItems(int $menuId) :  CustomFrontMenuItem
     {

@@ -2,7 +2,6 @@
 
 namespace CustomFrontMenu\Service;
 
-use CustomFrontMenu\Interface\CFMMenuInterface;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
@@ -11,7 +10,7 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 
 
-class CFMMenuService implements CFMMenuInterface
+class CustomFrontMenuService
 {
     public function __construct()
     {}
