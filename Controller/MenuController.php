@@ -165,7 +165,7 @@ class MenuController extends BaseAdminController
                 $menu = $customFrontMenuService->getMenu($menuId);
             }
 
-            $data = $customFrontMenuLoadService->loadTableBrowser($menu, $session);
+            $data = $customFrontMenuLoadService->loadTableBrowser($menu);
         }
 
         return [
