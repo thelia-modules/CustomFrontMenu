@@ -7,22 +7,61 @@ use CustomFrontMenu\Service\CFMSaveService;
 use CustomFrontMenu\Service\CFMLoadService;
 use CustomFrontMenu\Service\CFMMenuService;
 use Propel\Runtime\Exception\PropelException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
+use Thelia\Core\Template\Assets\AssetResolverInterface;
 use Thelia\Core\Translation\Translator;
 use CustomFrontMenu\CustomFrontMenu;
+use TheliaSmarty\Template\SmartyParser;
 
 class ConfigHook extends BaseHook
 {
-    protected $cfmSave, $cfmLoad, $cfmMenu, $menuController;
-
-    public function __construct(CFMSaveService $cfmSave, CFMLoadService $cfmLoad, CFMMenuService $cfmMenu, MenuController $menuController)
+    public function __construct(
+        protected CFMSaveService $cfmSave,
+        protected CFMLoadService $cfmLoad,
+        protected CFMMenuService $cfmMenu,
+        protected MenuController $menuController,
+        SmartyParser $parser,
+        AssetResolverInterface $resolver,
+        EventDispatcherInterface $eventDispatcher)
     {
-        parent::__construct();
-        $this->cfmSave = $cfmSave;
-        $this->cfmLoad = $cfmLoad;
-        $this->cfmMenu = $cfmMenu;
-        $this->menuController = $menuController;
+        parent::__construct($parser, $resolver, $eventDispatcher);
+
+    }
+
+    public static function getSubscribedHooks() :array
+    {
+        return [
+            "module.config-js" => [
+                [
+                    "type" => "back",
+                    "method" => "addMenuJs"
+                ]
+            ],
+            "main.head-css" => [
+                [
+                    "type" => "back",
+                    "method" => "addMenuCss"
+                ]
+            ],
+            "module.configuration" => [
+                [
+                    "type" => "back",
+                    "method" => "onModuleConfiguration"
+                ]
+            ]
+        ];
+    }
+
+    public function addMenuJs(HookRenderEvent $event):void
+    {
+        $event->add($this->addJS("assets/js/main.js"));
+    }
+
+    public function addMenuCss(HookRenderEvent $event):void
+    {
+       $event->add($this->addCSS("assets/css/styles.css"));
     }
 
     /**
