@@ -293,7 +293,7 @@ function changeParameters(id) {
         console.error("The id given in changeParameters parameter doesn't exist")
         return
     }
-    
+
     saveTitleTypeAndUrl(id, title, type, url)
 
     const titleSpan = menuItem.querySelector('[data-id="titleSpan"]')
@@ -410,7 +410,7 @@ function isValid(form) {
     else if (menuItemType !== "url" && menuItemType !== "empty"){
         let found = false
         for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
-            if (value.title + "-" + value.id === menuItemUrl){
+            if (value.title + "-" + value.id === menuItemUrl || (value.reference && value.title + "-" + value.reference + "-" + value.id === menuItemUrl)){
                 found = true
                 break
             }
@@ -421,7 +421,7 @@ function isValid(form) {
         }
     }
 
-    
+
     if (menuItemName.includes("`")) {
         errorMessageTitle.style.display = 'block';
         return false
@@ -477,7 +477,7 @@ function saveMenuItemUrl() {
     }
 
     const menuToModify = findMenuInList(CURRENT_ID, MENU_LIST)
-    
+
     if (menuToModify === null) {
         console.error("The id given in saveMenuItemUrl doesn't exist")
         return
@@ -534,7 +534,7 @@ function setEditFields(id) {
     else {
         form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
     }
-    
+
     if (!selectedLanguage || selectedLanguage === LOCALE){
         if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
             form['menuItem'].style.display = "block"
@@ -1126,6 +1126,9 @@ function updateDataList(selectedKey, parentDiv) {
         loopsDictionary[selectedKey].forEach(item => {
             const option = document.createElement('option');
             option.value = `${item.title}-${item.id}`;
+            if (item.reference) {
+                option.value = `${item.title}-${item.reference}-${item.id}`;
+            }
             dataList.appendChild(option);
         });
     }
