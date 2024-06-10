@@ -34,7 +34,8 @@ function getValueByLocaleOf(element, locale) {
             result = val
             found = true
             break
-        } else if (key === LOCALE) {
+        } 
+        if (key === LOCALE) {
             result = val
             found = true
         }
@@ -206,10 +207,9 @@ function addCustomMenuItem(element, id = "0") {
         children: []
     };
     newItem.title[LOCALE] = menuItemName
+    newItem.url[LOCALE] = menuItemUrl
     if (menuItemType.toLowerCase() !== "url") {
         newItem.url["en_US"] = menuItemUrl
-    } else {
-        newItem.url[LOCALE] = menuItemUrl
     }
 
     let newMenu = generateMenuRecursive(newItem)
@@ -355,17 +355,19 @@ function deleteMenuItem(id) {
         treeIcon.classList.remove('fa-caret-up')
         treeIcon.classList.remove('fa-caret-down')
     }
-    if (elementToRemove) {
-        if (elementToRemove.remove) {
-            elementToRemove.remove()
-        } else {
-            elementToRemove.parentNode.removeChild(elementToRemove)
-        }
-        MENU_LIST = deleteFromList(id, MENU_LIST)
-        generatePreviewMenus()
-    } else {
+
+    if (!elementToRemove) {
         console.error("The id doesn't exist")
+        return 
     }
+
+    if (elementToRemove.remove) {
+        elementToRemove.remove()
+    } else {
+        elementToRemove.parentNode.removeChild(elementToRemove)
+    }
+    MENU_LIST = deleteFromList(id, MENU_LIST)
+    generatePreviewMenus()
 }
 
 function deleteFromList(id, list) {
@@ -396,7 +398,7 @@ function isValid(form) {
         errorType.innerText = "Choose a category"
         return false
     }
-    else if (!(menuItemType in loopsDictionary) && menuItemType !== "url" && menuItemType !== "empty"){
+    if (!(menuItemType in loopsDictionary) && menuItemType !== "url" && menuItemType !== "empty"){
         errorType.innerText = "Invalid selection"
         return false
     }
@@ -407,7 +409,7 @@ function isValid(form) {
         errorType.innerText = "A value must be filled"
         return false
     }
-    else if (menuItemType !== "url" && menuItemType !== "empty"){
+    if (menuItemType !== "url" && menuItemType !== "empty"){
         let found = false
         for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
             if (value.title + "-" + value.id === menuItemUrl){
@@ -421,19 +423,17 @@ function isValid(form) {
         }
     }
 
-    
+    errorMessageTitle.style.display = 'none';
+    errorMessageUrl.style.display = 'none';
+
     if (menuItemName.includes("`")) {
         errorMessageTitle.style.display = 'block';
         return false
-    } else {
-        errorMessageTitle.style.display = 'none';
     }
 
     if (menuItemUrl.includes("`")) {
         errorMessageUrl.style.display = 'block';
         return false
-    } else {
-        errorMessageUrl.style.display = 'none';
     }
 
     return true
@@ -484,12 +484,9 @@ function saveMenuItemUrl() {
     }
 
     const itemType = editForm["menuType"].value
-    let modifiedLocal
+    let modifiedLocal = "en_US"
     if (selectedLanguage && itemType.toLowerCase() === 'url') {
         modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE
-    }
-    else{
-        modifiedLocal = "en_US"
     }
 
     menuToModify.type = itemType
@@ -508,11 +505,9 @@ function saveTitleTypeAndUrl(id, title, type, url) {
 
     menuToModify.title[modifiedLocal] = title
     menuToModify.type = type
+    menuToModify.url[modifiedLocal] = url
     if (type.toLowerCase() !== "url") {
         menuToModify.url["en_US"] = url
-    }
-    else {
-        menuToModify.url[modifiedLocal] = url
     }
 }
 // End save data
@@ -528,11 +523,9 @@ function setEditFields(id) {
     CURRENT_ID = id
     form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
     form.elements['menuType'].value = element.type.toLowerCase()
+    form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
     if(element.type.toLowerCase() === 'url') {
         form.elements['menuItem'].value = getValueByLocaleOf(element.url)
-    }
-    else {
-        form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
     }
     
     if (!selectedLanguage || selectedLanguage === LOCALE){
@@ -551,11 +544,9 @@ function setEditFields(id) {
         }
     }
     else {
+        form['menuItem'].style.display = "block"
         if (element.type.toLowerCase() === 'empty') {
             form['menuItem'].style.display = "none"
-        }
-        else{
-            form['menuItem'].style.display = "block"
         }
         form["menuType"].disabled = true
         form["menuItem"].disabled = true
@@ -599,10 +590,9 @@ function generateMenu(list) {
 function generateMenuRecursive(menuItem) {
     let depth = "zero-depth"
     if (menuItem.depth !== 0) {
+        depth = ""
         if (menuItem.depth % 2 === 0) {
             depth = "even-depth"
-        } else {
-            depth = ""
         }
     }
 
@@ -780,23 +770,18 @@ function toggleChildren(span, event) {
 
     if (childrenUl) {
         childrenUl.style.display = childrenUl.style.display === 'none' ? 'block' : 'none';
+        treeIcon.classList.remove('fa-caret-up');
+        treeIcon.classList.add('fa-caret-down');
         if (childrenUl.style.display === 'none') {
             treeIcon.classList.remove('fa-caret-down');
             treeIcon.classList.add('fa-caret-up');
-        } else {
-            treeIcon.classList.remove('fa-caret-up');
-            treeIcon.classList.add('fa-caret-down');
         }
     }
 }
 
 function toggleFlags() {
-    var flagsList = document.getElementById('flags-list');
-    if (flagsList.style.display === 'none') {
-        flagsList.style.display = 'block';
-    } else {
-        flagsList.style.display = 'none';
-    }
+    const flagsList = document.getElementById('flags-list');
+    flagsList.style.display = flagList.style.display === 'none' ? 'block' : 'none'
 }
 
 function selectLanguage(languageElement) {
@@ -810,22 +795,20 @@ function selectLanguage(languageElement) {
     else {
         currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, 'en_US')
     }
+
+    currentForm["menuType"].disabled = false
+    currentForm["menuItem"].disabled = false
+    currentForm["saveUrl"].disabled = false
     if (selectedLanguage !== LOCALE){
         currentForm["menuType"].disabled = true
+        currentForm["menuItem"].disabled = false
+        currentForm["saveUrl"].disabled = false
         if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
             currentForm["menuItem"].disabled = true
             currentForm["saveUrl"].disabled = true
-            }
-            else{
-            currentForm["menuItem"].disabled = false
-            currentForm["saveUrl"].disabled = false
         }
     }
-    else {
-        currentForm["menuType"].disabled = false
-        currentForm["menuItem"].disabled = false
-        currentForm["saveUrl"].disabled = false
-    }
+
     Array.from(currentForm["menuType"].options).forEach(option => {
         if (option.value.toLowerCase() === currentMenu.type.toLowerCase()) {
             option.selected = true;

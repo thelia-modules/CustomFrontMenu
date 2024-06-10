@@ -47,8 +47,7 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      */
     public function getMenuAndChildrenById(int $id, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFornMenuService, SessionInterface $session) : JsonResponse
     {
-        $menu = $customFrontMenuLoadService->loadTableBrowser($customFornMenuService->getMenu($id), $session);
-        if ($menu === null) {
+        if ($menu = $customFrontMenuLoadService->loadTableBrowser($customFornMenuService->getMenu($id), $session)) {
             return OpenApiService::jsonResponse('Menu not found', Response::HTTP_NOT_FOUND);
         }
         if (count($menu) === 0) {
