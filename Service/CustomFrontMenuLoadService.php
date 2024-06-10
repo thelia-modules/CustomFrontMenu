@@ -6,17 +6,26 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Exception;
 use Propel\Runtime\Propel;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Propel\Runtime\Exception\PropelException;
+use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Translation\Translator;
+use Thelia\Tools\URL;
 
 class CustomFrontMenuLoadService
 {
-    public function __construct(private int $COUNT_ID = 1)
+    public function __construct(
+        private readonly RequestStack $requestStack,
+        private int $COUNT_ID = 1
+    )
     {}
 
     /**
      * Load the different menu names
+     * @param CustomFrontMenuItem $root The menu root
+     * @return array All the menu names
      */
     public function loadSelectMenu(CustomFrontMenuItem $root) : array
     {
@@ -27,43 +36,44 @@ class CustomFrontMenuLoadService
             $newArray['id'] = 'menu-selected-' . $descendant->getId();
             $content = CustomFrontMenuItemI18nQuery::create()
                 ->filterById($descendant->getId())
-                ->findByLocale('en_US');
+                ->findOneByLocale('en_US');
 
-            $newArray['title'] = $content->getColumnValues('title')[0] . ' (id: ' . $descendant->getId() . ')';
+            $newArray['title'] = $content->getTitle() . ' (id: ' . $descendant->getId() . ')';
             $dataArray[] = $newArray;
         }
         return $dataArray;
     }
 
+    /**
+     * Generate an url basis on a view type and an id to get the associated content page.
+     */
     public function generateUrl(string $type, int $id, string $lang = null): string
     {
         // url of type http://cfm.th/?view=product&product_id=21&lang=en_US
 
-        $url = $_SERVER['REQUEST_SCHEME']
-                .'://'
-                .$_SERVER['SERVER_NAME']
-                .'/?view='
-                .strtolower($type)
-                .'&'
-                .strtolower($type)
-                .'_id='
-                .$id;
-
-        if(isset($lang)) {
-            $url .= '&lang='
-                .$lang;
+        $parameters = ['view' => strtolower($type), strtolower($type).'_id' => $id];
+        if($lang) {
+            $parameters['lang'] = $lang;
         }
-
-        return $url;
+        return URL::getInstance()->absoluteUrl('', $parameters);
     }
 
     /**
+     * Load all elements from the database recursively to parse them in an array
+     * @param CustomFrontMenuItem $parent
+     * @return array All the descendants items of the menu root given in parameter
      * @throws PropelException
-     * @throws Exception
      */
-    public function loadTableBrowser(CustomFrontMenuItem $parent, SessionInterface $session) : array
+    public function loadTableBrowser(CustomFrontMenuItem $parent) : array
     {
         $dataArray = [];
+
+        /** @var Request $request */
+        $request = $this->requestStack->getCurrentRequest();
+        /** @var Session $session */
+        $session = $request->getSession();
+        $localeAdmin = $session->get('thelia.current.admin_lang')->getLocale();
+
         $descendants = $parent->getChildren();
         foreach ($descendants as $descendant) {
             $newArray = [];
@@ -86,7 +96,7 @@ class CustomFrontMenuLoadService
             $newArray['type'] = $view;
             $viewId = $descendant->getViewId();
 
-            if(isset($view) && isset($viewId) && Validator::viewIsValid($view, false)) {
+            if($view && $viewId && Validator::viewIsValid($view, false)) {
                 $con = Propel::getConnection();
 
                 $table = strtolower($newArray['type']).'_i18n';
@@ -98,14 +108,14 @@ class CustomFrontMenuLoadService
 
                 $found = false;
                 foreach ($results as $arrayContent) {
-                    if($arrayContent['locale'] === $session->get('thelia.current.admin_lang')->getLocale()) {
+                    if($arrayContent['locale'] === $localeAdmin) {
                         $newArray['url']['en_US'] = $arrayContent['title'].'-'.$viewId;
                         $found = true;
                     }
                 }
                 if(!$found) {
                     $newArray['url']['en_US'] = "";
-                    if (isset($results[0]) && isset($results[0]['title'])) {
+                    if ($results[0] && $results[0]['title']) {
                         $newArray['url']['en_US'] = $results[0]['title'].'-'.$viewId;
                     }
                 }
@@ -117,7 +127,7 @@ class CustomFrontMenuLoadService
             ++$this->COUNT_ID;
 
             if ($descendant->hasChildren()) {
-                $newArray['children'] = $this->loadTableBrowser($descendant, $session);
+                $newArray['children'] = $this->loadTableBrowser($descendant);
             }
             $dataArray[] = $newArray;
         }
@@ -125,6 +135,10 @@ class CustomFrontMenuLoadService
     }
 
     /**
+     * Load all elements from the database recursively to parse them in an array with a lang
+     * @param CustomFrontMenuItem $parent
+     * @param string $lang
+     * @return array All the descendants items of the menu root given in parameter
      * @throws PropelException
      */
     public function loadTableBrowserLang(CustomFrontMenuItem $parent, string $lang) : array
