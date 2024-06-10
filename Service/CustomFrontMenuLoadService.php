@@ -89,8 +89,8 @@ class CustomFrontMenuLoadService
                 $newArray['url'][$I18nMenu->getLocale()] = $I18nMenu->getUrl();
             }
 
-            $view = $descendant->getView();
-            if (!isset($view) || $view === ""){
+            
+            if (!$view = $descendant->getView() || $view === ""){
                 $view = 'url';
             }
             $newArray['type'] = $view;
