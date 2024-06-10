@@ -3,6 +3,7 @@ namespace CustomFrontMenu\Smarty\Plugins;
 
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use CustomFrontMenu\Service\CustomFrontMenuService;
+use Thelia\Core\Event\TheliaEvents;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -42,11 +43,16 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 
         $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
-        
 
+        /*
+         * issue d'un autre module
+        $$this->dispatcher->dispatch($event, TheliaEvents::IMAGE_PROCESS);
+        $imagePath = $event->getFileUrl();
+        */
         $cssPath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/assets/css/customFrontMenu.css.html';
         $smarty->display($cssPath);
         $templatePath = THELIA_LOCAL_DIR . '/modules/CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
         $smarty->display($templatePath);
+
     }
 }
