@@ -191,10 +191,10 @@ class CustomFrontMenuLoadService
             $newArray['title'] = $title;
             $newArray['url'] = $url;
 
-            if (!isset($url) && Validator::viewIsValid($descendant->getView(), false)) {
+            if (!$url && Validator::viewIsValid($descendant->getView(), false)) {
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
-                if (isset($view) && isset($viewId)) {
+                if ($view && $viewId) {
                     $newArray['url'] = $this->generateUrl($view, $viewId, $lang);
                 }
             }

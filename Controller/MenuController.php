@@ -62,13 +62,13 @@ class MenuController extends BaseAdminController
         $newMenu = json_decode($dataJson, true);
         $menuId = json_decode($request->get('menuDataId'));
 
-        if (!isset($menuId) || $menuId === 'undefined' || $menuId === 'null') {
+        if (!$menuId || $menuId === 'undefined' || $menuId === 'null') {
             throw new Exception('Save failed : the menu id cannot be null or empty');
         }
 
         $menuToCheck = $customFrontMenuService->getMenu($menuId);
 
-        if (!isset($menuToCheck) || $menuToCheck->getLevel() !== 1) {
+        if (!$menuToCheck || $menuToCheck->getLevel() !== 1) {
             throw new Exception('Save failed : the menu id is invalid');
         }
 
@@ -126,7 +126,7 @@ class MenuController extends BaseAdminController
 
         $this->getSession()->getFlashBag()->add('success', Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME));
 
-        if (isset($_COOKIE['menuId'])) {
+        if ($_COOKIE['menuId']) {
             setcookie('menuId', -1);
         }
 
@@ -157,13 +157,13 @@ class MenuController extends BaseAdminController
         $menuNames = $customFrontMenuLoadService->loadSelectMenu($customFrontMenuService->getRoot());
         $data = [];
 
-        if (!isset($menuId) && count($menuNames) > 0) {
+        if (!$menuId && count($menuNames) > 0) {
             $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
         }
 
-        if(isset($menuId)) {
+        if($menuId) {
             $menu = $customFrontMenuService->getMenu($menuId);
-            if (!isset($menu) || $menu->getLevel() !== 1) {
+            if (!$menu || $menu->getLevel() !== 1) {
                 $this->getSession()->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
                 $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
                 setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);

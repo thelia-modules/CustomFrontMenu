@@ -56,12 +56,12 @@ class CustomFrontMenuSaveService
                     $content = new CustomFrontMenuItemI18n();
                     $content->setId($item->getId())
                         ->setLocale($locale);
-                    if (isset($url)) {
+                    if ($url) {
                         $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
                     }
                     $content->save();
-                    if(!isset($element['title'][$locale])) {
-                        if (isset($element['title'][$adminLocale])) {
+                    if(!$element['title'][$locale]) {
+                        if ($element['title'][$adminLocale]) {
                             $element['title'][$locale] = $element['title'][$adminLocale];
                         } else {
                             $found = false;
@@ -95,8 +95,8 @@ class CustomFrontMenuSaveService
                         ->setLocale($locale);
                 }
 
-                if(strtolower($element['type']) === 'url' && !isset($element['url'][$locale])) {
-                    if (isset($element['url'][$adminLocale])) {
+                if(strtolower($element['type']) === 'url' && !$element['url'][$locale]) {
+                    if ($element['url'][$adminLocale]) {
                         $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$adminLocale], $session), FilterType::URL));
                     } else {
                         $found = false;
@@ -120,7 +120,7 @@ class CustomFrontMenuSaveService
 
 
 
-            if (isset($element['children']) && $element['children'] !== []) {
+            if (!empty($element['children'])) {
                 $this->saveTableBrowser($element['children'], $item);
             }
 
