@@ -47,6 +47,6 @@ return array(
     'Would you like to delete this menu item ?' => 'Desidera eliminare questo elemento del menu?',
     'Would you like to delete this menu ?' => 'Desidera eliminare questo menu?',
     'Would you like to discard all changes ?' => 'Desidera annullare tutte le modifiche?',
-    'You have unsaved changes. Would you like to save them ?' => 'Sono presenti modifiche non salvate. Vorresti salvarli ?',
+    'You have unsaved changes. If you don\'t save them your changes will be lost' => 'Sono presenti modifiche non salvate. Se non li salvi, le modifiche andranno perse',
     '-- language to translate into --' => '-- lingua in cui tradurre --',
 );

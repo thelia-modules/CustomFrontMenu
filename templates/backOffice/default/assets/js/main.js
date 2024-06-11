@@ -336,7 +336,7 @@ function compareWithMenuList(element) {
         var menuListUrlValue = getValueByLocaleOf(menuItem.url, LOCALE);
 
         if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
-            alert(translations.unsavedChanges);
+            $('#UnsavedChanges').modal('show');
         } else {
             toggleFlags();
         }
