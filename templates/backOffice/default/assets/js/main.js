@@ -330,17 +330,19 @@ function compareWithMenuList(element) {
     }
 
     let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
+    console.log(form)
     let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
 
     if (menuItem) {
         var menuListNameValue = getValueByLocaleOf(menuItem.title, LOCALE);
         var menuListUrlValue = getValueByLocaleOf(menuItem.url, LOCALE);
 
-        if (currentNameValue !== menuListNameValue || currentUrlValue !== menuListUrlValue) {
+        if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
             alert(translations.unsavedChanges);
+        } else {
+            toggleFlags();
         }
     }
-    toggleFlags();
 }
 // End edit menu
 
@@ -781,8 +783,9 @@ function toggleChildren(span, event) {
 
 function toggleFlags() {
     const flagsList = document.getElementById('flags-list');
-    flagsList.style.display = flagList.style.display === 'none' ? 'block' : 'none'
+    flagsList.style.display = flagsList.style.display === 'none' ? 'block' : 'none';
 }
+
 
 function selectLanguage(languageElement) {
     const currentForm = document.forms["editMenuItemForm"]
