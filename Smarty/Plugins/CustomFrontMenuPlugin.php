@@ -8,27 +8,17 @@ use Thelia\Core\Template\TemplateHelperInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use Thelia\Core\HttpFoundation\Session\Session;
-use Symfony\Component\Asset\Package;
-use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
-    private $templateHelper,$kernelDebug,$cacheService;
 
     public function __construct(
         private CustomFrontMenuLoadService $CustomFrontMenuLoadService,
         private CustomFrontMenuService $customFrontMenuService,
         private Session $session,
-        TemplateHelperInterface $templateHelper,
-        $kernelDebug,
-        AdapterInterface $cacheService
     ) {
-        $this->templateHelper = $templateHelper;
-        $this->kernelDebug = $kernelDebug;
-        $this->cacheService = $cacheService;
     }
 
 
@@ -57,7 +47,6 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 
         $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
-
 
         $cssPath = $smarty->getTemplateDir("CustomFrontMenu"). "assets/css/customFrontMenu.css.html";
         $smarty->display($cssPath);
