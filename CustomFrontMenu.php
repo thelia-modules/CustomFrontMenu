@@ -14,6 +14,7 @@ namespace CustomFrontMenu;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
+use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
 
@@ -39,17 +40,29 @@ class CustomFrontMenu extends BaseModule
         return true;
     }
 
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null): void
+    {
+        $finder = Finder::create()
+            ->name('*.sql')
+            ->depth(0)
+            ->sortByName()
+            ->in(__DIR__.DS.'Config'.DS.'update');
+
+        $database = new Database($con);
+
+        /** @var \SplFileInfo $file */
+        foreach ($finder as $file) {
+            if (version_compare($currentVersion, $file->getBasename('.sql'), '<')) {
+                $database->insertSql(null, [$file->getPathname()]);
+            }
+        }
+    }
+
     /**
-     * Delete the database when the module is deleted if $deleteModuleBase is true
+     * Delete the cookie, but preserve the database
      */
     public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
     {
-        $database = new Database($con);
-
-        if ($deleteModuleData) {
-            $database->insertSql(null, [__DIR__.'/Config/sql/destroy.sql']);
-        }
-
         setcookie('menuId', '', time() - 3600, '/admin/module/CustomFrontMenu');
     }
 

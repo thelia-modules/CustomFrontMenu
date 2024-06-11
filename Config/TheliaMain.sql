@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS `custom_front_menu_item`;
 CREATE TABLE `custom_front_menu_item`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `view` VARCHAR(255) NOT NULL,
+    `view` VARCHAR(255),
     `view_id` INTEGER,
     `tree_left` INTEGER,
     `tree_right` INTEGER,
