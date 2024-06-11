@@ -209,12 +209,12 @@
                         <div class="dropdown open">
 
                             <div class="dropdown">
-                                <a id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="compareWithMenuList(this)">
+                                <a id="selectedLanguageBtn" class="btn top-btn dropdown-toggle" onclick="toggleFlags()">
                                     {intl l="-- language to translate into --" d="customfrontmenu.bo.default"}
                                 </a>
                                 <ul class="dropdown-menu" id="flags-list" style="display: none;">
                                     {loop type="lang" name="the-loop-name"}
-                                        <li data-locale="{$LOCALE}" onclick="selectLanguage(this)">
+                                        <li data-locale="{$LOCALE}" onclick="compareWithMenuList(this)">
                                             <img class="flags edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}" />
                                         </li>
                                     {/loop}
@@ -246,7 +246,7 @@
                         <label for="menuItemEdit">
                             {intl l="Target item" d="customfrontmenu.bo.default"}
                         </label>
-                        <select id="select-edit-type" class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this), resetTargetField(this)">
+                        <select id="select-edit-type" class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this); resetTargetField(this)">
                             <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
                             <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
                         </select>
@@ -259,7 +259,7 @@
                     <p class="error"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
+                    <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId());closeClosestModal(this)">
                         <span class="glyphicon glyphicon-check"></span>
                         {intl l="Save everything" d="customfrontmenu.bo.default"}
                     </button>
@@ -292,8 +292,11 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">
-                    {intl l="Close" d="customfrontmenu.bo.default"}
+                <button class="btn btn-success btn-responsive delete-if-no-menu" onclick="changeParameters(getCurrentId());closeClosestModal(this);selectLanguage(this.closest('#UnsavedChanges'))">
+                    {intl l="Save" d="customfrontmenu.bo.default"}
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="selectLanguage(this.closest('#UnsavedChanges'))">
+                    {intl l="Discard changes" d="customfrontmenu.bo.default"}
                 </button>
             </div>
         </div>
