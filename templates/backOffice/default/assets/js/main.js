@@ -330,14 +330,10 @@ function compareWithMenuList(element) {
 
     let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
     let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
-    console.log("current name:", currentNameValue)
-    console.log("current url:", currentUrlValue)
 
     if (menuItem) {
         var menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage);
         var menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage);
-        console.log("menuList name:", menuListNameValue)
-        console.log("menuList url:", menuListUrlValue)
 
         if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
             $('#UnsavedChanges').modal('show');
