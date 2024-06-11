@@ -545,12 +545,16 @@ function setEditFields(id) {
     }
     else {
         form['menuItem'].style.display = "block"
-        if (element.type.toLowerCase() === 'empty') {
-            form['menuItem'].style.display = "none"
-        }
         form["menuType"].disabled = true
         form["menuItem"].disabled = true
         form["saveUrl"].disabled = true
+        if (element.type.toLowerCase() === 'empty') {
+            form['menuItem'].style.display = "none"
+        }
+        else if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
+            form["menuItem"].disabled = false
+            form["saveUrl"].disabled = false
+        }
     }
     const select = document.getElementById('select-edit-type')
     updateInputOrDatalist(select)
@@ -781,7 +785,12 @@ function toggleChildren(span, event) {
 
 function toggleFlags() {
     const flagsList = document.getElementById('flags-list');
-    flagsList.style.display = flagList.style.display === 'none' ? 'block' : 'none'
+    if (flagsList.style.display === 'none') {
+        flagsList.style.display = 'block';
+    }
+    else{
+        flagsList.style.display = 'none';
+    }
 }
 
 function selectLanguage(languageElement) {
