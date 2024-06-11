@@ -5,7 +5,7 @@
 
     <table name="custom_front_menu_item" namespace="CustomFrontMenu\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
-        <column name="view" required="true" size="255" type="VARCHAR"/>
+        <column name="view" size="255" type="VARCHAR"/>
         <column name="view_id" type="INTEGER"/>
         <column name="title" size="255" type="VARCHAR"/>
         <column name="url" size="255" type="VARCHAR"/>

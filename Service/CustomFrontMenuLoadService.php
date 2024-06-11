@@ -12,6 +12,11 @@ use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Translation\Translator;
+use Thelia\Model\Base\BrandQuery;
+use Thelia\Model\CategoryQuery;
+use Thelia\Model\ContentQuery;
+use Thelia\Model\FolderQuery;
+use Thelia\Model\ProductQuery;
 use Thelia\Tools\URL;
 
 class CustomFrontMenuLoadService
@@ -63,6 +68,7 @@ class CustomFrontMenuLoadService
      * @param CustomFrontMenuItem $parent
      * @return array All the descendants items of the menu root given in parameter
      * @throws PropelException
+     * @throws Exception
      */
     public function loadTableBrowser(CustomFrontMenuItem $parent) : array
     {
@@ -72,7 +78,6 @@ class CustomFrontMenuLoadService
         $request = $this->requestStack->getCurrentRequest();
         /** @var Session $session */
         $session = $request->getSession();
-        $localeAdmin = $session->get('thelia.current.admin_lang')->getLocale();
 
         $descendants = $parent->getChildren();
         foreach ($descendants as $descendant) {
@@ -90,36 +95,46 @@ class CustomFrontMenuLoadService
             }
 
             $view = $descendant->getView();
-            if (!isset($view) || $view === ""){
+            if (!$view){
                 $view = 'url';
             }
             $newArray['type'] = $view;
             $viewId = $descendant->getViewId();
 
             if($view && $viewId && Validator::viewIsValid($view, false)) {
-                $con = Propel::getConnection();
 
-                $table = strtolower($newArray['type']).'_i18n';
-                $stmt = $con->prepare("SELECT locale, title FROM $table WHERE id = :id;");
-                $stmt->bindValue(':id', $viewId, \PDO::PARAM_INT);
-                $stmt->execute();
-
-                $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-                $found = false;
-                foreach ($results as $arrayContent) {
-                    if($arrayContent['locale'] === $localeAdmin) {
-                        $newArray['url']['en_US'] = $arrayContent['title'].'-'.$viewId;
-                        $found = true;
-                    }
+                $formatedView = ucfirst($view);
+                $class = 'Thelia\Model\\' . $formatedView . 'Query';
+                if (!class_exists($class)) {
+                    throw new \Exception("Class $class does not exist.");
                 }
-                if(!$found) {
-                    $newArray['url']['en_US'] = "";
-                    if ($results[0] && $results[0]['title']) {
-                        $newArray['url']['en_US'] = $results[0]['title'].'-'.$viewId;
-                    }
+                /** @var CategoryQuery|ProductQuery|FolderQuery|ContentQuery|BrandQuery $objectQuery */
+                $objectQuery = $class::create();
+                $useI18nQuery = 'use'.$formatedView.'I18nQuery';
+                if (!method_exists($objectQuery, $useI18nQuery)) {
+                    throw new Exception("Method $useI18nQuery does not exist in class $class.");
                 }
 
+                $query = $objectQuery
+                    ->$useI18nQuery()
+                        ->findById($viewId);
+
+                if ($query->isEmpty()) {
+                    throw new Exception("No results found for the specified id $viewId.");
+                }
+
+                foreach ($query as $item) {
+                    if ($item->getLocale() === $session->getAdminLang()->getLocale()) {
+                        $newArray['url']['en_US'] = $item->getTitle().'-'.$viewId;
+                        break;
+                    }
+                    if ($item->getLocale() === 'en_US') {
+                        $newArray['url']['en_US'] = $item->getTitle().'-'.$viewId;
+                    }
+                }
+                if (!$newArray['url']['en_US']) {
+                    $newArray['url']['en_US'] = $query->getFirst()->getTitle().'-'.$viewId;
+                }
             }
 
             $newArray['depth'] = $descendant->getLevel() - 2;
