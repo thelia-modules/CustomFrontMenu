@@ -4,19 +4,33 @@ namespace CustomFrontMenu\Smarty\Plugins;
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use CustomFrontMenu\Service\CustomFrontMenuService;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\Template\TemplateHelperInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Symfony\Component\Asset\Package;
+use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
 
+    private $templateHelper,$kernelDebug,$cacheService;
+
     public function __construct(
         private CustomFrontMenuLoadService $CustomFrontMenuLoadService,
         private CustomFrontMenuService $customFrontMenuService,
-        private Session $session)
-    {
+        private Session $session,
+        TemplateHelperInterface $templateHelper,
+        $kernelDebug,
+        AdapterInterface $cacheService
+    ) {
+        $this->templateHelper = $templateHelper;
+        $this->kernelDebug = $kernelDebug;
+        $this->cacheService = $cacheService;
     }
+
 
     public function getPluginDescriptors(): array
     {
@@ -44,10 +58,10 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
         $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
 
-        $cssPath = THELIA_MODULE_DIR . 'CustomFrontMenu/templates/frontOffice/default/assets/css/customFrontMenu.css.html';
-        $smarty->display($cssPath);
-        $templatePath = THELIA_MODULE_DIR . 'CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
-        $smarty->display($templatePath);
 
+        $cssPath = $smarty->getTemplateDir("CustomFrontMenu"). "assets/css/customFrontMenu.css.html";
+        $smarty->display($cssPath);
+        $templatePath = $smarty->getTemplateDir("CustomFrontMenu"). "customFrontMenu.html";
+        $smarty->display($templatePath);
     }
 }

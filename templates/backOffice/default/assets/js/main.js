@@ -325,7 +325,6 @@ function getFormItems(form) {
 function compareWithMenuList(element) {
     let form = element.closest('form');
     if (!form) {
-        console.error("Form hasn't been found");
         return;
     }
 
