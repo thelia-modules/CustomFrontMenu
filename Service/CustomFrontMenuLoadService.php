@@ -90,7 +90,8 @@ class CustomFrontMenuLoadService
             }
 
             $view = $descendant->getView();
-            if (!isset($view) || $view === ""){
+            
+            if (!$view || $view === ""){
                 $view = 'url';
             }
             $newArray['type'] = $view;

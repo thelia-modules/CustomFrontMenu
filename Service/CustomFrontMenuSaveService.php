@@ -38,15 +38,14 @@ class CustomFrontMenuSaveService
         foreach ($dataArray as $element) {
 
             $item = new CustomFrontMenuItem();
-            $item->insertAsLastChildOf($parent);
-
-            $item->save();
+            $item->insertAsLastChildOf($parent)
+                ->save();
 
             if(strtolower($element['type']) === 'url') {
                 foreach ($element['url'] as $locale => $url) {
                     $content = new CustomFrontMenuItemI18n();
-                    $content->setId($item->getId());
-                    $content->setLocale($locale);
+                    $content->setId($item->getId())
+                        ->setLocale($locale);
                     if (isset($url)) {
                         $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
                     }
@@ -70,13 +69,11 @@ class CustomFrontMenuSaveService
                     }
                 }
             } elseif ($element['type'] !== '') {
-                $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])));
                 $viewIdExploded = explode('-', $element['url']['en_US']);
-                $item->setViewId(intval(end($viewIdExploded)));
-                $item->save();
+                $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])))
+                    ->setViewId(intval(end($viewIdExploded)))
+                    ->save();
             }
-
-            if($element['title'])
 
             foreach ($element['title'] as $locale => $title) {
                 $content = CustomFrontMenuItemI18nQuery::create()
@@ -85,8 +82,8 @@ class CustomFrontMenuSaveService
 
                 if ($content === null) {
                     $content = new CustomFrontMenuItemI18n();
-                    $content->setId($item->getId());
-                    $content->setLocale($locale);
+                    $content->setId($item->getId())
+                        ->setLocale($locale);
                 }
 
                 if(strtolower($element['type']) === 'url' && !isset($element['url'][$locale])) {
@@ -102,15 +99,15 @@ class CustomFrontMenuSaveService
                             }
                         }
                         if (!$found) {
-                            $item->setView('Empty');
-                            $item->setViewId('');
-                            $item->save();
+                            $item->setView('Empty')
+                                ->setViewId('')
+                                ->save();
                         }
                     }
                 }
 
-                $content->setTitle(Validator::completeValidation($title, $session));
-                $content->save();
+                $content->setTitle(Validator::completeValidation($title, $session))
+                    ->save();
             }
 
 

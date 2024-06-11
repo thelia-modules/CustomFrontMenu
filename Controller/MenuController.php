@@ -141,21 +141,19 @@ class MenuController extends BaseAdminController
      * @param SessionInterface $session The user session, used to get locale and to display flashes
      * @param CustomFrontMenuLoadService $customFrontMenuLoadService The loading service
      * @param CustomFrontMenuService $customFrontMenuService The menu service
-     * @param int|null $menuId The id of the menu to load
+     * @param ?int $menuId The id of the menu to load
      * @return array All the data necessary to load the page content : Menu names,  menu items and the current menu id.
      * @throws PropelException
      */
     public function loadMenuItems(SessionInterface $session, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFrontMenuService, ?int $menuId = null) : array
     {
         $menuNames = $customFrontMenuLoadService->loadSelectMenu($customFrontMenuService->getRoot());
+        $data = [];
 
-        if (!isset($menuId)) {
-            if(count($menuNames) > 0) {
-                $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
-            }
+        if (!isset($menuId) && count($menuNames) > 0) {
+            $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
         }
 
-        $data = [];
         if(isset($menuId)) {
             $menu = $customFrontMenuService->getMenu($menuId);
             if (!isset($menu) || $menu->getLevel() !== 1) {
