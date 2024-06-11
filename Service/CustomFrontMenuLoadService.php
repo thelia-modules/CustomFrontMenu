@@ -19,8 +19,8 @@ use Thelia\Tools\URL;
 class CustomFrontMenuLoadService
 {
     public function __construct(
-        private readonly RequestStack $requestStack,
-        private int $COUNT_ID = 1
+        protected readonly RequestStack $requestStack,
+        protected int $COUNT_ID = 1
     )
     {}
 
