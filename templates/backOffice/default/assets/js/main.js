@@ -330,7 +330,6 @@ function compareWithMenuList(element) {
     }
 
     let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
-    console.log(form)
     let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
 
     if (menuItem) {
