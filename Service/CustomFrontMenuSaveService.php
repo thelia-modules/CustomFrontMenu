@@ -9,10 +9,16 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use Exception;
 use Propel\Runtime\Exception\PropelException;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Thelia\Core\HttpFoundation\Session\Session;
 
 class CustomFrontMenuSaveService
 {
+    function __construct(
+        protected RequestStack $requestStack
+    )
+    {}
+
     public function deleteSpecificItems(int $menuId) :  CustomFrontMenuItem
     {
         $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
@@ -33,8 +39,12 @@ class CustomFrontMenuSaveService
      * @throws PropelException
      * @throws Exception
      */
-    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent, SessionInterface $session) : void
+    public function saveTableBrowser(array $dataArray, CustomFrontMenuItem $parent) : void
     {
+        /** @var Session $session */
+        $session = $this->requestStack->getCurrentRequest()->getSession();
+        $adminLocale = $session->getAdminLang()->getLocale();
+
         foreach ($dataArray as $element) {
 
             $item = new CustomFrontMenuItem();
@@ -51,9 +61,8 @@ class CustomFrontMenuSaveService
                     }
                     $content->save();
                     if(!isset($element['title'][$locale])) {
-                        $langLocale = $session->get('thelia.current.admin_lang')->getLocale();
-                        if (isset($element['title'][$langLocale])) {
-                            $element['title'][$locale] = $element['title'][$langLocale];
+                        if (isset($element['title'][$adminLocale])) {
+                            $element['title'][$locale] = $element['title'][$adminLocale];
                         } else {
                             $found = false;
                             foreach ($element['title'] as $value) {
@@ -87,9 +96,8 @@ class CustomFrontMenuSaveService
                 }
 
                 if(strtolower($element['type']) === 'url' && !isset($element['url'][$locale])) {
-                    $langLocale = $session->get('thelia.current.admin_lang')->getLocale();
-                    if (isset($element['url'][$langLocale])) {
-                        $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$langLocale], $session), FilterType::URL));
+                    if (isset($element['url'][$adminLocale])) {
+                        $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$adminLocale], $session), FilterType::URL));
                     } else {
                         $found = false;
                         foreach ($element['url'] as $value) {
@@ -113,7 +121,7 @@ class CustomFrontMenuSaveService
 
 
             if (isset($element['children']) && $element['children'] !== []) {
-                $this->saveTableBrowser($element['children'], $item, $session);
+                $this->saveTableBrowser($element['children'], $item);
             }
 
             $parent->save();

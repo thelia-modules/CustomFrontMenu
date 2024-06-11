@@ -7,6 +7,12 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Validator
 {
+    function __construct(
+        protected SessionInterface $session
+    )
+    {
+
+    }
     /**
      * Manage the problems with empty fields or back quotes presence
      */

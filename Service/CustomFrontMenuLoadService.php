@@ -7,7 +7,6 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Exception;
 use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -68,10 +67,8 @@ class CustomFrontMenuLoadService
     {
         $dataArray = [];
 
-        /** @var Request $request */
-        $request = $this->requestStack->getCurrentRequest();
         /** @var Session $session */
-        $session = $request->getSession();
+        $session = $this->requestStack->getCurrentRequest()->getSession();
         $localeAdmin = $session->get('thelia.current.admin_lang')->getLocale();
 
         $descendants = $parent->getChildren();

@@ -3,7 +3,7 @@
 namespace CustomFrontMenu\Service;
 
 use Propel\Runtime\Exception\PropelException;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -12,7 +12,9 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 
 class CustomFrontMenuService
 {
-    public function __construct()
+    public function __construct(
+        protected readonly RequestStack $requestStack
+    )
     {}
 
     /**
@@ -33,16 +35,18 @@ class CustomFrontMenuService
     /**
      * @throws PropelException
      */
-    public function addMenu(CustomFrontMenuItem $root, string $menuName, SessionInterface $session) : int
+    public function addMenu(CustomFrontMenuItem $root, string $menuName) : int
     {
         $item = new CustomFrontMenuItem();
         $item->insertAsLastChildOf($root);
         $item->save();
+
         $content = new CustomFrontMenuItemI18n();
-        $content->setTitle(Validator::completeValidation($menuName, $session));
+        $content->setTitle(Validator::completeValidation($menuName, $this->requestStack->getCurrentRequest()->getSession()));
         $content->setId($item->getId());
         $content->setLocale('en_US');
         $content->save();
+
         return $item->getId();
     }
 

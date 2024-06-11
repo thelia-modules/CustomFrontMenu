@@ -6,7 +6,6 @@ use CustomFrontMenu\Service\CustomFrontMenuService;
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use OpenAPI\Controller\Front\BaseFrontOpenApiController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpFoundation\Response as ResponseAlias;
 use Thelia\Core\HttpFoundation\JsonResponse;
@@ -18,6 +17,8 @@ use Thelia\Core\Thelia;
 #[Route('open_api/custom-front-menu', name: 'custom_front_menu_api')]
 class CustomFrontMenuAPIController extends BaseFrontOpenApiController
 {
+    function __construct() 
+    {}
     #[Route('/{id}', methods: ['GET'])]
     /**
      * @OA\Get(
@@ -45,7 +46,7 @@ class CustomFrontMenuAPIController extends BaseFrontOpenApiController
      *    ),
      * )
      */
-    public function getMenuAndChildrenById(int $id, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFornMenuService, SessionInterface $session) : JsonResponse
+    public function getMenuAndChildrenById(int $id, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFornMenuService) : JsonResponse
     {
         $menu = $customFrontMenuLoadService->loadTableBrowser($customFornMenuService->getMenu($id));
         if ($menu === null) {
