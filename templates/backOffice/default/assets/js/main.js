@@ -301,8 +301,6 @@ function changeParameters(id) {
 
     deleteEditField('editMenuItemForm')
     generatePreviewMenus()
-
-    closeClosestModal(form);
 }
 
 function getFormItems(form) {
@@ -332,12 +330,21 @@ function compareWithMenuList(element) {
     let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
 
     if (menuItem) {
-        var menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage);
-        var menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage);
+        const menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage)
+        let menuListUrlValue
+        if (form["select-edit-type"] === "url") {
+            menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage)
+        }
+        else{
+            menuListUrlValue = getValueByLocaleOf(menuItem.url, 'en_US')
+        }
 
         if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
-            $('#UnsavedChanges').modal('show');
+            const modal = document.getElementById("UnsavedChanges")
+            $("#UnsavedChanges").modal('show');
+            modal.setAttribute('data-locale', element.getAttribute('data-locale'))
         } else {
+            selectLanguage(element)
             toggleFlags();
         }
     }
