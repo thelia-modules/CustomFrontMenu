@@ -4,13 +4,10 @@ namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
-use Exception;
 use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Propel\Runtime\Exception\PropelException;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Session\Session;
-use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
 
 class CustomFrontMenuLoadService

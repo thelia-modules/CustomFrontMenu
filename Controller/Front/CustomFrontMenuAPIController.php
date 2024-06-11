@@ -7,12 +7,9 @@ use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use OpenAPI\Controller\Front\BaseFrontOpenApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Thelia\Core\HttpFoundation\Response as ResponseAlias;
 use Thelia\Core\HttpFoundation\JsonResponse;
 use OpenApi\Annotations as OA;
-use OpenApi\Attributes\Get;
 use OpenApi\Service\OpenApiService;
-use Thelia\Core\Thelia;
 
 #[Route('open_api/custom-front-menu', name: 'custom_front_menu_api')]
 class CustomFrontMenuAPIController extends BaseFrontOpenApiController

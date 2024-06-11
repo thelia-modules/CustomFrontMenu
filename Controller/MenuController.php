@@ -17,7 +17,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Thelia\Core\Translation\Translator;
-use Thelia\Model\Base\LangQuery;
 use Thelia\Tools\URL;
 
 class MenuController extends BaseAdminController

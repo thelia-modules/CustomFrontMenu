@@ -10,8 +10,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Template\Assets\AssetResolverInterface;
-use Thelia\Core\Translation\Translator;
-use CustomFrontMenu\CustomFrontMenu;
 use TheliaSmarty\Template\SmartyParser;
 
 class ConfigHook extends BaseHook
