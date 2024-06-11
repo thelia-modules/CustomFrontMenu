@@ -7,12 +7,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Validator
 {
-    function __construct(
-        protected SessionInterface $session
-    )
-    {
-
-    }
     /**
      * Manage the problems with empty fields or back quotes presence
      */
@@ -39,26 +33,24 @@ class Validator
         return $string;
     }
 
-    public static function htmlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = false) : string
+    public static function htmlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = true) : string
     {
         $string = trim($string);
 
         $string = strip_tags($string);
 
-        if ($canBeEmpty) {
+        if (!$canBeEmpty) {
             $string = self::stringValidation($string, $session);
         }
-
-        //$string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 
         return $string;
     }
 
-    public static function sqlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = false) : string
+    public static function sqlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = true) : string
     {
         $string = trim($string);
 
-        if ($canBeEmpty) {
+        if (!$canBeEmpty) {
             $string = self::stringValidation($string, $session);
         }
 
@@ -79,8 +71,8 @@ class Validator
     public static function completeValidation(string $string, SessionInterface $session) : string
     {
         $string = self::stringValidation($string, $session);
-        $string = self::htmlSafeValidation($string, $session, true);
-        return self::sqlSafeValidation($string, $session, true);
+        $string = self::htmlSafeValidation($string, $session);
+        return self::sqlSafeValidation($string, $session, false);
     }
 
     /**
