@@ -2,7 +2,7 @@
 
 namespace CustomFrontMenu\Hook;
 
-use CustomFrontMenu\Controller\MenuController;
+use CustomFrontMenu\templates\frontOffice\MenuController;
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use CustomFrontMenu\Service\CustomFrontMenuService;
 use Propel\Runtime\Exception\PropelException;
