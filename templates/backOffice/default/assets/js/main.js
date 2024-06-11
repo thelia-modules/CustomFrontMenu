@@ -12,8 +12,8 @@ var loopsDictionary = {
 let CURRENT_ID = null
 let allowUnload = false
 let selectedLanguage
-let quotePattern = '&280&quote&280&'
-let percentPattern = '&280&percent&280&'
+const quotePattern = '&280&quote&280&'
+const percentPattern = '&280&percent&280&'
 
 // Get from json
 function getFromJson(json) {
@@ -525,11 +525,13 @@ function setEditFields(id) {
     }
     const form = document.getElementById('editMenuItemForm')
     CURRENT_ID = id
-    form.elements['menuItemName'].value = getValueByLocaleOf(element.title)
+    form.elements['menuItemName'].value = getValueByLocaleOf(element.title, selectedLanguage ? selectedLanguage : LOCALE)
     form.elements['menuType'].value = element.type.toLowerCase()
-    form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
     if(element.type.toLowerCase() === 'url') {
         form.elements['menuItem'].value = getValueByLocaleOf(element.url)
+    }
+    else{
+        form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
     }
     
     if (!selectedLanguage || selectedLanguage === LOCALE){
