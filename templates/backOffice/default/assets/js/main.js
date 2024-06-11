@@ -12,8 +12,8 @@ var loopsDictionary = {
 let CURRENT_ID = null
 let allowUnload = false
 let selectedLanguage
-let quotePattern = '&280&quote&280&'
-let percentPattern = '&280&percent&280&'
+const quotePattern = '&280&quote&280&'
+const percentPattern = '&280&percent&280&'
 
 // Get from json
 function getFromJson(json) {
