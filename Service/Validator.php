@@ -90,24 +90,16 @@ class Validator
      *  Valid strings : 'brand', 'category', 'content', 'folder', 'product'.
      *  (case-insensitive)
      * @param string $string
-     * @param bool $stringReturn True : return the valid string | False : return a boolean
-     * @return string|bool Return the valid string if $stringReturn is true, else a boolean
-     * @throws Exception
+     * @return bool Return true if the view $string is valid
      */
-    public static function viewIsValid(string $string, bool $stringReturn) : string|bool
+    public static function viewIsValid(string $string) : bool
     {
         $type = strtolower($string);
         $validTypes = ['brand', 'category', 'content', 'folder', 'product'];
         if (!in_array($type, $validTypes)) {
-            if (!$stringReturn) {
-                return false;
-            }
-            throw new Exception('Invalid view type : '.$string);
+            return false;
         }
-        if (!$stringReturn) {
-            return true;
-        }
-        return $string;
+        return true;
     }
 
     /**
@@ -116,7 +108,7 @@ class Validator
     public static function viewIsValidOrEmpty(string $string) : string
     {
         $type = strtolower($string);
-        if (self::viewIsValid($type, false) || $type === 'empty') {
+        if (self::viewIsValid($type) || $type === 'empty') {
             return $string;
         }
         throw new Exception('Invalid view type : '.$string);

@@ -96,7 +96,7 @@ class CustomFrontMenuLoadService
             $newArray['type'] = $view;
             $viewId = $descendant->getViewId();
 
-            if($view && $viewId && Validator::viewIsValid($view, false)) {
+            if($view && $viewId && Validator::viewIsValid($view)) {
 
                 $formatedView = ucfirst($view);
                 $class = 'Thelia\Model\\' . $formatedView . 'Query';
@@ -191,7 +191,7 @@ class CustomFrontMenuLoadService
             $newArray['title'] = $title;
             $newArray['url'] = $url;
 
-            if (!$url && Validator::viewIsValid($descendant->getView(), false)) {
+            if (!$url && Validator::viewIsValid($descendant->getView())) {
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
                 if ($view && $viewId) {
