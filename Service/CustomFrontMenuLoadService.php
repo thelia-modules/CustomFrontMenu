@@ -18,6 +18,7 @@ use Thelia\Model\ContentQuery;
 use Thelia\Model\FolderQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\Tools\URL;
+use function Symfony\Component\Translation\t;
 
 class CustomFrontMenuLoadService
 {
@@ -110,30 +111,34 @@ class CustomFrontMenuLoadService
                 }
                 /** @var CategoryQuery|ProductQuery|FolderQuery|ContentQuery|BrandQuery $objectQuery */
                 $objectQuery = $class::create();
-                $useI18nQuery = 'use'.$formatedView.'I18nQuery';
-                if (!method_exists($objectQuery, $useI18nQuery)) {
-                    throw new Exception("Method $useI18nQuery does not exist in class $class.");
-                }
 
                 $query = $objectQuery
-                    ->$useI18nQuery()
-                        ->findById($viewId);
+                    ->filterById($viewId)
+                    ->joinWith($formatedView.'I18n')
+                    ->find();
+
+                $queryI18n = $query->getColumnValues($formatedView.'I18ns')[0];
 
                 if ($query->isEmpty()) {
                     throw new Exception("No results found for the specified id $viewId.");
                 }
 
-                foreach ($query as $item) {
+                $title = null;
+                foreach ($queryI18n as $item) {
                     if ($item->getLocale() === $session->getAdminLang()->getLocale()) {
-                        $newArray['url']['en_US'] = $item->getTitle().'-'.$viewId;
+                        $title = $item->getTitle();
                         break;
                     }
                     if ($item->getLocale() === 'en_US') {
-                        $newArray['url']['en_US'] = $item->getTitle().'-'.$viewId;
+                        $title = $item->getTitle();
                     }
                 }
-                if (!$newArray['url']['en_US']) {
-                    $newArray['url']['en_US'] = $query->getFirst()->getTitle().'-'.$viewId;
+                if (!$title) {
+                     $title = $queryI18n[0]->getTitle();
+                }
+                $newArray['url']['en_US'] = $title.'-'.$viewId;
+                if (strtolower($view) === 'product') {
+                    $newArray['url']['en_US'] = $title.'-'.$query->getFirst()->getRef().'-'.$viewId; ;
                 }
             }
 
