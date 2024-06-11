@@ -31,7 +31,7 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 
     public function renderCustomFrontMenuPlugin($params, $smarty): void
     {
-        $langAdmin = $this->requestStack->getCurrentRequest()->getSession()->getAdminLang()->getLocale();
+        $lang = $this->requestStack->getCurrentRequest()->getSession()->getLang()->getLocale();
 
         if (!$params['menu_id']) {
             throw new \InvalidArgumentException('The menu_id parameter is required', 1);
@@ -42,7 +42,7 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
             throw new \InvalidArgumentException('The menu does not exist', 2);
         }
 
-        $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $langAdmin);
+        $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $lang);
         $smarty->assign('menuItems', $menuItems);
 
         $cssPath = $smarty->getTemplateDir("CustomFrontMenu"). "assets/css/customFrontMenu.css.html";
