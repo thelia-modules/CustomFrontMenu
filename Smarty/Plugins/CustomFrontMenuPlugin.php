@@ -3,9 +3,12 @@ namespace CustomFrontMenu\Smarty\Plugins;
 
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use CustomFrontMenu\Service\CustomFrontMenuService;
+use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\Template\TemplateHelperInterface;
 use TheliaSmarty\Template\AbstractSmartyPlugin;
 use TheliaSmarty\Template\SmartyPluginDescriptor;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 class CustomFrontMenuPlugin extends AbstractSmartyPlugin
 {
@@ -13,8 +16,8 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
     public function __construct(
         private CustomFrontMenuLoadService $CustomFrontMenuLoadService,
         private CustomFrontMenuService $customFrontMenuService,
-        private Session $session)
-    {
+        private Session $session
+    ) {
     }
 
     public function getPluginDescriptors(): array
@@ -43,10 +46,9 @@ class CustomFrontMenuPlugin extends AbstractSmartyPlugin
         $menuItems = $this->CustomFrontMenuLoadService->loadTableBrowserLang($menu, $this->session->get('thelia.current.lang')->getLocale());
         $smarty->assign('menuItems', $menuItems);
 
-        $cssPath = THELIA_MODULE_DIR . 'CustomFrontMenu/templates/frontOffice/default/assets/css/customFrontMenu.css.html';
+        $cssPath = $smarty->getTemplateDir("CustomFrontMenu"). "assets/css/customFrontMenu.css.html";
         $smarty->display($cssPath);
-        $templatePath = THELIA_MODULE_DIR . 'CustomFrontMenu/templates/frontOffice/default/customFrontMenu.html';
+        $templatePath = $smarty->getTemplateDir("CustomFrontMenu"). "customFrontMenu.html";
         $smarty->display($templatePath);
-
     }
 }
