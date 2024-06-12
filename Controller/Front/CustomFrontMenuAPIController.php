@@ -14,8 +14,6 @@ use OpenApi\Service\OpenApiService;
 #[Route('open_api/custom-front-menu', name: 'custom_front_menu_api')]
 class CustomFrontMenuAPIController extends BaseFrontOpenApiController
 {
-    function __construct() 
-    {}
     #[Route('/{id}', methods: ['GET'])]
     /**
      * @OA\Get(
