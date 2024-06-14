@@ -305,10 +305,34 @@ function changeParameters(id) {
 }
 
 function getFormItems(form) {
-    let menuItemName = form.elements['menuItemName'].value.trim()
-    if (menuItemName === null || menuItemName === '') {
-        menuItemName = 'New menu item'
+    const menuItemNames = form.elements['menuItemName']
+    let listOfNames = {}
+    let found = false
+    let englishOrLocaleName = ""
+    for (const menuItemName of menuItemNames){
+        const locale = menuItemName.getAttribute("data-locale")
+        const nameOfMenu = menuItemName.value.trim()
+        listOfNames[locale] = nameOfMenu
+        if (!found && locale === LOCALE){
+            englishOrLocaleName = nameOfMenu
+            found = true
+        }
+        else if(!found && locale === "en_US"){
+            englishOrLocaleName = nameOfMenu
+        }
     }
+
+    if (englishOrLocaleName !== ""){
+        for (let [local, name] of Object.entries(listOfNames)){
+            if (name === ""){
+                listOfNames[name] = englishOrLocaleName
+            }
+        }
+    }
+
+
+    console.log(listOfNames)
+
     let menuItemType = form.elements['menuType'].value.trim()
     if (menuItemType === null || menuItemType === '') {
         menuItemType = 'url'
@@ -319,36 +343,6 @@ function getFormItems(form) {
         selectedKey = ''
     }
     return [menuItemName, menuItemType, selectedKey]
-}
-
-function compareWithMenuList(element) {
-    let form = element.closest('form');
-    if (!form) {
-        return;
-    }
-
-    let [currentNameValue, currentTypeValue, currentUrlValue] = getFormItems(form);
-    let menuItem = findMenuInList(CURRENT_ID, MENU_LIST);
-
-    if (menuItem) {
-        const menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage)
-        let menuListUrlValue = ""
-        if (form["select-edit-type"] === "url") {
-            menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage)
-        }
-        else if (form["select-edit-type"] in loopsDictionary){
-            menuListUrlValue = menuItem.typeId
-        }
-
-        if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === "undefined"))) {
-            const modal = document.getElementById("UnsavedChanges")
-            $("#UnsavedChanges").modal('show');
-            modal.setAttribute('data-locale', element.getAttribute('data-locale'))
-        } else {
-            selectLanguage(element)
-        }
-        toggleFlags()
-    }
 }
 // End edit menu
 
@@ -395,12 +389,23 @@ function deleteMenu() {
 
 // Validation
 function isValid(form) {
-    const menuItemName = form.elements['menuItemName'].value.trim()
+    const errorMessageTitle = form.querySelector('#error-message-title')
+    const errorMessageUrl = form.querySelector('#error-message-url')
+    errorMessageTitle.style.display = 'none';
+    errorMessageUrl.style.display = 'none';
+
+    const menuItemNames = form.elements['menuItemName']
+    let listOfNames = {}
+    for (const menuItemName of menuItemNames){
+        if (menuItemName.value.trim().includes("`")){
+            errorMessageTitle.style.display = 'block';
+            return false
+        }
+        listOfNames[menuItemName.getAttribute("data-locale")] = menuItemName.value.trim()
+    }
+
     const menuItemType = form.elements['menuType'].value.trim()
     const errorType = form.getElementsByClassName("error")[0]
-    const errorMessageTitle = form.querySelector('#error-message-title');
-    const errorMessageUrl = form.querySelector('#error-message-url');
-
     errorType.innerText = ""
     if (menuItemType === ""){
         errorType.innerText = "Choose a category"
@@ -429,14 +434,6 @@ function isValid(form) {
             errorType.innerText = "Invalid " + menuItemType
             return false
         }
-    }
-
-    errorMessageTitle.style.display = 'none';
-    errorMessageUrl.style.display = 'none';
-
-    if (menuItemName.includes("`")) {
-        errorMessageTitle.style.display = 'block';
-        return false
     }
 
     if (menuItemUrl.includes("`")) {
@@ -542,7 +539,6 @@ function setEditFields(id) {
         if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
             form['menuItem'].style.display = "block"
             form["menuItem"].disabled = false
-            form["saveUrl"].disabled = false
         }
         else if (element.type.toLowerCase() === 'empty') {
             form['menuItem'].style.display = "none"
@@ -550,20 +546,17 @@ function setEditFields(id) {
         else {
             form['menuItem'].style.display = "block"
             form["menuItem"].disabled = false
-            form["saveUrl"].disabled = false
         }
     }
     else {
         form['menuItem'].style.display = "block"
         form["menuType"].disabled = true
         form["menuItem"].disabled = true
-        form["saveUrl"].disabled = true
         if (element.type.toLowerCase() === 'empty') {
             form['menuItem'].style.display = "none"
         }
         else if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
             form["menuItem"].disabled = false
-            form["saveUrl"].disabled = false
         }
     }
     const select = document.getElementById('select-edit-type')
@@ -792,12 +785,6 @@ function toggleChildren(span, event) {
         }
     }
 }
-
-function toggleFlags() {
-    const flagsList = document.getElementById('flags-list');
-    flagsList.style.display = flagsList.style.display === 'none' ? 'block' : 'none';
-}
-
 
 function selectLanguage(languageElement) {
     const currentForm = document.forms["editMenuItemForm"]

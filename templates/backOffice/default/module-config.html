@@ -186,10 +186,10 @@
 </div>
 
 <!-- Edit Menu Item Modal -->
+<!-- Version originale
 <div class="modal fade" id="EditMenu" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <li class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">
@@ -262,6 +262,73 @@
                     <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId());closeClosestModal(this)">
                         <span class="glyphicon glyphicon-check"></span>
                         {intl l="Save everything" d="customfrontmenu.bo.default"}
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('editMenuItemForm')">
+                        {intl l="Close" d="customfrontmenu.bo.default"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+-->
+
+<div class="modal fade" id="EditMenu" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    {intl l="Edit menu" d="customfrontmenu.bo.default"}
+                </h4>
+            </div>
+
+            <form id="editMenuItemForm">
+                <div class="modal-body">
+                    <input type="hidden" id="menuId" name="menuId" value="" />
+
+                    <div id="error-message-title" style="color: red; display: none;">
+                        Cannot use back quote ( ` )
+                    </div>
+                    <div class="edit-modal-line">
+                        <label for="menuItemName">
+                            {intl l="Item name" d="customfrontmenu.bo.default"}
+                        </label>
+                        <div id="menu-item-list-of-names">
+                        {loop type="lang" name="the-loop-name"}
+                            <div class ="item-name-by-language">
+                                <input type="text" name="menuItemName" data-locale="{$LOCALE}"/>
+                                <img class="edit-menu-flags" src="/assets/backOffice/default/template-assets/assets/img/svgFlags/{$LOCALE|substr:0:2}.svg" alt="{$LOCALE}" />
+                            </div>
+                        {/loop}
+                        <br/><br/>
+                        </div>
+                    </div>
+
+                    <div id="error-message-url" style="color: red; display: none;">
+                        Cannot use back quote ( ` )
+                    </div>
+
+                    <div class="edit-modal-line">
+                        <label for="menuItemEdit">
+                            {intl l="Target item" d="customfrontmenu.bo.default"}
+                        </label>
+                        <select id="select-edit-type" class="menuType btn top-btn mr" name="menuType" onchange="updateInputOrDatalist(this); resetTargetField(this)">
+                            <option value="empty">{intl l="No target item" d="customfrontmenu.bo.default"}</option>
+                            <option value="url">{intl l="Personal url" d="customfrontmenu.bo.default"}</option>
+                        </select>
+                        <input list="itemListEdit" type="text" id="menuItemEdit" name="menuItem" style="display:none">
+                        <datalist id="itemListEdit" class="itemList"></datalist>
+                    </div>
+                    <p class="error"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
+                        <span class="glyphicon glyphicon-check"></span>
+                        {intl l="Save" d="customfrontmenu.bo.default"}
                     </button>
                     <button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteEditField('editMenuItemForm')">
                         {intl l="Close" d="customfrontmenu.bo.default"}

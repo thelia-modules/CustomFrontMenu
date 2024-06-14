@@ -119,7 +119,7 @@ ul.menu-item:last-child {
 
 .edit-modal-line {
     display: flex;
-    align-items: center;
+    align-items: start;
     margin-bottom: 15px;
 }
 
@@ -155,11 +155,6 @@ ul.menu-item:last-child {
     border-radius: 10px;
 }
 
-.edit-menu-flags{
-    width: 100%;
-    margin: 1em 0 1em 0;
-}
-
 .edit-modal-line select{
     margin-right: 10px;
 }
@@ -175,6 +170,21 @@ ul.menu-item:last-child {
 .itemList option {
     display: none;
 }
+
+#menu-item-list-of-names{
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-menu-flags{
+    width: 30px;
+}
+
+.item-name-by-language {
+    align-items: center;
+    margin: 5px 0 5px 0;
+}
+
 /* ------------------------------ End edit modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
