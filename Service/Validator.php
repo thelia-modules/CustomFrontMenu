@@ -81,10 +81,10 @@ class Validator
      *
      *  Valid strings : 'brand', 'category', 'content', 'folder', 'product'.
      *  (case-insensitive)
-     * @param string $string
+     * @param ?string $string
      * @return bool Return true if the view $string is valid
      */
-    public static function viewIsValid(string $string) : bool
+    public static function viewIsValid(?string $string) : bool
     {
         $type = strtolower($string);
         $validTypes = ['brand', 'category', 'content', 'folder', 'product'];
