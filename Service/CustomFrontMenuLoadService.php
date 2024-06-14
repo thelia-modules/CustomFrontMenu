@@ -130,9 +130,9 @@ class CustomFrontMenuLoadService
                 if (!$title) {
                      $title = $queryI18n[0]->getTitle();
                 }
-                $newArray['url']['en_US'] = $title.'-'.$viewId;
+                $newArray['typeId'] = $title.'-'.$viewId;
                 if (strtolower($view) === 'product') {
-                    $newArray['url']['en_US'] = $title.'-'.$query->getFirst()->getRef().'-'.$viewId; ;
+                    $newArray['typeId'] = $title.'-'.$query->getFirst()->getRef().'-'.$viewId; ;
                 }
             }
 

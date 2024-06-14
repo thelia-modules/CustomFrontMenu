@@ -78,7 +78,7 @@ class CustomFrontMenuSaveService
                     }
                 }
             } elseif ($element['type'] !== '') {
-                $viewIdExploded = explode('-', $element['url']['en_US']);
+                $viewIdExploded = explode('-', $element['typeId']);
                 $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])))
                     ->setViewId(intval(end($viewIdExploded)))
                     ->save();
