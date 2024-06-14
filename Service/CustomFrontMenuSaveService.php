@@ -77,7 +77,7 @@ class CustomFrontMenuSaveService
                         }
                     }
                 }
-            } elseif ($element['type'] !== '') {
+            } elseif (strtolower($element['type']) !== 'empty') {
                 $viewIdExploded = explode('-', $element['typeId']);
                 $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])))
                     ->setViewId(intval(end($viewIdExploded)))
@@ -95,8 +95,8 @@ class CustomFrontMenuSaveService
                         ->setLocale($locale);
                 }
 
-                if(strtolower($element['type']) === 'url' && !$element['url'][$locale]) {
-                    if ($element['url'][$adminLocale]) {
+                if(strtolower($element['type']) === 'url' && !isset($element['url'][$locale])) {
+                    if (isset($element['url'][$adminLocale])) {
                         $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($element['url'][$adminLocale], $session), FilterType::URL));
                     } else {
                         $found = false;
