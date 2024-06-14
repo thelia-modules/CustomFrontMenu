@@ -332,22 +332,22 @@ function compareWithMenuList(element) {
 
     if (menuItem) {
         const menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage)
-        let menuListUrlValue
+        let menuListUrlValue = ""
         if (form["select-edit-type"] === "url") {
             menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage)
         }
-        else{
+        else if (form["select-edit-type"] in loopsDictionary){
             menuListUrlValue = menuItem.typeId
         }
 
-        if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
+        if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === "undefined"))) {
             const modal = document.getElementById("UnsavedChanges")
             $("#UnsavedChanges").modal('show');
             modal.setAttribute('data-locale', element.getAttribute('data-locale'))
         } else {
             selectLanguage(element)
-            toggleFlags();
         }
+        toggleFlags()
     }
 }
 // End edit menu
@@ -830,7 +830,6 @@ function selectLanguage(languageElement) {
         }
     });
     document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
-    toggleFlags();
 }
 
 // End drop down
