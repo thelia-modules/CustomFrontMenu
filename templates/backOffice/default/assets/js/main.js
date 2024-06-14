@@ -35,7 +35,7 @@ function getValueByLocaleOf(element, locale) {
             found = true
             break
         } 
-        if (key === LOCALE) {
+        if (key === 'en_US') {
             result = val
             found = true
         }
@@ -202,6 +202,7 @@ function addCustomMenuItem(element, id = "0") {
         id: getNextId(),
         title: {},
         type: menuItemType,
+        typeId: null,
         url: {},
         depth: depthToAdd,
         children: []
@@ -209,7 +210,7 @@ function addCustomMenuItem(element, id = "0") {
     newItem.title[LOCALE] = menuItemName
     newItem.url[LOCALE] = menuItemUrl
     if (menuItemType.toLowerCase() !== "url") {
-        newItem.url["en_US"] = menuItemUrl
+        newItem.typeId = menuItemUrl
     }
 
     let newMenu = generateMenuRecursive(newItem)
@@ -336,7 +337,7 @@ function compareWithMenuList(element) {
             menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage)
         }
         else{
-            menuListUrlValue = getValueByLocaleOf(menuItem.url, 'en_US')
+            menuListUrlValue = menuItem.typeId
         }
 
         if (!(currentNameValue === menuListNameValue && (currentUrlValue === menuListUrlValue || currentUrlValue === ""))) {
@@ -491,14 +492,14 @@ function saveMenuItemUrl() {
     }
 
     const itemType = editForm["menuType"].value
-    let modifiedLocal = "en_US"
-    if (selectedLanguage && itemType.toLowerCase() === 'url') {
-        modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE
-    }
-
     menuToModify.type = itemType
 
-    menuToModify.url[modifiedLocal] = editForm["menuItem"].value
+    if (itemType.toLowerCase() === "url") {
+        const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE
+        menuToModify.url[modifiedLocal] = editForm["menuItem"].value
+    } else {
+        menuToModify.typeId = editForm["menuItem"].value
+    }
 }
 
 function saveTitleTypeAndUrl(id, title, type, url) {
@@ -514,7 +515,7 @@ function saveTitleTypeAndUrl(id, title, type, url) {
     menuToModify.type = type
     menuToModify.url[modifiedLocal] = url
     if (type.toLowerCase() !== "url") {
-        menuToModify.url["en_US"] = url
+        menuToModify.typeId = url
     }
 }
 // End save data
@@ -534,7 +535,7 @@ function setEditFields(id) {
         form.elements['menuItem'].value = getValueByLocaleOf(element.url)
     }
     else{
-        form.elements['menuItem'].value = getValueByLocaleOf(element.url, 'en_US')
+        form.elements['menuItem'].value = element.typeId
     }
     
     if (!selectedLanguage || selectedLanguage === LOCALE){
@@ -807,7 +808,7 @@ function selectLanguage(languageElement) {
         currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
     }
     else {
-        currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, 'en_US')
+        currentForm['menuItem'].value = currentMenu.typeId
     }
 
     currentForm["menuType"].disabled = false
