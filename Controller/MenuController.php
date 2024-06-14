@@ -126,7 +126,7 @@ class MenuController extends BaseAdminController
 
         $this->getSession()->getFlashBag()->add('success', Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME));
 
-        if ($_COOKIE['menuId']) {
+        if (isset($_COOKIE['menuId'])) {
             setcookie('menuId', -1);
         }
 

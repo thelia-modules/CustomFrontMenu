@@ -60,8 +60,8 @@ class CustomFrontMenuSaveService
                         $content->setUrl(Validator::filterValidation(Validator::htmlSafeValidation($url, $session), FilterType::URL));
                     }
                     $content->save();
-                    if(!$element['title'][$locale]) {
-                        if ($element['title'][$adminLocale]) {
+                    if(!isset($element['title'][$locale])) {
+                        if (isset($element['title'][$adminLocale])) {
                             $element['title'][$locale] = $element['title'][$adminLocale];
                         } else {
                             $found = false;
