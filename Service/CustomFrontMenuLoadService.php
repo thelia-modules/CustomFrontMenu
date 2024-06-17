@@ -84,13 +84,17 @@ class CustomFrontMenuLoadService
                 throw new PropelException('No content found for the given id:' . $descendant->getId());
             }
 
+            $urlExist = false;
             foreach ($I18nMenus as $I18nMenu) {
                 $newArray['title'][$I18nMenu->getLocale()] = $I18nMenu->getTitle();
                 $newArray['url'][$I18nMenu->getLocale()] = $I18nMenu->getUrl();
+                if($I18nMenu->getUrl()) {
+                    $urlExist = true;
+                }
             }
 
             $view = $descendant->getView();
-            if (!$view){
+            if (!$view && $urlExist){
                 $view = 'url';
             }
             $newArray['type'] = $view;
@@ -191,7 +195,7 @@ class CustomFrontMenuLoadService
             $newArray['title'] = $title;
             $newArray['url'] = $url;
 
-            if (!$url && Validator::viewIsValid($descendant->getView())) {
+            if (Validator::viewIsValid($descendant->getView())) {
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
                 if ($view && $viewId) {

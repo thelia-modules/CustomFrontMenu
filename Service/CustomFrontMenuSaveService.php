@@ -82,6 +82,10 @@ class CustomFrontMenuSaveService
                 $item->setView(ucfirst(Validator::viewIsValidOrEmpty($element['type'])))
                     ->setViewId(intval(end($viewIdExploded)))
                     ->save();
+            } else {
+                $item->setView('Empty')
+                    ->setViewId('')
+                    ->save();
             }
 
             foreach ($element['title'] as $locale => $title) {
