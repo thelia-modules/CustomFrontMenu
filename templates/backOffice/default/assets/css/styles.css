@@ -116,13 +116,6 @@ ul.menu-item:last-child {
     margin-bottom: 20px;
 }
 
-
-.edit-modal-line {
-    display: flex;
-    align-items: start;
-    margin-bottom: 15px;
-}
-
 .edit-modal-line label{
     margin-bottom: 0;
 }
@@ -175,12 +168,39 @@ ul.menu-item:last-child {
     width: 30px;
 }
 
-.item-name-by-language {
-    align-items: center;
+.item-name-by-language-maskable{
     margin: 5px 0 5px 0;
 }
 
+.item-name-by-language-maskable input{
+    margin-right: 5px;
+    width: calc(100% - 40px);
+}
+
 /* ------------------------------ End edit modal ------------------------------ */
+
+/* ------------------------------ Begin edit modal && add modal ------------------------------ */
+
+.item-name-by-language {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0 5px 0;
+}
+
+.item-name-by-language input {
+    width: 50%;
+    margin-right: 5px;
+}
+
+.item-name-by-language img, .item-name-by-language-maskable img{
+    height: calc(100% - 10px);
+}
+
+.edit-modal-line {
+    margin: 15px 0 15px 0;
+}
+/* ------------------------------ End edit modal && add modal ------------------------------ */
 
 /* ------------------------------ Begin drop down ------------------------------ */
 

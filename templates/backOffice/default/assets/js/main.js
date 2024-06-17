@@ -1146,21 +1146,31 @@ function updateDataList(selectedKey, parentDiv) {
 function updateInputOrDatalist(selectElement) {
     const selectedKey = selectElement.value;
     const parentDiv = selectElement.closest('.edit-modal-line');
-    const inputElement = selectElement.form["menuItem"]
+    const languageDivs = parentDiv.querySelectorAll('.item-name-by-language-maskable');
     const datalistElement = parentDiv.querySelector('.itemList');
+    const defaultInputElement = parentDiv.querySelector('#menuItemEdit');
 
     if (selectedKey === "" || selectedKey === "empty") {
-        inputElement.style.display = "none";
-        inputElement.value = "";
+        defaultInputElement.style.display = "none";
+        defaultInputElement.value = "";
         datalistElement.style.display = "none";
+        languageDivs.forEach(div => {
+            div.style.display = "none";
+        });
     } else if (selectedKey === "url") {
-        inputElement.style.display = "block";
+        defaultInputElement.style.display = "none";
         datalistElement.style.display = "none";
         datalistElement.innerHTML = "";
+        languageDivs.forEach(div => {
+            div.style.display = "block";
+        });
     } else {
-        inputElement.style.display = "block";
+        defaultInputElement.style.display = "block";
         datalistElement.style.display = "block";
         updateDataList(selectedKey, parentDiv);
+        languageDivs.forEach(div => {
+            div.style.display = "none";
+        });
     }
 }
 
