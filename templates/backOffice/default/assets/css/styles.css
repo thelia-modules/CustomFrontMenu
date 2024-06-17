@@ -171,11 +171,6 @@ ul.menu-item:last-child {
     display: none;
 }
 
-#menu-item-list-of-names{
-    display: flex;
-    flex-direction: column;
-}
-
 .edit-menu-flags{
     width: 30px;
 }

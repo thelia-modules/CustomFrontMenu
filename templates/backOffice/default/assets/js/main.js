@@ -29,14 +29,14 @@ function getValueByLocaleOf(element, locale) {
     }
     let found = false
     let result
-    for (const [key, val] of Object.entries(element)) {
-        if (key === locale) {
-            result = val
+    for (const [locale, title] of Object.entries(element)) {
+        if (locale === locale) {
+            result = title
             found = true
             break
         } 
-        if (key === 'en_US') {
-            result = val
+        if (locale === 'en_US') {
+            result = title
             found = true
         }
     }
@@ -200,26 +200,27 @@ function addCustomMenuItem(element, id = "0") {
     }
     let newItem = {
         id: getNextId(),
-        title: {},
+        title: menuItemName,
         type: menuItemType,
         typeId: null,
         url: {},
         depth: depthToAdd,
         children: []
-    };
-    newItem.title[LOCALE] = menuItemName
-    newItem.url[LOCALE] = menuItemUrl
-    if (menuItemType.toLowerCase() !== "url") {
+    }
+    if (menuItemType.toLowerCase() !== "url"){
         newItem.typeId = menuItemUrl
+    }
+    else{
+        newItem.url[LOCALE] = menuItemUrl
     }
 
     let newMenu = generateMenuRecursive(newItem)
     if (menu === null) {
-        document.getElementById('menu-item-list').innerHTML += newMenu;
-        MENU_LIST.push(newItem);
+        document.getElementById('menu-item-list').innerHTML += newMenu
+        MENU_LIST.push(newItem)
     } else {
-        let childNodes = document.getElementById(id).parentNode.childNodes;
-        let ulElement = null;
+        let childNodes = document.getElementById(id).parentNode.childNodes
+        let ulElement = null
         for (let i = 0; i < childNodes.length; i++) {
             if (childNodes[i].nodeType === Node.ELEMENT_NODE && childNodes[i].classList.contains('menu-item')) {
                 ulElement = childNodes[i];
@@ -302,18 +303,21 @@ function changeParameters(id) {
 
     deleteEditField('editMenuItemForm')
     generatePreviewMenus()
+    closeClosestModal(form)
 }
 
 function getFormItems(form) {
-    const menuItemNames = form.elements['menuItemName']
     let listOfNames = {}
     let found = false
     let englishOrLocaleName = ""
-    for (const menuItemName of menuItemNames){
-        const locale = menuItemName.getAttribute("data-locale")
-        const nameOfMenu = menuItemName.value.trim()
-        listOfNames[locale] = nameOfMenu
-        if (!found && locale === LOCALE){
+
+    const menuItemNameInputs = form.getElementsByClassName("item-name-by-language")
+    for (child of menuItemNameInputs){
+        const input = child.querySelector("input")
+        const locale = input.getAttribute("data-locale")
+        const nameOfMenu = input.value.trim()
+        listOfNames[input.getAttribute("data-locale")] = input.value.trim()
+        if (!found && locale === LOCALE && nameOfMenu !== ""){
             englishOrLocaleName = nameOfMenu
             found = true
         }
@@ -325,24 +329,21 @@ function getFormItems(form) {
     if (englishOrLocaleName !== ""){
         for (let [local, name] of Object.entries(listOfNames)){
             if (name === ""){
-                listOfNames[name] = englishOrLocaleName
+                listOfNames[local] = englishOrLocaleName
             }
         }
     }
 
-
-    console.log(listOfNames)
-
     let menuItemType = form.elements['menuType'].value.trim()
     if (menuItemType === null || menuItemType === '') {
-        menuItemType = 'url'
+        menuItemType = 'empty'
     }
 
     let selectedKey = form.elements['menuItem'].value
     if (selectedKey === null) {
         selectedKey = ''
     }
-    return [menuItemName, menuItemType, selectedKey]
+    return [listOfNames, menuItemType, selectedKey]
 }
 // End edit menu
 
@@ -394,19 +395,37 @@ function isValid(form) {
     errorMessageTitle.style.display = 'none';
     errorMessageUrl.style.display = 'none';
 
-    const menuItemNames = form.elements['menuItemName']
-    let listOfNames = {}
-    for (const menuItemName of menuItemNames){
-        if (menuItemName.value.trim().includes("`")){
+    const menuItemName = form.getElementsByClassName("item-name-by-language")
+    let found = false
+    let englishOrLocaleName
+
+    for (child of menuItemName){
+        input = child.querySelector("input")
+
+        const locale = input.getAttribute("data-locale")
+        const nameOfMenu = input.value.trim()
+        if (nameOfMenu.includes("`")){
             errorMessageTitle.style.display = 'block';
             return false
         }
-        listOfNames[menuItemName.getAttribute("data-locale")] = menuItemName.value.trim()
+
+        if (!found && locale === LOCALE && nameOfMenu !== ""){
+            englishOrLocaleName = nameOfMenu
+            found = true
+        }
+        else if(!found && locale === "en_US"){
+            englishOrLocaleName = nameOfMenu
+        }
     }
 
     const menuItemType = form.elements['menuType'].value.trim()
     const errorType = form.getElementsByClassName("error")[0]
     errorType.innerText = ""
+    if (englishOrLocaleName === ""){
+        errorType.innerText = "English value or local value must be entered"
+        return false
+    }
+
     if (menuItemType === ""){
         errorType.innerText = "Choose a category"
         return false
@@ -508,11 +527,13 @@ function saveTitleTypeAndUrl(id, title, type, url) {
         return
     }
 
-    menuToModify.title[modifiedLocal] = title
+    menuToModify.title = title
     menuToModify.type = type
-    menuToModify.url[modifiedLocal] = url
-    if (type.toLowerCase() !== "url") {
+    if (type.toLowerCase() !== "url"){
         menuToModify.typeId = url
+    }
+    else{
+        menuToModify.url[LOCALE] = url
     }
 }
 // End save data
@@ -525,8 +546,11 @@ function setEditFields(id) {
         return
     }
     const form = document.getElementById('editMenuItemForm')
+    const menuTitles = element.title
     CURRENT_ID = id
-    form.elements['menuItemName'].value = getValueByLocaleOf(element.title, selectedLanguage ? selectedLanguage : LOCALE)
+    for (const inputToFill of form.querySelectorAll("input")){
+        inputToFill.value = menuTitles[inputToFill.getAttribute("data-locale")]
+    }
     form.elements['menuType'].value = element.type.toLowerCase()
     if(element.type.toLowerCase() === 'url') {
         form.elements['menuItem'].value = getValueByLocaleOf(element.url)
@@ -565,8 +589,9 @@ function setEditFields(id) {
 
 function deleteEditField(formId) {
     const form = document.getElementById(formId)
-    form.elements['menuItemName'].value = ""
-    form.elements['menuItem'].value = ""
+    for (const inputToClear of form.querySelectorAll("input")){
+        inputToClear.value = ""
+    }
 }
 // End form edit field
 
