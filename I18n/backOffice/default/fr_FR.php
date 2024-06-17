@@ -29,7 +29,7 @@ return array(
     'Menu name cannot be empty' => 'Le nom d\'un menu ne peut pas être vide',
     'Menu title' => "Titre du menu",
     'No parent' => 'Aucun parent',
-    'No target item' => 'Pas de produit cible',
+    'No target item' => 'Pas d\'élément cible',
     'Parent' => 'Parent',
     'Personal url' => 'Url personnelle',
     'Position' => 'Position',
