@@ -333,10 +333,10 @@ function compareWithMenuList(element) {
     if (menuItem) {
         const menuListNameValue = getValueByLocaleOf(menuItem.title, selectedLanguage)
         let menuListUrlValue = ""
-        if (form["select-edit-type"] === "url") {
+        if (form["select-edit-type"].value === "url") {
             menuListUrlValue = getValueByLocaleOf(menuItem.url, selectedLanguage)
         }
-        else if (form["select-edit-type"] in loopsDictionary){
+        else if (form["select-edit-type"].value in loopsDictionary){
             menuListUrlValue = menuItem.typeId
         }
 
