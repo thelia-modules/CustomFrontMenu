@@ -202,16 +202,15 @@ function addCustomMenuItem(element, id = "0") {
         id: getNextId(),
         title: menuItemName,
         type: menuItemType,
-        typeId: null,
-        url: {},
         depth: depthToAdd,
         children: []
     }
+
     if (menuItemType.toLowerCase() !== "url"){
         newItem.typeId = menuItemUrl
     }
-    else{
-        newItem.url[LOCALE] = menuItemUrl
+    else if (menuItemType.toLowerCase() !== "empty"){
+        newItem.url = menuItemUrl
     }
 
     let newMenu = generateMenuRecursive(newItem)
@@ -308,8 +307,10 @@ function changeParameters(id) {
 
 function getFormItems(form) {
     let listOfNames = {}
+    let listOfUrls = {}
     let found = false
     let englishOrLocaleName = ""
+    let englishOrLocaleUrl = ""
 
     const menuItemNameInputs = form.getElementsByClassName("item-name-by-language")
     for (child of menuItemNameInputs){
@@ -339,11 +340,35 @@ function getFormItems(form) {
         menuItemType = 'empty'
     }
 
-    let selectedKey = form.elements['menuItem'].value
-    if (selectedKey === null) {
-        selectedKey = ''
+    if (menuItemType === 'url') {
+        const menuItemUrlInputs = form.getElementsByClassName("menu-item-url")
+        found = false
+        for (input of menuItemUrlInputs){
+            const locale = input.getAttribute("data-locale")
+            const urlOfMenu = input.value.trim()
+            listOfUrls[input.getAttribute("data-locale")] = input.value.trim()
+            if (!found && locale === LOCALE && urlOfMenu !== ""){
+                englishOrLocaleUrl = urlOfMenu
+                found = true
+            }
+            else if(!found && locale === "en_US"){
+                englishOrLocaleUrl = urlOfMenu
+            }
+        }
+
+        if (englishOrLocaleUrl !== ""){
+            for (let [local, name] of Object.entries(listOfUrls)){
+                if (name === ""){
+                    console.log("local", local)
+                    listOfUrls[local] = englishOrLocaleUrl
+                }
+            }
+        }
     }
-    return [listOfNames, menuItemType, selectedKey]
+    else{
+        listOfUrls = form.elements['menuItemProduct'].value.trim()
+    }
+    return [listOfNames, menuItemType, listOfUrls]
 }
 // End edit menu
 
@@ -395,12 +420,12 @@ function isValid(form) {
     errorMessageTitle.style.display = 'none';
     errorMessageUrl.style.display = 'none';
 
-    const menuItemName = form.getElementsByClassName("item-name-by-language")
+    const menuItemNames = form.getElementsByClassName("item-name-by-language")
     let found = false
     let englishOrLocaleName
 
-    for (child of menuItemName){
-        input = child.querySelector("input")
+    for (nameInput of menuItemNames){
+        input = nameInput.querySelector("input")
 
         const locale = input.getAttribute("data-locale")
         const nameOfMenu = input.value.trim()
@@ -422,7 +447,7 @@ function isValid(form) {
     const errorType = form.getElementsByClassName("error")[0]
     errorType.innerText = ""
     if (englishOrLocaleName === ""){
-        errorType.innerText = "English value or local value must be entered"
+        errorType.innerText = "English value or local value must be entered for the title"
         return false
     }
 
@@ -435,14 +460,9 @@ function isValid(form) {
         return false
     }
 
-    const menuItemUrl = form.elements['menuItem'].value.trim()
-
-    if ((menuItemUrl === "" || menuItemUrl === null || menuItemUrl === undefined) && menuItemType !== "empty"){
-        errorType.innerText = "A value must be filled"
-        return false
-    }
     if (menuItemType !== "url" && menuItemType !== "empty"){
         let found = false
+        const menuItemUrl = form.elements['menuItemProduct'].value
         for (const [key, value] of Object.entries(loopsDictionary[menuItemType])){
             if (value.title + "-" + value.id === menuItemUrl || (value.reference && value.title + "-" + value.reference + "-" + value.id === menuItemUrl)){
                 found = true
@@ -454,10 +474,33 @@ function isValid(form) {
             return false
         }
     }
+    else if (menuItemType === "url"){
+        const menuItemUrls = form.getElementsByClassName("menu-item-url")
+        let found = false
+        let englishOrLocaleUrl
 
-    if (menuItemUrl.includes("`")) {
-        errorMessageUrl.style.display = 'block';
-        return false
+        for (const urlInput of menuItemUrls){
+
+            const locale = urlInput.getAttribute("data-locale")
+            const urlOfMenu = urlInput.value.trim()
+            if (urlOfMenu.includes("`")){
+                errorMessageTitle.style.display = 'block';
+                return false
+            }
+
+            if (!found && locale === LOCALE && urlOfMenu !== ""){
+                englishOrLocaleUrl = urlOfMenu
+                found = true
+            }
+            else if(!found && locale === "en_US"){
+                englishOrLocaleUrl = urlOfMenu
+            }
+        }
+
+        if (englishOrLocaleUrl === ""){
+            errorType.innerText = "English value or local value must be entered for the url"
+            return false
+        }
     }
 
     return true
@@ -650,7 +693,7 @@ function generateMenuRecursive(menuItem) {
                 <span data-id="titleSpan">` + getValueByLocaleOf(menuItem.title) + `</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(` + menuItem.id + `)">
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="resetSelect('EditMenu');setEditFields(` + menuItem.id + `)">
                     <i class="glyphicon glyphicon-edit"></i>
                 </a>
                 <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
@@ -1145,49 +1188,60 @@ function updateDataList(selectedKey, parentDiv) {
 
 function updateInputOrDatalist(selectElement) {
     const selectedKey = selectElement.value;
+    const form = selectElement.form;
     const parentDiv = selectElement.closest('.edit-modal-line');
-    const languageDivs = parentDiv.querySelectorAll('.item-name-by-language-maskable');
-    const datalistElement = parentDiv.querySelector('.itemList');
-    const defaultInputElement = parentDiv.querySelector('#menuItemEdit');
+    const languageDivs = form.getElementsByClassName('item-name-by-language-maskable');
+    const datalistElement = form.getElementsByClassName("itemList")[0]
+    const defaultInputElement = form.querySelector('#menuItemEdit');
 
     if (selectedKey === "" || selectedKey === "empty") {
         defaultInputElement.style.display = "none";
         defaultInputElement.value = "";
         datalistElement.style.display = "none";
-        languageDivs.forEach(div => {
+        for (const div of languageDivs){
             div.style.display = "none";
-        });
+        };
     } else if (selectedKey === "url") {
         defaultInputElement.style.display = "none";
         datalistElement.style.display = "none";
         datalistElement.innerHTML = "";
-        languageDivs.forEach(div => {
+        for (const div of languageDivs){
             div.style.display = "block";
-        });
+        };
     } else {
         defaultInputElement.style.display = "block";
         datalistElement.style.display = "block";
         updateDataList(selectedKey, parentDiv);
-        languageDivs.forEach(div => {
+        for (const div of languageDivs){
             div.style.display = "none";
-        });
+        };
     }
 }
 
 function resetSelect(modalId) {
-    const modal = document.getElementById(modalId)
-    const selectElement = modal.getElementsByTagName("form")[0]['menuType']
-    modal.getElementsByTagName("form")[0].reset()
-    var options = selectElement.getElementsByTagName('option')
+    const form = document.getElementById(modalId).getElementsByTagName("form")[0]
+    form.reset()
+    const selectElement = form['menuType']
+    const options = selectElement.getElementsByTagName('option')
 
-    for (var i = 0; i < options.length; i++) {
-        var option = options[i];
+    for (const option of options) {
         if (option.value === "") {
             selectElement.insertBefore(option, options[0]);
             option.disabled = true;
             break;
         }
     }
+
+    const languageDivs = form.getElementsByClassName('item-name-by-language-maskable');
+    for (const div of languageDivs){
+        div.style.display = "none";
+    };
+
+    const menuItemProduct = form["menuItemProduct"];
+    menuItemProduct.style.display = "none";
+
+    
+
 }
 
 function resetTargetField(select) {
