@@ -29,13 +29,13 @@ function getValueByLocaleOf(element, locale) {
     }
     let found = false
     let result
-    for (const [locale, title] of Object.entries(element)) {
-        if (locale === locale) {
+    for (const [lang, title] of Object.entries(element)) {
+        if (lang === locale) {
             result = title
             found = true
             break
         } 
-        if (locale === 'en_US') {
+        if (lang === 'en_US') {
             result = title
             found = true
         }
