@@ -592,7 +592,10 @@ function setEditFields(id) {
     
     const menuTitles = element.title
     for (const inputToFill of form.elements['menuItemName']){
-        inputToFill.value = menuTitles[inputToFill.getAttribute("data-locale")]
+        const title = menuTitles[inputToFill.getAttribute("data-locale")]
+        if (title){
+            inputToFill.value = title
+        }
     }
 
     if (element.type.toLowerCase() !== 'url' && element.type.toLowerCase() !== "empty") {
@@ -602,7 +605,10 @@ function setEditFields(id) {
         const menuItemUrls = form.getElementsByClassName("menu-item-url")
         for (const urlInput of menuItemUrls){
             urlInput.parentNode.style.display = "block"
-            urlInput.value = element.url[urlInput.getAttribute("data-locale")]
+            const url = element.url[urlInput.getAttribute("data-locale")]
+            if (url){
+                urlInput.value = url
+            }
         }
     }
     else{
