@@ -289,9 +289,6 @@ function changeParameters(id) {
     }
 
     const [title, type, url] = getFormItems(form)
-    console.log("title", title)
-    console.log("type", type)
-    console.log("url", url)
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
@@ -362,7 +359,6 @@ function getFormItems(form) {
         if (englishOrLocaleUrl !== ""){
             for (let [local, name] of Object.entries(listOfUrls)){
                 if (name === ""){
-                    console.log("local", local)
                     listOfUrls[local] = englishOrLocaleUrl
                 }
             }
@@ -683,7 +679,7 @@ function generateMenuRecursive(menuItem) {
                 <span data-id="titleSpan">` + getValueByLocaleOf(menuItem.title) + `</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(` + menuItem.id + `)">
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="resetSelect('EditMenu');setEditFields(` + menuItem.id + `)">
                     <i class="glyphicon glyphicon-edit"></i>
                 </a>
                 <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
