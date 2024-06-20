@@ -16,7 +16,6 @@
     var translations = {
         hideAllChildren: '{intl l="Hide all children" d="customfrontmenu.bo.default"}',
         showAllChildren: '{intl l="Show all children" d="customfrontmenu.bo.default"}',
-        unsavedChanges: '{intl l="Warning: You have unsaved changes!" d="customfrontmenu.bo.default"}',
     };
     //------ state of 'hide childrens' button ------
     var buttonState = 'hide';
@@ -270,37 +269,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
-
-<!-- Unsaved changes -->
-<div class="modal fade" id="UnsavedChanges" role="dialog">
-    <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    &times;
-                </button>
-                <h4 class="modal-title">
-                    {intl l="Unsaved changes" d="customfrontmenu.bo.default"}
-                </h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    {intl l="You have unsaved changes. If you don't save them your changes will be lost" d="customfrontmenu.bo.default"}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success btn-responsive delete-if-no-menu" onclick="changeParameters(getCurrentId());closeClosestModal(this);selectLanguage(this.closest('#UnsavedChanges'))">
-                    {intl l="Save" d="customfrontmenu.bo.default"}
-                </button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="selectLanguage(this.closest('#UnsavedChanges'))">
-                    {intl l="Discard changes" d="customfrontmenu.bo.default"}
-                </button>
-            </div>
         </div>
     </div>
 </div>

@@ -846,39 +846,6 @@ function toggleChildren(span, event) {
     }
 }
 
-function selectLanguage(languageElement) {
-    const currentForm = document.forms["editMenuItemForm"]
-    selectedLanguage = languageElement.getAttribute('data-locale')
-    currentMenu = findMenuInList(CURRENT_ID, MENU_LIST)
-    currentForm["menuItemName"].value = getValueByLocaleOf(currentMenu.title, selectedLanguage)
-    if(currentMenu.type.toLowerCase() === 'url') {
-        currentForm['menuItem'].value = getValueByLocaleOf(currentMenu.url, selectedLanguage)
-    }
-    else {
-        currentForm['menuItem'].value = currentMenu.typeId
-    }
-
-    currentForm["menuType"].disabled = false
-    currentForm["menuItem"].disabled = false
-    currentForm["saveUrl"].disabled = false
-    if (selectedLanguage !== LOCALE){
-        currentForm["menuType"].disabled = true
-        currentForm["menuItem"].disabled = false
-        currentForm["saveUrl"].disabled = false
-        if (currentMenu.type.toLowerCase() !== "url" || currentForm["menuType"].value !== "url"){
-            currentForm["menuItem"].disabled = true
-            currentForm["saveUrl"].disabled = true
-        }
-    }
-
-    Array.from(currentForm["menuType"].options).forEach(option => {
-        if (option.value.toLowerCase() === currentMenu.type.toLowerCase()) {
-            option.selected = true;
-        }
-    });
-    document.getElementById('selectedLanguageBtn').innerText = selectedLanguage;
-}
-
 // End drop down
 
 // Drag and drop
