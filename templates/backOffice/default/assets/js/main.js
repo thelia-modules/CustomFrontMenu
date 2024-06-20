@@ -289,6 +289,9 @@ function changeParameters(id) {
     }
 
     const [title, type, url] = getFormItems(form)
+    console.log("title", title)
+    console.log("type", type)
+    console.log("url", url)
     const menuItem = document.getElementById(id).parentElement
     if (menuItem === null) {
         console.error("The id given in changeParameters parameter doesn't exist")
@@ -562,7 +565,6 @@ function saveMenuItemUrl() {
 }
 
 function saveTitleTypeAndUrl(id, title, type, url) {
-    const modifiedLocal = selectedLanguage ? selectedLanguage : LOCALE;
     const menuToModify = findMenuInList(id, MENU_LIST)
 
     if (menuToModify === null) {
@@ -576,56 +578,44 @@ function saveTitleTypeAndUrl(id, title, type, url) {
         menuToModify.typeId = url
     }
     else{
-        menuToModify.url[LOCALE] = url
+        menuToModify.url = url
     }
 }
 // End save data
 
 // Form edit field
 function setEditFields(id) {
+    CURRENT_ID = id
     const element = findMenuInList(id, MENU_LIST)
     if (element === null) {
         console.error("The id given in setEditField doesn't exist")
         return
     }
     const form = document.getElementById('editMenuItemForm')
+    form.elements['menuType'].value = element.type.toLowerCase()
+    
     const menuTitles = element.title
-    CURRENT_ID = id
-    for (const inputToFill of form.querySelectorAll("input")){
+    for (const inputToFill of form.elements['menuItemName']){
         inputToFill.value = menuTitles[inputToFill.getAttribute("data-locale")]
     }
-    form.elements['menuType'].value = element.type.toLowerCase()
-    if(element.type.toLowerCase() === 'url') {
-        form.elements['menuItem'].value = getValueByLocaleOf(element.url)
+
+    if (element.type.toLowerCase() !== 'url' && element.type.toLowerCase() !== "empty") {
+        form.elements['menuItemProduct'].value = element.typeId
+    }
+    else if (element.type.toLowerCase() === 'url'){
+        const menuItemUrls = form.getElementsByClassName("menu-item-url")
+        for (const urlInput of menuItemUrls){
+            urlInput.parentNode.style.display = "block"
+            urlInput.value = element.url[urlInput.getAttribute("data-locale")]
+        }
     }
     else{
-        form.elements['menuItem'].value = element.typeId
+        for (const urlInput of form.getElementsByClassName("menu-item-url")){
+            urlInput.parentNode.style.display = "none"
+        }
+        form.elements['menuItemProduct'].style.display = "none"
     }
-    
-    if (!selectedLanguage || selectedLanguage === LOCALE){
-        if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
-            form['menuItem'].style.display = "block"
-            form["menuItem"].disabled = false
-        }
-        else if (element.type.toLowerCase() === 'empty') {
-            form['menuItem'].style.display = "none"
-        }
-        else {
-            form['menuItem'].style.display = "block"
-            form["menuItem"].disabled = false
-        }
-    }
-    else {
-        form['menuItem'].style.display = "block"
-        form["menuType"].disabled = true
-        form["menuItem"].disabled = true
-        if (element.type.toLowerCase() === 'empty') {
-            form['menuItem'].style.display = "none"
-        }
-        else if (element.type.toLowerCase() === "url" && form["menuType"].value === "url"){
-            form["menuItem"].disabled = false
-        }
-    }
+
     const select = document.getElementById('select-edit-type')
     updateInputOrDatalist(select)
 }
@@ -693,7 +683,7 @@ function generateMenuRecursive(menuItem) {
                 <span data-id="titleSpan">` + getValueByLocaleOf(menuItem.title) + `</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="resetSelect('EditMenu');setEditFields(` + menuItem.id + `)">
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="setEditFields(` + menuItem.id + `)">
                     <i class="glyphicon glyphicon-edit"></i>
                 </a>
                 <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
@@ -1239,9 +1229,6 @@ function resetSelect(modalId) {
 
     const menuItemProduct = form["menuItemProduct"];
     menuItemProduct.style.display = "none";
-
-    
-
 }
 
 function resetTargetField(select) {
