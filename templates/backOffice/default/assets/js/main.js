@@ -1192,7 +1192,7 @@ function updateInputOrDatalist(selectElement) {
     const parentDiv = selectElement.closest('.edit-modal-line');
     const languageDivs = form.getElementsByClassName('item-name-by-language-maskable');
     const datalistElement = form.getElementsByClassName("itemList")[0]
-    const defaultInputElement = form.querySelector('#menuItemEdit');
+    const defaultInputElement = form['menuItemProduct'];
 
     if (selectedKey === "" || selectedKey === "empty") {
         defaultInputElement.style.display = "none";
