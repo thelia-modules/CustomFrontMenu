@@ -1201,8 +1201,7 @@ function resetSelect(modalId) {
 }
 
 function resetTargetField(select) {
-    const inputElement = select.form["menuItem"]
-    inputElement.value = "";
+    select.form["menuItemProduct"].value = ""
 }
 // End search product
 
