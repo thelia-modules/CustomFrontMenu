@@ -1,75 +1,119 @@
 <?php
 
+declare(strict_types=1);
+
+/*************************************************************************************/
+/*      This file is part of the Thelia package.                                     */
+/*                                                                                   */
+/*      Copyright (c) OpenStudio                                                     */
+/*      email : dev@thelia.net                                                       */
+/*      web : http://www.thelia.net                                                  */
+/*                                                                                   */
+/*      For the full copyright and license information, please view the LICENSE.txt  */
+/*************************************************************************************/
+
 namespace CustomFrontMenu\Controller;
 
 use CustomFrontMenu\CustomFrontMenu;
+use CustomFrontMenu\Service\BackOffice\MenuTargetCatalog;
 use CustomFrontMenu\Service\CustomFrontMenuLoadService;
 use CustomFrontMenu\Service\CustomFrontMenuSaveService;
 use CustomFrontMenu\Service\CustomFrontMenuService;
-use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
-use Symfony\Component\Routing\Attribute\Route;
-use Thelia\Core\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Thelia\Core\Security\AccessManager;
+use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
 
 class MenuController extends BaseAdminController
 {
-    public function __construct(
-        protected readonly RequestStack $requestStack
-    )
-    {}
+    private const COOKIE_NAME = 'menuId';
+    private const COOKIE_PATH = '/admin/module/CustomFrontMenu';
 
-    protected function getSession(): SessionInterface
+    public function __construct(
+        protected readonly MenuTargetCatalog $targetCatalog,
+    ) {
+    }
+
+    /**
+     * Composing a menu is an administration operation: it needs the module resource,
+     * and each POST carries the one-shot token.
+     */
+    private function denyUnlessAllowed(Request $request): ?Response
     {
-        return $this->requestStack->getCurrentRequest()->getSession();
+        if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'CustomFrontMenu', AccessManager::UPDATE)) {
+            return $response;
+        }
+
+        $this->getTokenProvider()->checkToken((string) $request->request->get('_token', ''));
+
+        return null;
+    }
+
+    private function backToScreen(): RedirectResponse
+    {
+        return new RedirectResponse(URL::getInstance()->absoluteUrl(self::COOKIE_PATH));
+    }
+
+    private function rememberMenu(int $menuId): void
+    {
+        setcookie(self::COOKIE_NAME, (string) $menuId, [
+            'path' => self::COOKIE_PATH,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 
     /**
      * Load the menu selected by the user.
-     * @param Request $request The user request with the desired menu id
-     * @return RedirectResponse
      */
-    #[Route("/admin/module/CustomFrontMenu/selectMenu", name: "admin.customfrontmenu.select.menu", methods: ["POST"])]
-    public function selectOtherMenu(Request $request) : RedirectResponse
+    #[Route('/admin/module/CustomFrontMenu/selectMenu', name: 'admin.customfrontmenu.select.menu', methods: ['POST'])]
+    public function selectOtherMenu(Request $request): Response
     {
-        $menuId = intval(str_replace("menu-selected-", "", $request->get('menuId')));
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
 
-        setcookie('menuId', $menuId);
+        $this->rememberMenu((int) str_replace('menu-selected-', '', (string) $request->get('menuId')));
 
-        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        return $this->backToScreen();
     }
 
     /**
      * Save the selected menu items in database.
-     * @param Request $request The user request with the menu items and the selected menu id
-     * @param CustomFrontMenuSaveService $customFrontMenuSave The saving service
-     * @param CustomFrontMenuService $customFrontMenuService
+     *
      * @throws PropelException
-     * @throws Exception
      */
-    #[Route("/admin/module/CustomFrontMenu/save", name:"admin.customfrontmenu.save", methods:["POST"])]
-    public function saveMenuItems(Request $request, CustomFrontMenuSaveService $customFrontMenuSave, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
-    {
+    #[Route('/admin/module/CustomFrontMenu/save', name: 'admin.customfrontmenu.save', methods: ['POST'])]
+    public function saveMenuItems(
+        Request $request,
+        CustomFrontMenuSaveService $customFrontMenuSave,
+        CustomFrontMenuService $customFrontMenuService,
+    ): Response {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
 
-        $dataJson = $request->get('menuData');
-        $newMenu = json_decode($dataJson, true);
-        $menuId = json_decode($request->get('menuDataId'));
+        $newMenu = json_decode((string) $request->get('menuData'), true);
+        $menuId = json_decode((string) $request->get('menuDataId'));
 
-        if (!$menuId || $menuId === 'undefined' || $menuId === 'null') {
-            throw new Exception('Save failed : the menu id cannot be null or empty');
+        if (!\is_array($newMenu)) {
+            throw new \InvalidArgumentException('Save failed: the menu payload is not a list of items');
+        }
+
+        if (!\is_int($menuId) || 0 === $menuId) {
+            throw new \InvalidArgumentException('Save failed: the menu id cannot be null or empty');
         }
 
         $menuToCheck = $customFrontMenuService->getMenu($menuId);
 
-        if (!$menuToCheck || $menuToCheck->getLevel() !== 1) {
-            throw new Exception('Save failed : the menu id is invalid');
+        if (!$menuToCheck || 1 !== $menuToCheck->getLevel()) {
+            throw new \InvalidArgumentException('Save failed: the menu id is invalid');
         }
 
         // Delete all the items currently in database for the menu to save
@@ -78,105 +122,128 @@ class MenuController extends BaseAdminController
         // Add all new items in database
         $customFrontMenuSave->saveTableBrowser($newMenu, $menu);
 
-        $this->getSession()->getFlashBag()->add('success', Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME));
+        $this->getSession()->getFlashBag()->add(
+            'success',
+            Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME),
+        );
 
-        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        return $this->backToScreen();
     }
 
     /**
-     * Add a new menu with the name given by the user.
-     * The user is redirected in this new menu.
-     * @param Request $request The user request with the menu name
-     * @param CustomFrontMenuLoadService $customFrontMenuLoadService The loading service
-     * @param CustomFrontMenuService $customFrontMenuService The menu service
-     * @throws Exception
+     * Add a new menu with the name given by the user, and select it.
+     *
+     * @throws PropelException
      */
-    #[Route("/admin/module/CustomFrontMenu/add", name: "admin.customfrontmenu.addmenu", methods: ["POST"])]
-    public function addMenu(Request $request, CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
+    #[Route('/admin/module/CustomFrontMenu/add', name: 'admin.customfrontmenu.addmenu', methods: ['POST'])]
+    public function addMenu(Request $request, CustomFrontMenuService $customFrontMenuService): Response
     {
-        $menuName = $request->get('menuName');
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
         $root = $customFrontMenuService->getRoot();
-        $itemId = $customFrontMenuService->addMenu($root, $menuName);
-        $this->loadMenuItems($customFrontMenuLoadService, $customFrontMenuService, $itemId);
-        setcookie('menuId', $itemId);
+        $itemId = $customFrontMenuService->addMenu($root, (string) $request->get('menuName'));
 
-        $this->getSession()->getFlashBag()->add('success', Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME));
+        $this->rememberMenu($itemId);
 
-        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        $this->getSession()->getFlashBag()->add(
+            'success',
+            Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME),
+        );
+
+        return $this->backToScreen();
     }
 
     /**
      * Delete the current menu.
-     * The user is redirected in the first menu if it exists.
-     * @param Request $request The user request with the menu id
-     * @param CustomFrontMenuService $customFrontMenuService The menu service
-     * @throws Exception
      */
-    #[Route("/admin/module/CustomFrontMenu/delete", name:"admin.customfrontmenu.deletemenu", methods:["POST"])]
-    public function deleteMenu(Request $request, CustomFrontMenuService $customFrontMenuService) : RedirectResponse
+    #[Route('/admin/module/CustomFrontMenu/delete', name: 'admin.customfrontmenu.deletemenu', methods: ['POST'])]
+    public function deleteMenu(Request $request, CustomFrontMenuService $customFrontMenuService): Response
     {
-        $firstCurrentMenuId = $request->get('menuId');
-        if($firstCurrentMenuId === null || $firstCurrentMenuId === 'menu-selected-') {
-            throw new Exception('Delete failed : the menu id cannot be null or empty');
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
         }
 
-        $currentMenuId = intval(str_replace("menu-selected-", "", $firstCurrentMenuId));
+        $rawMenuId = (string) $request->get('menuId', '');
 
-        $customFrontMenuService->deleteMenu($currentMenuId);
-
-        $this->getSession()->getFlashBag()->add('success', Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME));
-
-        if (isset($_COOKIE['menuId'])) {
-            setcookie('menuId', -1);
+        if ('' === $rawMenuId || 'menu-selected-' === $rawMenuId) {
+            throw new \InvalidArgumentException('Delete failed: the menu id cannot be null or empty');
         }
 
-        return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu'));
+        $customFrontMenuService->deleteMenu((int) str_replace('menu-selected-', '', $rawMenuId));
+
+        $this->getSession()->getFlashBag()->add(
+            'success',
+            Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME),
+        );
+
+        $this->rememberMenu(-1);
+
+        return $this->backToScreen();
     }
 
     /**
-     * Clear all flashes
-     */
-    #[Route("/admin/module/CustomFrontMenu/clearFlashes", name:"admin.customfrontmenu.clearflashes", methods:["GET"])]
-    public function clearFlashes() : Response
-    {
-        $this->getSession()->getFlashBag()->clear();
-        // Clear the response too to limit the data returned by http
-        return new Response('', ResponseAlias::HTTP_OK);
-    }
-
-    /**
-     * Load the menu items
-     * @param CustomFrontMenuLoadService $customFrontMenuLoadService The loading service
-     * @param CustomFrontMenuService $customFrontMenuService The menu service
-     * @param ?int $menuId The id of the menu to load
-     * @return array All the data necessary to load the page content : Menu names,  menu items and the current menu id.
+     * Everything the composition screen needs to render.
+     *
+     * @return array<string, mixed>
+     *
      * @throws PropelException
      */
-    public function loadMenuItems(CustomFrontMenuLoadService $customFrontMenuLoadService, CustomFrontMenuService $customFrontMenuService, ?int $menuId = null) : array
-    {
+    public function loadMenuItems(
+        CustomFrontMenuLoadService $customFrontMenuLoadService,
+        CustomFrontMenuService $customFrontMenuService,
+        ?int $menuId = null,
+    ): array {
         $menuNames = $customFrontMenuLoadService->loadSelectMenu($customFrontMenuService->getRoot());
         $data = [];
 
-        if (!$menuId && count($menuNames) > 0) {
-            $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
+        if (!$menuId && \count($menuNames) > 0) {
+            $menuId = (int) str_replace('menu-selected-', '', $menuNames[0]['id']);
         }
 
-        if($menuId) {
+        if ($menuId) {
             $menu = $customFrontMenuService->getMenu($menuId);
-            if (!$menu || $menu->getLevel() !== 1) {
-                $this->getSession()->getFlashBag()->add('fail', Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME));
-                $menuId = intval(str_replace("menu-selected-", "", $menuNames[0]['id']));
-                setcookie('menuId', $menuId, ['path' => '/admin/module/CustomFrontMenu']);
+
+            if (!$menu || 1 !== $menu->getLevel()) {
+                $this->getSession()->getFlashBag()->add(
+                    'fail',
+                    Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME),
+                );
+
+                if (0 === \count($menuNames)) {
+                    return $this->screenData($menuNames, [], 0);
+                }
+
+                $menuId = (int) str_replace('menu-selected-', '', $menuNames[0]['id']);
+                $this->rememberMenu($menuId);
                 $menu = $customFrontMenuService->getMenu($menuId);
             }
 
-            $data = $customFrontMenuLoadService->loadTableBrowser($menu);
+            if ($menu) {
+                $data = $customFrontMenuLoadService->loadTableBrowser($menu);
+            }
         }
+
+        return $this->screenData($menuNames, $data, (int) $menuId);
+    }
+
+    /**
+     * @param array<int, array<string, string>> $menuNames
+     * @param array<int, mixed>                 $menuItems
+     *
+     * @return array<string, mixed>
+     */
+    private function screenData(array $menuNames, array $menuItems, int $menuId): array
+    {
+        $locale = $this->getSession()->getAdminLang()->getLocale();
 
         return [
             'menuNames' => json_encode($menuNames),
-            'menuItems' => json_encode($data),
-            'currentMenuId' => utf8_encode($menuId)
+            'menuItems' => json_encode($menuItems),
+            'currentMenuId' => $menuId,
+            'locale' => $locale,
+            'targets' => $this->targetCatalog->targets($locale),
         ];
     }
 }
