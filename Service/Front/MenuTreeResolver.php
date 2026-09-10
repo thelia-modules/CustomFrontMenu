@@ -149,26 +149,39 @@ final readonly class MenuTreeResolver
      * Locale, then en_US, then whatever exists: an entry with no translation in the
      * visitor's language still has to render.
      *
+     * The back-office form writes one row per active language, so a language left blank
+     * exists in the table with an empty value. An empty value is not a translation: it
+     * must not win over, nor block, the fallback.
+     *
      * @throws PropelException
      */
     private function i18nValue(CustomFrontMenuItem $item, string $locale, string $column): string
     {
         $translations = CustomFrontMenuItemI18nQuery::create()->findById($item->getId());
 
-        $fallback = '';
+        $english = '';
+        $any = '';
 
         foreach ($translations as $translation) {
-            $value = (string) ('title' === $column ? $translation->getTitle() : $translation->getUrl());
+            $value = trim((string) ('title' === $column ? $translation->getTitle() : $translation->getUrl()));
+
+            if ('' === $value) {
+                continue;
+            }
 
             if ($translation->getLocale() === $locale) {
                 return $value;
             }
 
-            if ('' === $fallback || 'en_US' === $translation->getLocale()) {
-                $fallback = $value;
+            if ('en_US' === $translation->getLocale()) {
+                $english = $value;
+            }
+
+            if ('' === $any) {
+                $any = $value;
             }
         }
 
-        return $fallback;
+        return '' !== $english ? $english : $any;
     }
 }

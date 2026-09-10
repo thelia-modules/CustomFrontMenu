@@ -1,23 +1,13 @@
 <?php
 
 return array(
-    'Brand' => 'Marque',
-    'Category' => 'Catégorie',
-    'Product' => 'Produit',
-    'Content' => 'Contenu',
-    'Folder' => 'Fichier',
-    'Link to' => 'Lien à',
-    'Menu name' => 'Nom du menu',
-    'New link' => 'Nouveau lien',
-    'No parent' => 'Aucun parent',
-    'Page' => 'Page',
-    'Parent' => 'Parent',
-    'URL' => 'URL',
-
-    'This menu does not exists' => "Ce menu n'existe pas",
-
+    'A menu name is required' => 'Le nom du menu est obligatoire',
+    'An entry name is required' => 'Le nom de l\'entrée est obligatoire',
     'Current menu deleted successfully' => 'Le menu a été supprimé avec succès',
     'New menu added successfully' => 'Nouveau menu ajouté avec succès',
-    'This menu has been successfully saved !' => 'Ce menu a été sauvegardé avec succès !',
-
+    'Pick a target for this entry' => 'Choisissez une cible pour cette entrée',
+    'This entry has been deleted' => 'L\'entrée a été supprimée',
+    'This entry has been successfully saved' => 'L\'entrée a été enregistrée',
+    'This menu does not exist' => 'Ce menu n\'existe pas',
+    'This menu entry does not exist' => 'Cette entrée de menu n\'existe pas',
 );
