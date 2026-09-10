@@ -3,7 +3,7 @@
   "license": "LGPL-3.0-or-later",
   "type": "thelia-module",
   "require": {
-    "thelia/installer": "~1.1"
+    "thelia/installer": "^1.6"
   },
   "extra": {
     "installer-name": "CustomFrontMenu"
