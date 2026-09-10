@@ -1,0 +1,76 @@
+{% extends '@BackOfficeDefaultTwig/base.html.twig' %}
+
+{% set domain = 'customfrontmenu.bo.default-twig' %}
+
+{% block title %}{{ entryTitle }}{% endblock %}
+{% block body_testid %}custom-front-menu-entry{% endblock %}
+
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('admin.home') }}">{{ 'Home'|trans }}</a></li>
+            <li class="breadcrumb-item"><a href="/admin/module/CustomFrontMenu">{{ 'Menus'|trans({}, domain) }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menuId }) }}">{{ menuTitle }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ entryTitle }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid" data-testid="custom-front-menu-entry-page">
+        <h1 class="h3 mb-3">{{ 'Edit an entry'|trans({}, domain) }}</h1>
+
+        <form method="POST" action="{{ url('admin.customfrontmenu.entries.save', { itemId: itemId }) }}">
+            <input type="hidden" name="_token" value="{{ assignToken() }}">
+
+            <div class="card mb-3">
+                <div class="card-header">{{ 'Label'|trans({}, domain) }}</div>
+                <div class="card-body">
+                    {% for lang in bo_languages() %}
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">
+                                <img src="{{ asset('backoffice/img/svgFlags/' ~ lang.code ~ '.svg') }}" alt="{{ lang.title }}" width="22" height="14">
+                            </span>
+                            <input type="text" class="form-control" name="title[{{ lang.locale }}]"
+                                   value="{{ translations[lang.locale].title|default('') }}"
+                                   placeholder="{{ lang.title }}">
+                        </div>
+                    {% endfor %}
+                    <div class="form-text">{{ 'A language left empty falls back to another one on the front.'|trans({}, domain) }}</div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">{{ 'Target'|trans({}, domain) }}</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="cfm-view">{{ 'Kind of target'|trans({}, domain) }}</label>
+                        <select class="form-select" id="cfm-view" name="view"
+                                hx-get="{{ url('admin.customfrontmenu.entries.target_field', { itemId: itemId }) }}"
+                                hx-target="#cfm-target-field"
+                                hx-swap="outerHTML"
+                                hx-trigger="change"
+                                hx-include="this">
+                            <option value="none"{{ view == 'none' ? ' selected' : '' }}>{{ 'No target'|trans({}, domain) }}</option>
+                            <option value="url"{{ view == 'url' ? ' selected' : '' }}>{{ 'Address'|trans({}, domain) }}</option>
+                            {% for kind in ['brand', 'category', 'content', 'folder', 'product'] %}
+                                <option value="{{ kind }}"{{ view == kind ? ' selected' : '' }}>{{ kind|trans({}, domain) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% include '@CustomFrontMenuModule/backOffice/default-twig/custom-front-menu/_target_field.html.twig' %}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check2" aria-hidden="true"></i> {{ 'Save'|trans({}, domain) }}
+                </button>
+                <a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menuId }) }}" class="btn btn-outline-secondary">
+                    {{ 'Cancel'|trans({}, domain) }}
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -15,10 +15,10 @@ declare(strict_types=1);
 namespace CustomFrontMenu\Controller;
 
 use CustomFrontMenu\CustomFrontMenu;
+use CustomFrontMenu\Model\CustomFrontMenuItem;
+use CustomFrontMenu\Service\BackOffice\MenuComposer;
 use CustomFrontMenu\Service\BackOffice\MenuTargetCatalog;
-use CustomFrontMenu\Service\CustomFrontMenuLoadService;
-use CustomFrontMenu\Service\CustomFrontMenuSaveService;
-use CustomFrontMenu\Service\CustomFrontMenuService;
+use CustomFrontMenu\Service\BackOffice\MenuTreePresenter;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,20 +31,468 @@ use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
 
+/**
+ * Composition of the front menus, in the default-twig back-office.
+ *
+ * One action per write, each persisted on its own: the 1.x screen kept the whole tree in
+ * the browser and saved it by dropping and recreating every row.
+ */
+#[Route('/admin/module/CustomFrontMenu', name: 'admin.customfrontmenu')]
 class MenuController extends BaseAdminController
 {
-    private const COOKIE_NAME = 'menuId';
-    private const COOKIE_PATH = '/admin/module/CustomFrontMenu';
+    private const DOMAIN = CustomFrontMenu::DOMAIN_NAME;
+    private const VIEWS = ['brand', 'category', 'content', 'folder', 'product'];
 
     public function __construct(
-        protected readonly MenuTargetCatalog $targetCatalog,
+        private readonly MenuComposer $composer,
+        private readonly MenuTreePresenter $presenter,
+        private readonly MenuTargetCatalog $targetCatalog,
     ) {
     }
 
+    // ---------------------------------------------------------------- menus
+
     /**
-     * BaseController types getSession() as SessionInterface, but flashes and the admin
-     * language live on the Thelia session.
+     * The list of menus, rendered into the module configuration page by ConfigHook.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws PropelException
      */
+    public function menuListData(): array
+    {
+        $locale = $this->locale();
+        $menus = [];
+
+        foreach ($this->composer->menus() as $menu) {
+            $menus[] = [
+                'id' => (int) $menu->getId(),
+                'title' => $this->presenter->title($menu, $locale),
+                'entryCount' => \count($menu->getDescendants()),
+            ];
+        }
+
+        return ['menus' => $menus];
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/menus', name: '.menus.create', methods: ['POST'])]
+    public function createMenu(Request $request): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $title = trim((string) $request->request->get('title', ''));
+
+        if ('' === $title) {
+            return $this->failure('A menu name is required', $this->configurationUrl());
+        }
+
+        $menu = $this->composer->createMenu($title, $this->locale());
+
+        $this->success('New menu added successfully');
+
+        return new RedirectResponse($this->menuUrl((int) $menu->getId()));
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/menus/{menuId}/delete', name: '.menus.delete', methods: ['POST'], requirements: ['menuId' => '\d+'])]
+    public function deleteMenu(Request $request, int $menuId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $menu = $this->composer->menu($menuId);
+
+        if (null === $menu) {
+            return $this->failure('This menu does not exist', $this->configurationUrl());
+        }
+
+        $this->composer->delete($menu);
+        $this->success('Current menu deleted successfully');
+
+        return new RedirectResponse($this->configurationUrl());
+    }
+
+    /**
+     * The tree of one menu.
+     *
+     * @throws PropelException
+     */
+    #[Route('/menus/{menuId}', name: '.menus.show', methods: ['GET'], requirements: ['menuId' => '\d+'])]
+    public function showMenu(int $menuId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed(null)) {
+            return $denied;
+        }
+
+        $menu = $this->composer->menu($menuId);
+
+        if (null === $menu) {
+            return new RedirectResponse($this->configurationUrl());
+        }
+
+        $locale = $this->locale();
+        $tree = $this->presenter->tree($menu, $locale);
+
+        return $this->render('custom-front-menu/tree', [
+            'menuId' => $menuId,
+            'menuTitle' => $this->presenter->title($menu, $locale),
+            'tree' => $tree,
+            // The "add an entry" form picks its parent from a flat list: a shared modal
+            // filled from the clicked row would need module JavaScript.
+            'flatTree' => $this->flatten($tree),
+            'preselectedParent' => (int) $this->getRequest()->query->get('parent', 0),
+        ]);
+    }
+
+    // --------------------------------------------------------------- entries
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/menus/{menuId}/entries', name: '.entries.create', methods: ['POST'], requirements: ['menuId' => '\d+'])]
+    public function createEntry(Request $request, int $menuId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $menu = $this->composer->menu($menuId);
+
+        if (null === $menu) {
+            return $this->failure('This menu does not exist', $this->configurationUrl());
+        }
+
+        $parentId = (int) $request->request->get('parent_id', 0);
+        $parent = $menu;
+
+        if ($parentId > 0) {
+            $candidate = $this->composer->entry($parentId);
+
+            if (null === $candidate) {
+                return $this->failure('This menu entry does not exist', $this->menuUrl($menuId));
+            }
+
+            $parent = $candidate;
+        }
+
+        $title = trim((string) $request->request->get('title', ''));
+
+        if ('' === $title) {
+            return $this->failure('An entry name is required', $this->menuUrl($menuId));
+        }
+
+        $entry = $this->composer->createEntry($parent, $title, $this->locale());
+
+        return new RedirectResponse($this->entryUrl((int) $entry->getId()));
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}', name: '.entries.edit', methods: ['GET'], requirements: ['itemId' => '\d+'])]
+    public function editEntry(int $itemId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed(null)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry($itemId);
+
+        if (null === $entry) {
+            return new RedirectResponse($this->configurationUrl());
+        }
+
+        $view = strtolower((string) $entry->getView());
+        $menuId = (int) $this->menuOf($entry)?->getId();
+
+        return $this->render('custom-front-menu/entry', [
+            'itemId' => $itemId,
+            'menuId' => $menuId,
+            'menuTitle' => $this->presenter->title($this->composer->menu($menuId), $this->locale()),
+            'entryTitle' => $this->presenter->title($entry, $this->locale()),
+            'translations' => $this->composer->translations($entry),
+            'view' => \in_array($view, self::VIEWS, true) ? $view : ('' === $view ? 'none' : 'url'),
+            'viewId' => (int) $entry->getViewId(),
+            'targets' => $this->targetCatalog->targets($this->locale()),
+        ]);
+    }
+
+    /**
+     * The target field alone, swapped in by HTMX when the kind of target changes. Keeps
+     * the dependent field server-rendered instead of shipping module JavaScript.
+     *
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}/target-field', name: '.entries.target_field', methods: ['GET'], requirements: ['itemId' => '\d+'])]
+    public function entryTargetField(Request $request, int $itemId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed(null)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry($itemId);
+
+        if (null === $entry) {
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
+        $view = strtolower((string) $request->query->get('view', 'none'));
+
+        return $this->render('custom-front-menu/_target_field', [
+            'view' => \in_array($view, [...self::VIEWS, 'url'], true) ? $view : 'none',
+            'viewId' => (int) $entry->getViewId(),
+            'translations' => $this->composer->translations($entry),
+            'targets' => $this->targetCatalog->targets($this->locale()),
+        ]);
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}', name: '.entries.save', methods: ['POST'], requirements: ['itemId' => '\d+'])]
+    public function saveEntry(Request $request, int $itemId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry($itemId);
+
+        if (null === $entry) {
+            return $this->failure('This menu entry does not exist', $this->configurationUrl());
+        }
+
+        $view = strtolower(trim((string) $request->request->get('view', 'none')));
+        $titles = (array) $request->request->all('title');
+        $urls = (array) $request->request->all('url');
+
+        if (\in_array($view, self::VIEWS, true)) {
+            $viewId = (int) $request->request->get('view_id', 0);
+
+            if ($viewId <= 0) {
+                return $this->failure('Pick a target for this entry', $this->entryUrl($itemId));
+            }
+
+            $this->composer->setTarget($entry, ucfirst($view), $viewId);
+        } else {
+            $this->composer->setTarget($entry, null, null);
+        }
+
+        foreach ($titles as $locale => $title) {
+            $this->composer->setTranslation(
+                $entry,
+                (string) $locale,
+                $this->cleanTitle((string) $title),
+                'url' === $view ? $this->cleanUrl((string) ($urls[$locale] ?? '')) : null,
+            );
+        }
+
+        $this->success('This entry has been successfully saved');
+
+        return new RedirectResponse($this->menuUrl((int) $this->menuOf($entry)?->getId()));
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}/delete', name: '.entries.delete', methods: ['POST'], requirements: ['itemId' => '\d+'])]
+    public function deleteEntry(Request $request, int $itemId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry($itemId);
+
+        if (null === $entry) {
+            return $this->failure('This menu entry does not exist', $this->configurationUrl());
+        }
+
+        $menuId = (int) $this->menuOf($entry)?->getId();
+        $this->composer->delete($entry);
+
+        $this->success('This entry has been deleted');
+
+        return new RedirectResponse($this->menuUrl($menuId));
+    }
+
+    // -------------------------------------------------------------- moving
+
+    /**
+     * Reparent an entry by drag and drop.
+     *
+     * The field names are those the back-office bo-category-tree Stimulus controller
+     * posts: reusing the theme's tree controller means accepting its contract, which is
+     * still cheaper than shipping a second drag and drop implementation.
+     *
+     * @throws PropelException
+     */
+    #[Route('/entries/move', name: '.entries.move', methods: ['POST'])]
+    public function moveEntry(Request $request): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry((int) $request->request->get('category_id', 0));
+        $newParentId = (int) $request->request->get('new_parent_id', 0);
+
+        if (null === $entry) {
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
+        $menu = $this->menuOf($entry);
+        $newParent = $newParentId > 0 ? $this->composer->entry($newParentId) : $menu;
+
+        // A drop outside this menu, or onto the entry's own subtree, is a no-op.
+        if (null === $newParent || null === $menu || $this->menuOf($newParent)?->getId() !== $menu->getId()) {
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
+        $this->composer->move($entry, $newParent);
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}/up', name: '.entries.up', methods: ['POST'], requirements: ['itemId' => '\d+'])]
+    public function moveEntryUp(Request $request, int $itemId): Response
+    {
+        return $this->reorder($request, $itemId, up: true);
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/entries/{itemId}/down', name: '.entries.down', methods: ['POST'], requirements: ['itemId' => '\d+'])]
+    public function moveEntryDown(Request $request, int $itemId): Response
+    {
+        return $this->reorder($request, $itemId, up: false);
+    }
+
+    /**
+     * @throws PropelException
+     */
+    private function reorder(Request $request, int $itemId, bool $up): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $entry = $this->composer->entry($itemId);
+
+        if (null === $entry) {
+            return $this->failure('This menu entry does not exist', $this->configurationUrl());
+        }
+
+        $up ? $this->composer->moveUp($entry) : $this->composer->moveDown($entry);
+
+        return new RedirectResponse($this->menuUrl((int) $this->menuOf($entry)?->getId()));
+    }
+
+    // ------------------------------------------------------------- plumbing
+
+    /**
+     * Composing a menu is an administration operation. A null request means a GET screen,
+     * which needs the permission but carries no token.
+     */
+    private function denyUnlessAllowed(?Request $request): ?Response
+    {
+        if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'CustomFrontMenu', AccessManager::UPDATE)) {
+            return $response;
+        }
+
+        if ($request instanceof Request) {
+            $this->getTokenProvider()->checkToken((string) $request->request->get('_token', ''));
+        }
+
+        return null;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $nodes
+     *
+     * @return list<array{id: int, title: string, depth: int}>
+     */
+    private function flatten(array $nodes): array
+    {
+        $flat = [];
+
+        foreach ($nodes as $node) {
+            $flat[] = ['id' => $node['id'], 'title' => $node['title'], 'depth' => $node['depth']];
+            $flat = [...$flat, ...$this->flatten($node['children'])];
+        }
+
+        return $flat;
+    }
+
+    /**
+     * @throws PropelException
+     */
+    private function menuOf(CustomFrontMenuItem $item): ?CustomFrontMenuItem
+    {
+        $current = $item;
+
+        while ($current->getLevel() > 1) {
+            $parent = $current->getParent();
+
+            if (!$parent instanceof CustomFrontMenuItem) {
+                return null;
+            }
+
+            $current = $parent;
+        }
+
+        return 1 === $current->getLevel() ? $current : null;
+    }
+
+    /**
+     * A menu label is shown on every front page: no markup, and no back quote, which the
+     * 1.x screen used as its own delimiter.
+     */
+    private function cleanTitle(string $title): ?string
+    {
+        $title = trim(strip_tags(str_replace('`', "'", $title)));
+
+        return '' === $title ? null : $title;
+    }
+
+    /**
+     * Only http(s) and site-relative URLs: a menu link is rendered on every page, so a
+     * javascript: or data: URL entered here would be a stored cross-site scripting hole.
+     */
+    private function cleanUrl(string $url): ?string
+    {
+        $url = trim(strip_tags($url));
+
+        if ('' === $url) {
+            return null;
+        }
+
+        if (str_starts_with($url, '/')) {
+            return $url;
+        }
+
+        $scheme = strtolower((string) parse_url($url, \PHP_URL_SCHEME));
+
+        return \in_array($scheme, ['http', 'https'], true) ? $url : null;
+    }
+
+    private function locale(): string
+    {
+        return $this->theliaSession()->getAdminLang()->getLocale();
+    }
+
     private function theliaSession(): Session
     {
         /** @var Session $session */
@@ -53,210 +501,36 @@ class MenuController extends BaseAdminController
         return $session;
     }
 
-    /**
-     * Composing a menu is an administration operation: it needs the module resource,
-     * and each POST carries the one-shot token.
-     */
-    private function denyUnlessAllowed(Request $request): ?Response
+    private function success(string $message): void
     {
-        if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'CustomFrontMenu', AccessManager::UPDATE)) {
-            return $response;
-        }
-
-        $this->getTokenProvider()->checkToken((string) $request->request->get('_token', ''));
-
-        return null;
-    }
-
-    private function backToScreen(): RedirectResponse
-    {
-        return new RedirectResponse(URL::getInstance()->absoluteUrl(self::COOKIE_PATH));
-    }
-
-    private function rememberMenu(int $menuId): void
-    {
-        setcookie(self::COOKIE_NAME, (string) $menuId, [
-            'path' => self::COOKIE_PATH,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    }
-
-    /**
-     * Load the menu selected by the user.
-     */
-    #[Route('/admin/module/CustomFrontMenu/selectMenu', name: 'admin.customfrontmenu.select.menu', methods: ['POST'])]
-    public function selectOtherMenu(Request $request): Response
-    {
-        if (null !== $denied = $this->denyUnlessAllowed($request)) {
-            return $denied;
-        }
-
-        $this->rememberMenu((int) str_replace('menu-selected-', '', (string) $request->get('menuId')));
-
-        return $this->backToScreen();
-    }
-
-    /**
-     * Save the selected menu items in database.
-     *
-     * @throws PropelException
-     */
-    #[Route('/admin/module/CustomFrontMenu/save', name: 'admin.customfrontmenu.save', methods: ['POST'])]
-    public function saveMenuItems(
-        Request $request,
-        CustomFrontMenuSaveService $customFrontMenuSave,
-        CustomFrontMenuService $customFrontMenuService,
-    ): Response {
-        if (null !== $denied = $this->denyUnlessAllowed($request)) {
-            return $denied;
-        }
-
-        $newMenu = json_decode((string) $request->get('menuData'), true);
-        $menuId = json_decode((string) $request->get('menuDataId'));
-
-        if (!\is_array($newMenu)) {
-            throw new \InvalidArgumentException('Save failed: the menu payload is not a list of items');
-        }
-
-        if (!\is_int($menuId) || 0 === $menuId) {
-            throw new \InvalidArgumentException('Save failed: the menu id cannot be null or empty');
-        }
-
-        $menuToCheck = $customFrontMenuService->getMenu($menuId);
-
-        if (!$menuToCheck || 1 !== $menuToCheck->getLevel()) {
-            throw new \InvalidArgumentException('Save failed: the menu id is invalid');
-        }
-
-        // Delete all the items currently in database for the menu to save
-        $menu = $customFrontMenuSave->deleteSpecificItems($menuId);
-
-        // Add all new items in database
-        $customFrontMenuSave->saveTableBrowser($newMenu, $menu);
-
         $this->theliaSession()->getFlashBag()->add(
             'success',
-            Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME),
+            Translator::getInstance()->trans($message, [], self::DOMAIN),
         );
-
-        return $this->backToScreen();
     }
 
-    /**
-     * Add a new menu with the name given by the user, and select it.
-     *
-     * @throws PropelException
-     */
-    #[Route('/admin/module/CustomFrontMenu/add', name: 'admin.customfrontmenu.addmenu', methods: ['POST'])]
-    public function addMenu(Request $request, CustomFrontMenuService $customFrontMenuService): Response
+    private function failure(string $message, string $redirectTo): RedirectResponse
     {
-        if (null !== $denied = $this->denyUnlessAllowed($request)) {
-            return $denied;
-        }
-
-        $root = $customFrontMenuService->getRoot();
-        $itemId = $customFrontMenuService->addMenu($root, (string) $request->get('menuName'));
-
-        $this->rememberMenu($itemId);
-
         $this->theliaSession()->getFlashBag()->add(
-            'success',
-            Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME),
+            'error',
+            Translator::getInstance()->trans($message, [], self::DOMAIN),
         );
 
-        return $this->backToScreen();
+        return new RedirectResponse($redirectTo);
     }
 
-    /**
-     * Delete the current menu.
-     */
-    #[Route('/admin/module/CustomFrontMenu/delete', name: 'admin.customfrontmenu.deletemenu', methods: ['POST'])]
-    public function deleteMenu(Request $request, CustomFrontMenuService $customFrontMenuService): Response
+    private function configurationUrl(): string
     {
-        if (null !== $denied = $this->denyUnlessAllowed($request)) {
-            return $denied;
-        }
-
-        $rawMenuId = (string) $request->get('menuId', '');
-
-        if ('' === $rawMenuId || 'menu-selected-' === $rawMenuId) {
-            throw new \InvalidArgumentException('Delete failed: the menu id cannot be null or empty');
-        }
-
-        $customFrontMenuService->deleteMenu((int) str_replace('menu-selected-', '', $rawMenuId));
-
-        $this->theliaSession()->getFlashBag()->add(
-            'success',
-            Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME),
-        );
-
-        $this->rememberMenu(-1);
-
-        return $this->backToScreen();
+        return URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu');
     }
 
-    /**
-     * Everything the composition screen needs to render.
-     *
-     * @return array<string, mixed>
-     *
-     * @throws PropelException
-     */
-    public function loadMenuItems(
-        CustomFrontMenuLoadService $customFrontMenuLoadService,
-        CustomFrontMenuService $customFrontMenuService,
-        ?int $menuId = null,
-    ): array {
-        $menuNames = $customFrontMenuLoadService->loadSelectMenu($customFrontMenuService->getRoot());
-        $data = [];
-
-        if (!$menuId && \count($menuNames) > 0) {
-            $menuId = (int) str_replace('menu-selected-', '', $menuNames[0]['id']);
-        }
-
-        if ($menuId) {
-            $menu = $customFrontMenuService->getMenu($menuId);
-
-            if (!$menu || 1 !== $menu->getLevel()) {
-                $this->theliaSession()->getFlashBag()->add(
-                    'fail',
-                    Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME),
-                );
-
-                if (0 === \count($menuNames)) {
-                    return $this->screenData($menuNames, [], 0);
-                }
-
-                $menuId = (int) str_replace('menu-selected-', '', $menuNames[0]['id']);
-                $this->rememberMenu($menuId);
-                $menu = $customFrontMenuService->getMenu($menuId);
-            }
-
-            if ($menu) {
-                $data = $customFrontMenuLoadService->loadTableBrowser($menu);
-            }
-        }
-
-        return $this->screenData($menuNames, $data, (int) $menuId);
-    }
-
-    /**
-     * @param array<int, array<string, string>> $menuNames
-     * @param array<int, mixed>                 $menuItems
-     *
-     * @return array<string, mixed>
-     */
-    private function screenData(array $menuNames, array $menuItems, int $menuId): array
+    private function menuUrl(int $menuId): string
     {
-        $locale = $this->theliaSession()->getAdminLang()->getLocale();
+        return URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu/menus/'.$menuId);
+    }
 
-        return [
-            'menuNames' => json_encode($menuNames),
-            'menuItems' => json_encode($menuItems),
-            'currentMenuId' => $menuId,
-            'locale' => $locale,
-            'targets' => $this->targetCatalog->targets($locale),
-        ];
+    private function entryUrl(int $itemId): string
+    {
+        return URL::getInstance()->absoluteUrl('/admin/module/CustomFrontMenu/entries/'.$itemId);
     }
 }

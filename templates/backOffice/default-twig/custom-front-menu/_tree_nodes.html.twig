@@ -1,0 +1,71 @@
+{% set domain = 'customfrontmenu.bo.default-twig' %}
+{% for item in items %}
+    <li class="bo-category-tree__item" data-bo-category-tree-target="node" data-category-id="{{ item.id }}" draggable="true">
+        <div class="d-flex align-items-center py-1 border-bottom" style="padding-left: {{ item.depth * 24 }}px;">
+            <button type="button" class="btn btn-sm btn-link p-0 me-2" data-action="bo-category-tree#toggle" aria-label="{{ 'Toggle children'|trans({}, domain) }}">
+                {% if item.children|length > 0 %}
+                    <i class="bi bi-chevron-down bo-category-tree__chevron" aria-hidden="true"></i>
+                {% else %}
+                    <i class="bi bi-dot text-muted" aria-hidden="true"></i>
+                {% endif %}
+            </button>
+
+            <i class="bi bi-grip-vertical text-muted me-2" aria-hidden="true" style="cursor: grab;"></i>
+
+            <a href="{{ url('admin.customfrontmenu.entries.edit', { itemId: item.id }) }}"
+               class="bo-category-tree__title flex-grow-1 text-decoration-none">
+                {{ item.title }}
+            </a>
+
+            {% if item.target.kind == 'none' %}
+                <span class="badge bg-light text-muted border ms-2">{{ item.target.label }}</span>
+            {% elseif item.target.kind == 'url' %}
+                <span class="badge bg-light text-muted border ms-2" title="{{ item.target.label }}">
+                    <i class="bi bi-link-45deg" aria-hidden="true"></i> {{ item.target.label|u.truncate(40, '…') }}
+                </span>
+            {% else %}
+                <span class="badge ms-2 {{ item.target.ok ? 'bg-light text-muted border' : 'bg-warning-subtle text-warning-emphasis border border-warning' }}">
+                    {{ item.target.kind|trans({}, domain) }} · {{ item.target.label }}
+                </span>
+            {% endif %}
+
+            <div class="btn-group btn-group-sm ms-3" role="group">
+                <form method="POST" action="{{ url('admin.customfrontmenu.entries.up', { itemId: item.id }) }}">
+                    <input type="hidden" name="_token" value="{{ assignToken() }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="{{ 'Move up'|trans({}, domain) }}">
+                        <i class="bi bi-arrow-up" aria-hidden="true"></i>
+                    </button>
+                </form>
+                <form method="POST" action="{{ url('admin.customfrontmenu.entries.down', { itemId: item.id }) }}">
+                    <input type="hidden" name="_token" value="{{ assignToken() }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="{{ 'Move down'|trans({}, domain) }}">
+                        <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </div>
+
+            {# A link rather than a modal: filling a shared modal would need module
+               JavaScript, and the theme registers no controller for us. #}
+            <a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menuId }) }}?parent={{ item.id }}#cfm-add-entry"
+               class="btn btn-sm btn-outline-primary ms-2" title="{{ 'Add a sub-entry'|trans({}, domain) }}">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            </a>
+
+            <form method="POST" action="{{ url('admin.customfrontmenu.entries.delete', { itemId: item.id }) }}" class="ms-1">
+                <input type="hidden" name="_token" value="{{ assignToken() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ 'Delete'|trans({}, domain) }}"
+                        data-controller="confirm-modal"
+                        data-action="click->confirm-modal#confirm"
+                        data-confirm-modal-message-value="{{ 'Delete this entry and everything under it?'|trans({}, domain) }}">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+
+        {% if item.children|length > 0 %}
+            <ul class="list-unstyled bo-category-tree__children" data-bo-category-tree-target="children" data-parent-id="{{ item.id }}">
+                {% include '@CustomFrontMenuModule/backOffice/default-twig/custom-front-menu/_tree_nodes.html.twig' with { items: item.children, menuId: menuId } only %}
+            </ul>
+        {% endif %}
+    </li>
+{% endfor %}

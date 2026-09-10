@@ -1,0 +1,34 @@
+{#
+  The target field, which depends on the chosen kind. Swapped in by HTMX when the kind
+  changes, so no module JavaScript is needed.
+#}
+{% set domain = 'customfrontmenu.bo.default-twig' %}
+
+<div id="cfm-target-field">
+    {% if view == 'url' %}
+        {% for lang in bo_languages() %}
+            <div class="input-group mb-2">
+                <span class="input-group-text">
+                    <img src="{{ asset('backoffice/img/svgFlags/' ~ lang.code ~ '.svg') }}" alt="{{ lang.title }}" width="22" height="14">
+                </span>
+                <input type="url" class="form-control" name="url[{{ lang.locale }}]"
+                       value="{{ translations[lang.locale].url|default('') }}"
+                       placeholder="https://example.com/page">
+            </div>
+        {% endfor %}
+        <div class="form-text">{{ 'Only http, https and site-relative addresses are kept.'|trans({}, domain) }}</div>
+
+    {% elseif view in ['brand', 'category', 'content', 'folder', 'product'] %}
+        <select class="form-select" name="view_id" required>
+            <option value="">{{ 'Pick one'|trans({}, domain) }}</option>
+            {% for row in targets[view] %}
+                <option value="{{ row.id }}"{{ row.id == viewId ? ' selected' : '' }}>
+                    {{ row.title ?: ('Untitled'|trans({}, domain)) }}{% if row.reference is defined and row.reference %} · {{ row.reference }}{% endif %} (#{{ row.id }})
+                </option>
+            {% endfor %}
+        </select>
+
+    {% else %}
+        <div class="form-text">{{ 'This entry is a label with no link.'|trans({}, domain) }}</div>
+    {% endif %}
+</div>

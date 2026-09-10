@@ -1,0 +1,89 @@
+{% extends '@BackOfficeDefaultTwig/base.html.twig' %}
+
+{% set domain = 'customfrontmenu.bo.default-twig' %}
+
+{% block title %}{{ menuTitle }}{% endblock %}
+{% block body_testid %}custom-front-menu-tree{% endblock %}
+
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('admin.home') }}">{{ 'Home'|trans }}</a></li>
+            <li class="breadcrumb-item"><a href="/admin/modules">{{ 'Modules'|trans }}</a></li>
+            <li class="breadcrumb-item"><a href="/admin/module/CustomFrontMenu">{{ 'Menus'|trans({}, domain) }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ menuTitle }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid" data-testid="custom-front-menu-tree-page">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+            <h1 class="h3 mb-0">{{ menuTitle }}</h1>
+            <a href="/admin/module/CustomFrontMenu" class="btn btn-outline-secondary">
+                <i class="bi bi-list" aria-hidden="true"></i> {{ 'All menus'|trans({}, domain) }}
+            </a>
+        </div>
+
+        <p class="text-muted small">
+            {{ 'Drag an entry onto another to nest it. Drag it onto the menu drop zone to bring it back to the first level. Every move is saved right away.'|trans({}, domain) }}
+        </p>
+
+        <div class="card mb-3" data-controller="bo-category-tree"
+             data-bo-category-tree-move-url-value="{{ url('admin.customfrontmenu.entries.move') }}"
+             data-bo-category-tree-token-value="{{ assignToken() }}">
+            <div class="card-body p-3">
+                <ul class="bo-category-tree list-unstyled mb-0" data-bo-category-tree-target="root" data-parent-id="0" data-testid="custom-front-menu-tree-root">
+                    {% if tree is empty %}
+                        <li class="text-muted small py-3 text-center" data-testid="custom-front-menu-tree-empty">
+                            {{ 'This menu has no entry yet.'|trans({}, domain) }}
+                        </li>
+                    {% else %}
+                        {% include '@CustomFrontMenuModule/backOffice/default-twig/custom-front-menu/_tree_nodes.html.twig' with { items: tree, menuId: menuId } only %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" id="cfm-add-entry">
+            <div class="card-header">{{ 'Add an entry'|trans({}, domain) }}</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url('admin.customfrontmenu.entries.create', { menuId: menuId }) }}" class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label" for="cfm-entry-title">{{ 'Entry name'|trans({}, domain) }}</label>
+                        <input type="text" class="form-control" id="cfm-entry-title" name="title" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="cfm-entry-parent">{{ 'Place it under'|trans({}, domain) }}</label>
+                        <select class="form-select" id="cfm-entry-parent" name="parent_id">
+                            <option value="0">{{ 'First level of the menu'|trans({}, domain) }}</option>
+                            {% for option in flatTree %}
+                                <option value="{{ option.id }}"{{ option.id == preselectedParent ? ' selected' : '' }}>
+                                    {% if option.depth > 0 %}{% for i in 1..option.depth %}—{% endfor %} {% endif %}{{ option.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="hidden" name="_token" value="{{ assignToken() }}">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'Add'|trans({}, domain) }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <form method="POST" action="{{ url('admin.customfrontmenu.menus.delete', { menuId: menuId }) }}">
+                <input type="hidden" name="_token" value="{{ assignToken() }}">
+                <button type="submit" class="btn btn-outline-danger"
+                        data-controller="confirm-modal"
+                        data-action="click->confirm-modal#confirm"
+                        data-confirm-modal-message-value="{{ 'Delete this whole menu and all its entries?'|trans({}, domain) }}">
+                    <i class="bi bi-trash" aria-hidden="true"></i> {{ 'Delete this menu'|trans({}, domain) }}
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

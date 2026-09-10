@@ -1,324 +1,71 @@
 {#
-  Menu composition screen, rendered by ConfigHook on the module.configuration hook.
-
-  The catalogue of pickable targets travels in one data- attribute rather than the five
-  {loop} blocks of the Smarty screen, which emitted one <script> tag per catalogue row.
-  Flash messages are rendered by the back-office base layout, not here.
+  Module configuration screen: the list of menus. Composing one happens on its own page,
+  so the menu being edited is in the URL rather than in a cookie.
 #}
 {% set domain = 'customfrontmenu.bo.default-twig' %}
 
-<div class="general-block-decorator"
-     id="cfm-screen"
-     data-cfm-menu-names="{{ menuNames }}"
-     data-cfm-menu-items="{{ menuItems }}"
-     data-cfm-current-menu-id="{{ currentMenuId }}"
-     data-cfm-locale="{{ locale }}"
-     data-cfm-targets="{{ targets|json_encode }}"
-     data-cfm-translations="{{ {
-        hideAllChildren: 'Hide all children'|trans({}, domain),
-        showAllChildren: 'Show all children'|trans({}, domain)
-     }|json_encode }}">
+<div class="row g-3" data-testid="custom-front-menu-list">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">{{ 'Menus'|trans({}, domain) }}</div>
 
-    <div class="top d-flex flex-wrap gap-2 align-items-center mb-3">
-        <select id="selectMenuName" class="form-select w-auto delete-if-no-menu"></select>
-
-        <form id="askedMenu" action="{{ url('admin.customfrontmenu.select.menu') }}" method="POST" class="d-none">
-            <input type="hidden" name="menuId" id="menuId">
-            <input type="hidden" name="_token" value="{{ assignToken() }}">
-        </form>
-
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ConfirmAddMenu">
-            {{ 'Add a new menu'|trans({}, domain) }}
-        </button>
-        <button type="button" class="btn btn-outline-danger delete-if-no-menu" data-bs-toggle="modal" data-bs-target="#ConfirmDeleteMenu">
-            {{ 'Delete this menu'|trans({}, domain) }}
-        </button>
-    </div>
-
-    <div id="preview-menu">
-        <h3>{{ 'Preview menu'|trans({}, domain) }}</h3>
-        <ul id="menus"></ul>
-    </div>
-
-    <div class="top d-flex flex-wrap gap-2 align-items-center my-3">
-        <button type="button" id="toggle-all-children" class="btn btn-outline-secondary delete-if-no-menu" onclick="toggleTopLevelVisibility()">
-            {{ 'Hide all children'|trans({}, domain) }}
-        </button>
-        <button type="button" title="{{ 'Add a new parent'|trans({}, domain) }}" class="btn btn-primary add-parent-btn delete-if-no-menu"
-                data-bs-toggle="modal" data-bs-target="#AddAndEditMenu" onclick="resetSelect('AddAndEditMenu')">
-            {{ 'Add a new parent'|trans({}, domain) }}
-            <i class="bi bi-plus-circle"></i>
-        </button>
-    </div>
-
-    <div class="row">
-        <div class="menu">
-            <ul class="menu-item depth-0" id="menu-item-list"></ul>
-        </div>
-        <div class="drop-indicator" style="display: none;"></div>
-        <form id="savedData" action="{{ url('admin.customfrontmenu.save') }}" method="POST" class="d-none">
-            <input type="hidden" name="menuData" id="menuData">
-            <input type="hidden" name="menuDataId" id="menuDataId">
-            <input type="hidden" name="_token" value="{{ assignToken() }}">
-        </form>
-    </div>
-
-    <div id="save-div" class="bottom d-flex gap-2 mt-3">
-        <button type="button" class="btn btn-success delete-if-no-menu" id="save-menu" onclick="saveData()">
-            {{ 'Save'|trans({}, domain) }}
-        </button>
-        <button type="button" class="btn btn-danger delete-if-no-menu" id="discard-change-menu" data-bs-toggle="modal" data-bs-target="#ConfirmDiscard">
-            {{ 'Discard changes'|trans({}, domain) }}
-        </button>
-    </div>
-</div>
-
-{% macro localeInputs(name, extraClass, hidden) %}
-    {% for lang in bo_languages() %}
-        <div class="{{ hidden ? 'item-name-by-language-maskable' : 'item-name-by-language' }}"{{ hidden ? ' style=display:none'|raw : '' }}>
-            <input type="text" name="{{ name }}" class="form-control d-inline-block w-auto {{ extraClass }}"
-                   data-locale="{{ lang.locale }}" placeholder="{{ lang.title }}">
-            <img class="edit-menu-flags" src="{{ asset('backoffice/img/svgFlags/' ~ lang.code ~ '.svg') }}"
-                 alt="{{ lang.title }}" width="22" height="14">
-        </div>
-    {% endfor %}
-{% endmacro %}
-
-{% macro targetSelect(id, datalistId, inputId) %}
-    {% set domain = 'customfrontmenu.bo.default-twig' %}
-    <select {% if id %}id="{{ id }}"{% endif %} class="menuType form-select w-auto" name="menuType"
-            onchange="updateInputOrDatalist(this); resetTargetField(this)">
-        <option value="" selected>{{ 'Select a category'|trans({}, domain) }}</option>
-        <option value="empty">{{ 'No target item'|trans({}, domain) }}</option>
-        <option value="url">{{ 'Personal url'|trans({}, domain) }}</option>
-    </select>
-    <div class="input-container">
-        {{ _self.localeInputs('menuItem', 'menu-item-url', true) }}
-        <input list="{{ datalistId }}" type="text" id="{{ inputId }}" name="menuItemProduct"
-               class="form-control" style="display:none" placeholder="Undefined">
-    </div>
-    <datalist id="{{ datalistId }}" class="itemList"></datalist>
-{% endmacro %}
-
-{# Add a parent item #}
-<div class="modal fade" id="AddAndEditMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Add a menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="newParentForm">
-                <div class="modal-body">
-                    <div class="cfm-error text-danger" data-cfm-error="title" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                    </div>
-                    <div class="edit-modal-line">
-                        <label class="form-label" for="menuItemName">{{ 'Item title'|trans({}, domain) }}</label>
-                        <div class="menu-item-list-of-names">
-                            {{ _self.localeInputs('menuItemName', '', false) }}
-                        </div>
-
-                        <div class="cfm-error text-danger" data-cfm-error="url" style="display: none;">
-                            {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                        </div>
-                        <div class="edit-modal-line">
-                            <label class="form-label">{{ 'Target item'|trans({}, domain) }}</label>
-                            {{ _self.targetSelect('', 'itemListAdd', 'menuItemEdit') }}
-                        </div>
-                    </div>
-                    <p class="error"></p>
+            {% if menus is empty %}
+                <div class="card-body text-muted">
+                    {{ 'No menu yet. Create one to get started.'|trans({}, domain) }}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, '0')">
-                        <i class="bi bi-check2"></i> {{ 'Create'|trans({}, domain) }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="deleteEditField('newParentForm')">
-                        {{ 'Close'|trans({}, domain) }}
-                    </button>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ 'Name'|trans({}, domain) }}</th>
+                                <th scope="col" class="text-end">{{ 'Entries'|trans({}, domain) }}</th>
+                                <th scope="col" class="text-end">{{ 'Front-office call'|trans({}, domain) }}</th>
+                                <th scope="col" class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for menu in menus %}
+                                <tr data-testid="custom-front-menu-row-{{ menu.id }}">
+                                    <td>
+                                        <a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menu.id }) }}" class="text-decoration-none fw-medium">
+                                            {{ menu.title }}
+                                        </a>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-light text-muted border">{{ menu.entryCount }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <code class="small">{{ '{{ custom_front_menu(' ~ menu.id ~ ') }}' }}</code>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menu.id }) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-diagram-3" aria-hidden="true"></i> {{ 'Compose'|trans({}, domain) }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </form>
+            {% endif %}
         </div>
     </div>
-</div>
 
-{# Edit an item #}
-<div class="modal fade" id="EditMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Edit menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editMenuItemForm">
-                <div class="modal-body">
-                    <div class="cfm-error text-danger" data-cfm-error="title" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">{{ 'Add a new menu'|trans({}, domain) }}</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url('admin.customfrontmenu.menus.create') }}">
+                    <div class="mb-3">
+                        <label class="form-label" for="cfm-menu-title">{{ 'Menu name'|trans({}, domain) }}</label>
+                        <input type="text" class="form-control" id="cfm-menu-title" name="title" required>
                     </div>
-                    <div class="edit-modal-line">
-                        <label class="form-label" for="menuItemName">{{ 'Item name'|trans({}, domain) }}</label>
-                        <div class="menu-item-list-of-names">
-                            {{ _self.localeInputs('menuItemName', '', false) }}
-                        </div>
-                    </div>
-
-                    <div class="cfm-error text-danger" data-cfm-error="url" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                    </div>
-
-                    <div class="edit-modal-line">
-                        <label class="form-label" for="menuItemEdit">{{ 'Target item'|trans({}, domain) }}</label>
-                        {{ _self.targetSelect('select-edit-type', 'itemListEdit', 'menuItemEdit') }}
-                    </div>
-                    <p class="error"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="changeParameters(getCurrentId())">
-                        <i class="bi bi-check2"></i> {{ 'Save'|trans({}, domain) }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="deleteEditField('editMenuItemForm')">
-                        {{ 'Close'|trans({}, domain) }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{# Add a child item #}
-<div class="modal fade" id="AddAndEditSecondaryMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Add a menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addMenuItemForm">
-                <div class="modal-body">
-                    <p>{{ 'Add a submenu'|trans({}, domain) }}</p>
-                    <div class="cfm-error text-danger" data-cfm-error="title" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                    </div>
-                    <label class="form-label" for="menuItemName">{{ 'Submenu name'|trans({}, domain) }}</label>
-                    <div class="menu-item-list-of-names">
-                        {{ _self.localeInputs('menuItemName', '', false) }}
-                    </div>
-
-                    <div class="cfm-error text-danger" data-cfm-error="url" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                    </div>
-                    <div class="edit-modal-line">
-                        <label class="form-label">{{ 'Target item'|trans({}, domain) }}</label>
-                        {{ _self.targetSelect('', 'itemListAddChild', 'menuItemAddChild') }}
-                    </div>
-                    <p class="error"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="addCustomMenuItem(this, getCurrentId())">
-                        <i class="bi bi-check2"></i> {{ 'Create'|trans({}, domain) }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="deleteEditField('addMenuItemForm')">
-                        {{ 'Close'|trans({}, domain) }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{# Delete one item #}
-<div class="modal fade" id="DeleteMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Delete menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>{{ 'Would you like to delete this menu item ?'|trans({}, domain) }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteMenuItem(getCurrentId())">
-                    <i class="bi bi-trash"></i> {{ 'Delete'|trans({}, domain) }}
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'Close'|trans({}, domain) }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# Discard changes #}
-<div class="modal fade" id="ConfirmDiscard" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Discard changes'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>{{ 'Would you like to discard all changes ?'|trans({}, domain) }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="allowUnload = true; location.reload()">
-                    <i class="bi bi-trash"></i> {{ 'Delete'|trans({}, domain) }}
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'Close'|trans({}, domain) }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# Add a menu #}
-<div class="modal fade" id="ConfirmAddMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Add a new menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addMenuForm" action="{{ url('admin.customfrontmenu.addmenu') }}" method="POST">
-                    <div id="error-message-empty" class="text-danger" style="display: none;">
-                        {{ 'Menu name cannot be empty'|trans({}, domain) }}
-                    </div>
-                    <div id="error-message-back-quote" class="text-danger" style="display: none;">
-                        {{ 'Cannot use back quote ( ` )'|trans({}, domain) }}
-                    </div>
-                    <label class="form-label" for="menuName">{{ 'Menu name'|trans({}, domain) }}</label>
-                    <input type="text" class="form-control" id="menuName" name="menuName">
                     <input type="hidden" name="_token" value="{{ assignToken() }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'Create'|trans({}, domain) }}
+                    </button>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addMenu()">
-                    <i class="bi bi-check2"></i> {{ 'Create'|trans({}, domain) }}
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'Close'|trans({}, domain) }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# Delete the current menu #}
-<div class="modal fade" id="ConfirmDeleteMenu" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">{{ 'Delete menu'|trans({}, domain) }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>{{ 'Would you like to delete this menu ?'|trans({}, domain) }}</p>
-                <form id="deleteForm" action="{{ url('admin.customfrontmenu.deletemenu') }}" method="POST">
-                    <input type="hidden" name="menuId" id="menuNameToDelete">
-                    <input type="hidden" name="_token" value="{{ assignToken() }}">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteMenu()">
-                    <i class="bi bi-trash"></i> {{ 'Delete'|trans({}, domain) }}
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'Close'|trans({}, domain) }}</button>
             </div>
         </div>
     </div>
