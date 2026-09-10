@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Service\Validator;
@@ -84,7 +86,7 @@ class CustomFrontMenuSaveService
                     ->save();
             } else {
                 $item->setView('Empty')
-                    ->setViewId('')
+                    ->setViewId(null)
                     ->save();
             }
 
@@ -112,7 +114,7 @@ class CustomFrontMenuSaveService
                         }
                         if (!$found) {
                             $item->setView('Empty')
-                                ->setViewId('')
+                                ->setViewId(null)
                                 ->save();
                         }
                     }
