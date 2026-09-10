@@ -8,7 +8,8 @@ This module lets you create dynamic menus.
 
 ### Prerequisites
 
-The OpenApi module must be activated to enable CustomFrontMenu.
+Thelia 3.0 or later. The menu API is served by the core API Platform stack: no
+additional module is required.
 
 ### Manually
 
@@ -74,7 +75,8 @@ Ce module vous permet de créer des menus dynamiques.
 
 ### Prérequis
 
-Le module OpenApi doit être activé pour utiliser CustomFrontMenu.
+Thelia 3.0 ou supérieur. L'API du menu est servie par API Platform, fourni par le
+cœur : aucun module supplémentaire n'est requis.
 
 ### Manuellement
 
