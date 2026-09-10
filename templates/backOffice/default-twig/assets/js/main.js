@@ -1,14 +1,14 @@
+// The screen hands its payload over in data- attributes on #cfm-screen: the catalogue
+// of pickable targets, the menus, the current selection, the locale and the JS strings.
+const CFM_SCREEN = document.getElementById('cfm-screen')
+
 var MENU_NAMES
 var MENU_LIST
-var CURRENT_SELECTED_MENU_ID
-var LOCALE
-var loopsDictionary = {
-    "brand": brandLoopData,
-    "category": categoryLoopData,
-    "content": contentLoopData,
-    "folder": folderLoopData,
-    "product": productLoopData
-};
+var CURRENT_SELECTED_MENU_ID = parseInt(CFM_SCREEN.dataset.cfmCurrentMenuId, 10)
+var LOCALE = CFM_SCREEN.dataset.cfmLocale
+var loopsDictionary = JSON.parse(CFM_SCREEN.dataset.cfmTargets)
+var translations = JSON.parse(CFM_SCREEN.dataset.cfmTranslations)
+var buttonState = 'hide'
 let CURRENT_ID = null
 let allowUnload = false
 let selectedLanguage
@@ -51,8 +51,7 @@ function getValueByLocaleOf(element, locale) {
 function closeClosestModal(element) {
     let modal = element.closest('.modal');
     if (modal) {
-        let modalId = modal.getAttribute('id');
-        $(`#${modalId}`).modal('hide');
+        bootstrap.Modal.getOrCreateInstance(modal).hide();
     }
 }
 // End close closest modal
@@ -163,7 +162,7 @@ function addMenu() {
         errorMessageEmpty.style.display = 'none';
         errorMessageBackQuote.style.display = 'block';
     } else {
-        $('#ConfirmAddMenu').modal('hide');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ConfirmAddMenu')).hide();
         errorMessageEmpty.style.display = 'none';
         errorMessageBackQuote.style.display = 'none';
         document.getElementById('addMenuForm').submit();
@@ -685,19 +684,19 @@ function generateMenuRecursive(menuItem) {
                 <span data-id="titleSpan">` + getValueByLocaleOf(menuItem.title) + `</span>` + arrowSpan + `
             </div>
             <div class="btn-group priority-over-drop-and-down">
-                <a title="Edit this item" class="btn btn-info btn-responsive" data-toggle="modal" data-target="#EditMenu" onclick="resetSelect('EditMenu');setEditFields(` + menuItem.id + `)">
-                    <i class="glyphicon glyphicon-edit"></i>
+                <a title="Edit this item" class="btn btn-info btn-responsive" data-bs-toggle="modal" data-bs-target="#EditMenu" onclick="resetSelect('EditMenu');setEditFields(` + menuItem.id + `)">
+                    <i class="bi bi-pencil"></i>
                 </a>
-                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-toggle="modal" data-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
-                    <i class="glyphicon glyphicon-plus-sign"></i>
+                <a title="Add a new child" class="btn btn-primary btn-responsive action-btn" data-bs-toggle="modal" data-bs-target="#AddAndEditSecondaryMenu" onclick="setCurrentId(` + menuItem.id + `); resetSelect('AddAndEditSecondaryMenu')">
+                    <i class="bi bi-plus-circle"></i>
                 </a>
-                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-toggle="modal" data-target="#DeleteMenu" onclick="setCurrentId(` + menuItem.id + `)">
-                    <i class="glyphicon glyphicon-trash"></i>
+                <a title="Delete this item" class="btn btn-danger btn-responsive module-delete-action" data-bs-toggle="modal" data-bs-target="#DeleteMenu" onclick="setCurrentId(` + menuItem.id + `)">
+                    <i class="bi bi-trash"></i>
                 </a>
             </div>
             <span class="arrows  priority-over-drop-and-down">
-                <a class="leftArrow"  onclick="moveMenuUp(` + menuItem.id + `)"><i class="glyphicon glyphicon-arrow-up" title="move menu above"></i></a>
-                <a class="rightArrow"  onclick="moveMenuDown(` + menuItem.id + `)"><i class="glyphicon glyphicon-arrow-down" title="move menu below"></i></a>
+                <a class="leftArrow"  onclick="moveMenuUp(` + menuItem.id + `)"><i class="bi bi-arrow-up" title="move menu above"></i></a>
+                <a class="rightArrow"  onclick="moveMenuDown(` + menuItem.id + `)"><i class="bi bi-arrow-down" title="move menu below"></i></a>
             </span>
         </div>
         <ul class="menu-item" style="` + ((children) ? "display: block;" : "display: none;") + `">
@@ -1205,38 +1204,6 @@ function resetTargetField(select) {
 }
 // End search product
 
-// Flashes
-
-// Function to remove flash messages from the DOM
-function removeFlashMessages() {
-    const flashMessages = document.getElementsByClassName('alert-flash-to-delete')
-    Array.from(flashMessages).forEach(function (message) {
-        message.remove()
-    });
-}
-
-// Function to notify server to clear flash messages
-function clearFlashMessagesOnServer() {
-    let xhr = new XMLHttpRequest()
-    xhr.open('GET', '/admin/module/CustomFrontMenu/clearFlashes', true)
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status !== 200) {
-                console.error('Network response was not ok:', xhr.statusText)
-            }
-        }
-    };
-
-    xhr.onerror = function () {
-        console.error('Error:', xhr.statusText);
-    }
-
-    xhr.send()
-}
-
-// End flashes
-
 // Event Listener
 window.addEventListener('beforeunload', function(event) {
     if (!allowUnload) {
@@ -1256,8 +1223,8 @@ document.getElementById('selectMenuName').addEventListener('change', function() 
 window.onload = function() {
 
     // Get data
-    MENU_NAMES = getFromJson(menuNames)
-    MENU_LIST = getFromJson(menuItems)
+    MENU_NAMES = getFromJson(CFM_SCREEN.dataset.cfmMenuNames)
+    MENU_LIST = getFromJson(CFM_SCREEN.dataset.cfmMenuItems)
     replaceAllQuotesAndPercent(MENU_LIST)
     for (let menu of MENU_NAMES){
         menu.title = putQuoteAndPercent(menu.title)
@@ -1274,14 +1241,6 @@ window.onload = function() {
         let listToDelete = Array.from(document.getElementsByClassName('delete-if-no-menu'))
         listToDelete.forEach(function (elementToDelete) {
             elementToDelete.disabled = true
-        })
-    }
-
-    // Manage flashes
-    if (document.getElementsByClassName('alert-flash-to-delete').length > 0) {
-        clearFlashMessagesOnServer()
-        document.addEventListener('click', function() {
-                removeFlashMessages()
         })
     }
 
