@@ -3,14 +3,14 @@
 namespace CustomFrontMenu\Service;
 
 use Exception;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Thelia\Core\HttpFoundation\Session\Session;
 
 class Validator
 {
     /**
      * Manage the problems with empty fields or back quotes presence
      */
-    public static function stringValidation(string $string, SessionInterface $session) : string
+    public static function stringValidation(string $string, Session $session) : string
     {
         $string = trim($string);
         if (strlen($string) === 0) {
@@ -23,7 +23,7 @@ class Validator
     /**
      * Replace back quotes with simple quotes and add a warning flash message.
      */
-    public static function backQuoteProhibited(string $string, SessionInterface $session) : string
+    public static function backQuoteProhibited(string $string, Session $session) : string
     {
         $string = trim($string);
         if (str_contains($string, '`')) {
@@ -33,7 +33,7 @@ class Validator
         return $string;
     }
 
-    public static function htmlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = true) : string
+    public static function htmlSafeValidation(string $string, Session $session, bool $canBeEmpty = true) : string
     {
         $string = trim($string);
 
@@ -46,7 +46,7 @@ class Validator
         return $string;
     }
 
-    public static function sqlSafeValidation(string $string, SessionInterface $session, bool $canBeEmpty = true) : string
+    public static function sqlSafeValidation(string $string, Session $session, bool $canBeEmpty = true) : string
     {
         $string = trim($string);
 
@@ -68,7 +68,7 @@ class Validator
     /**
      * Check the empty space, back quote, html and sql constraints
      */
-    public static function completeValidation(string $string, SessionInterface $session) : string
+    public static function completeValidation(string $string, Session $session) : string
     {
         $string = self::stringValidation($string, $session);
         $string = self::htmlSafeValidation($string, $session);

@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
@@ -38,6 +39,18 @@ class MenuController extends BaseAdminController
     public function __construct(
         protected readonly MenuTargetCatalog $targetCatalog,
     ) {
+    }
+
+    /**
+     * BaseController types getSession() as SessionInterface, but flashes and the admin
+     * language live on the Thelia session.
+     */
+    private function theliaSession(): Session
+    {
+        /** @var Session $session */
+        $session = $this->getSession();
+
+        return $session;
     }
 
     /**
@@ -122,7 +135,7 @@ class MenuController extends BaseAdminController
         // Add all new items in database
         $customFrontMenuSave->saveTableBrowser($newMenu, $menu);
 
-        $this->getSession()->getFlashBag()->add(
+        $this->theliaSession()->getFlashBag()->add(
             'success',
             Translator::getInstance()->trans('This menu has been successfully saved !', [], CustomFrontMenu::DOMAIN_NAME),
         );
@@ -147,7 +160,7 @@ class MenuController extends BaseAdminController
 
         $this->rememberMenu($itemId);
 
-        $this->getSession()->getFlashBag()->add(
+        $this->theliaSession()->getFlashBag()->add(
             'success',
             Translator::getInstance()->trans('New menu added successfully', [], CustomFrontMenu::DOMAIN_NAME),
         );
@@ -173,7 +186,7 @@ class MenuController extends BaseAdminController
 
         $customFrontMenuService->deleteMenu((int) str_replace('menu-selected-', '', $rawMenuId));
 
-        $this->getSession()->getFlashBag()->add(
+        $this->theliaSession()->getFlashBag()->add(
             'success',
             Translator::getInstance()->trans('Current menu deleted successfully', [], CustomFrontMenu::DOMAIN_NAME),
         );
@@ -206,7 +219,7 @@ class MenuController extends BaseAdminController
             $menu = $customFrontMenuService->getMenu($menuId);
 
             if (!$menu || 1 !== $menu->getLevel()) {
-                $this->getSession()->getFlashBag()->add(
+                $this->theliaSession()->getFlashBag()->add(
                     'fail',
                     Translator::getInstance()->trans('This menu does not exists', [], CustomFrontMenu::DOMAIN_NAME),
                 );
@@ -236,7 +249,7 @@ class MenuController extends BaseAdminController
      */
     private function screenData(array $menuNames, array $menuItems, int $menuId): array
     {
-        $locale = $this->getSession()->getAdminLang()->getLocale();
+        $locale = $this->theliaSession()->getAdminLang()->getLocale();
 
         return [
             'menuNames' => json_encode($menuNames),
