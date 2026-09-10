@@ -33,14 +33,19 @@ Menu items can be added, deleted, renamed or moved. Translations can be made dir
 
 Each menu item is linked to a URL. This can be entered directly or associated with a `brand`, `category`, `content`, `folder` or `product`.
 
-In front-office, each menu should be called by a smarty plugin manually.
-
-To override the css file, you can replace or modify : `templates/frontOffice/default/assets/css/customFrontMenu.css.html`.
+In front-office, each menu is rendered by calling the `custom_front_menu()` Twig function
+in your theme. The module ships markup only: style the `.cfm-menu` classes from your theme.
 
 ## Example
 
-```smarty
-{CustomFrontMenuPlugin menu_id=388}
+```twig
+{{ custom_front_menu(388) }}
+```
+
+The visitor's locale is used by default. Pass a second argument to force one:
+
+```twig
+{{ custom_front_menu(388, 'fr_FR') }}
 ```
 
 _________________
@@ -80,12 +85,18 @@ Les éléments du menu peuvent être ajoutés, supprimés, renommés ou déplac�
 
 Chaque élément du menu est lié à une URL. Celle-ci peut être saisie directement ou associée à un `brand`, `category`, `content`, `folder` ou `product`.
 
-Dans le front-office, chaque menu doit être appelé manuellement par un plugin smarty.
+Dans le front-office, chaque menu est rendu en appelant la fonction Twig `custom_front_menu()` dans votre thème.
 
-Pour remplacer le fichier css, vous pouvez remplacer ou modifier : `templates/frontOffice/default/assets/css/customFrontMenu.css.html`.
+Le module ne fournit que le markup : les classes `.cfm-menu` sont à styler depuis votre thème.
 
 ## Exemple
 
-```smarty
-{CustomFrontMenuPlugin menu_id=388}
+```twig
+{{ custom_front_menu(388) }}
+```
+
+La locale du visiteur est utilisée par défaut. Un second argument permet de la forcer :
+
+```twig
+{{ custom_front_menu(388, 'fr_FR') }}
 ```

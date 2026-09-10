@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CustomFrontMenu\Service;
 
 use CustomFrontMenu\Model\CustomFrontMenuItem;
@@ -9,12 +11,11 @@ use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Session\Session;
-use Thelia\Model\Base\BrandQuery;
+use Thelia\Model\BrandQuery;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\ContentQuery;
 use Thelia\Model\FolderQuery;
 use Thelia\Model\ProductQuery;
-use Thelia\Tools\URL;
 
 class CustomFrontMenuLoadService
 {
@@ -47,17 +48,33 @@ class CustomFrontMenuLoadService
     }
 
     /**
-     * Generate an url basis on a view type and an id to get the associated content page.
+     * Public URL of a menu target, in the given locale.
+     *
+     * getUrl() goes through URL::retrieve(), which returns the rewritten URL when the
+     * target has one and falls back to the ?view=&{view}_id= form when it has not, so
+     * the menu links match what the rest of the front links to.
+     *
+     * @throws PropelException
      */
-    public function generateUrl(string $type, int $id, string $lang = null): string
+    public function resolvePublicUrl(string $view, int $viewId, string $locale): ?string
     {
-        // url of type http://cfm.th/?view=product&product_id=21&lang=en_US
+        $queryClass = match (strtolower($view)) {
+            'brand' => BrandQuery::class,
+            'category' => CategoryQuery::class,
+            'content' => ContentQuery::class,
+            'folder' => FolderQuery::class,
+            'product' => ProductQuery::class,
+            default => null,
+        };
 
-        $parameters = ['view' => strtolower($type), strtolower($type).'_id' => $id];
-        if($lang) {
-            $parameters['lang'] = $lang;
+        if (null === $queryClass) {
+            return null;
         }
-        return URL::getInstance()->absoluteUrl('', $parameters);
+
+        $target = $queryClass::create()->findPk($viewId);
+
+        // Target deleted since the menu was composed: no link rather than a broken one.
+        return $target?->getUrl($locale);
     }
 
     /**
@@ -198,7 +215,7 @@ class CustomFrontMenuLoadService
                 $view = $descendant->getView();
                 $viewId = $descendant->getViewId();
                 if ($view && $viewId) {
-                    $newArray['url'] = $this->generateUrl($view, $viewId, $lang);
+                    $newArray['url'] = $this->resolvePublicUrl($view, (int) $viewId, $lang) ?? '';
                 }
             }
 
