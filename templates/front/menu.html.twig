@@ -1,0 +1,27 @@
+{#
+  Markup only: the module ships no stylesheet, the theme styles .cfm-menu.
+  Rendered by the custom_front_menu() Twig function.
+#}
+{% macro items(menuItems) %}
+    {% for item in menuItems %}
+        <li class="cfm-menu__item">
+            {% if item.url is defined and item.url is not empty %}
+                <a class="cfm-menu__link" href="{{ item.url }}">{{ item.title }}</a>
+            {% else %}
+                <span class="cfm-menu__label">{{ item.title }}</span>
+            {% endif %}
+
+            {% if item.children is defined and item.children is not empty %}
+                <ul class="cfm-menu__children">
+                    {{ _self.items(item.children) }}
+                </ul>
+            {% endif %}
+        </li>
+    {% endfor %}
+{% endmacro %}
+
+<nav class="cfm-menu" itemtype="https://schema.org/SiteNavigationElement" itemscope>
+    <ul class="cfm-menu__list">
+        {{ _self.items(menuItems) }}
+    </ul>
+</nav>
