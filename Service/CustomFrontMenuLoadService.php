@@ -7,7 +7,6 @@ namespace CustomFrontMenu\Service;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Exception;
-use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -45,36 +44,6 @@ class CustomFrontMenuLoadService
             $dataArray[] = $newArray;
         }
         return $dataArray;
-    }
-
-    /**
-     * Public URL of a menu target, in the given locale.
-     *
-     * getUrl() goes through URL::retrieve(), which returns the rewritten URL when the
-     * target has one and falls back to the ?view=&{view}_id= form when it has not, so
-     * the menu links match what the rest of the front links to.
-     *
-     * @throws PropelException
-     */
-    public function resolvePublicUrl(string $view, int $viewId, string $locale): ?string
-    {
-        $queryClass = match (strtolower($view)) {
-            'brand' => BrandQuery::class,
-            'category' => CategoryQuery::class,
-            'content' => ContentQuery::class,
-            'folder' => FolderQuery::class,
-            'product' => ProductQuery::class,
-            default => null,
-        };
-
-        if (null === $queryClass) {
-            return null;
-        }
-
-        $target = $queryClass::create()->findPk($viewId);
-
-        // Target deleted since the menu was composed: no link rather than a broken one.
-        return $target?->getUrl($locale);
     }
 
     /**
@@ -168,67 +137,4 @@ class CustomFrontMenuLoadService
         return $dataArray;
     }
 
-    /**
-     * Load all elements from the database recursively to parse them in an array with a lang
-     * @param CustomFrontMenuItem $parent
-     * @param string $lang
-     * @return array All the descendants items of the menu root given in parameter
-     * @throws PropelException
-     */
-    public function loadTableBrowserLang(CustomFrontMenuItem $parent, string $lang) : array
-    {
-        $dataArray = [];
-        $descendants = $parent->getChildren();
-        foreach ($descendants as $descendant) {
-            $newArray = [];
-            $I18nMenus = CustomFrontMenuItemI18nQuery::create()->findById($descendant->getId());
-
-            if (count($I18nMenus) <= 0){
-                throw new PropelException('No content found for the given id:' . $descendant->getId());
-            }
-
-            $found = false;
-            $title = '';
-            $url = '';
-            foreach ($I18nMenus as $I18nMenu) {
-                if ($I18nMenu->getLocale() === $lang) {
-                    $title = $I18nMenu->getTitle();
-                    $url = $I18nMenu->getUrl();
-                    $found = true;
-                    break;
-                }
-                elseif ($I18nMenu->getLocale() === 'en_US') {
-                    $title = $I18nMenu->getTitle();
-                    $url = $I18nMenu->getUrl();
-                }
-            }
-
-            if (!$found) {
-                $title = $I18nMenus->getColumnValues('title')[0];
-                $url = $I18nMenus->getColumnValues('url')[0];
-            }
-
-            $newArray['title'] = $title;
-            $newArray['url'] = $url;
-
-            if (Validator::viewIsValid($descendant->getView())) {
-                $view = $descendant->getView();
-                $viewId = $descendant->getViewId();
-                if ($view && $viewId) {
-                    $newArray['url'] = $this->resolvePublicUrl($view, (int) $viewId, $lang) ?? '';
-                }
-            }
-
-            $newArray['depth'] = $descendant->getLevel() - 2;
-            $newArray['id'] = $this
-                ->COUNT_ID;
-            ++$this->COUNT_ID;
-
-            if ($descendant->hasChildren()) {
-                $newArray['children'] = $this->loadTableBrowserLang($descendant, $lang);
-            }
-            $dataArray[] = $newArray;
-        }
-        return $dataArray;
-    }
 }

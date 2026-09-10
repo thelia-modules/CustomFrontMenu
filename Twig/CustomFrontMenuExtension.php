@@ -15,8 +15,7 @@ declare(strict_types=1);
 
 namespace CustomFrontMenu\Twig;
 
-use CustomFrontMenu\Service\CustomFrontMenuLoadService;
-use CustomFrontMenu\Service\CustomFrontMenuService;
+use CustomFrontMenu\Service\Front\MenuTreeResolver;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Twig\Environment;
@@ -34,8 +33,7 @@ final class CustomFrontMenuExtension extends AbstractExtension
     private const TEMPLATE = '@CustomFrontMenuModule/front/menu.html.twig';
 
     public function __construct(
-        private readonly CustomFrontMenuService $menuService,
-        private readonly CustomFrontMenuLoadService $loadService,
+        private readonly MenuTreeResolver $treeResolver,
         private readonly RequestStack $requestStack,
     ) {
     }
@@ -53,17 +51,15 @@ final class CustomFrontMenuExtension extends AbstractExtension
 
     public function render(Environment $twig, int $menuId, ?string $locale = null): string
     {
-        $menu = $this->menuService->getMenu($menuId);
+        $menuItems = $this->treeResolver->resolve($menuId, $locale ?? $this->locale());
 
         // A theme asking for a menu that no longer exists gets nothing, not an
         // exception: a deleted menu must not take the whole page down.
-        if (null === $menu) {
+        if (null === $menuItems) {
             return '';
         }
 
-        return $twig->render(self::TEMPLATE, [
-            'menuItems' => $this->loadService->loadTableBrowserLang($menu, $locale ?? $this->locale()),
-        ]);
+        return $twig->render(self::TEMPLATE, ['menuItems' => $menuItems]);
     }
 
     private function locale(): string

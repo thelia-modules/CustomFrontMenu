@@ -5,8 +5,8 @@
 {% macro items(menuItems) %}
     {% for item in menuItems %}
         <li class="cfm-menu__item">
-            {% if item.url is defined and item.url is not empty %}
-                <a class="cfm-menu__link" href="{{ item.url }}">{{ item.title }}</a>
+            {% if item.href is defined and item.href is not empty %}
+                <a class="cfm-menu__link" href="{{ item.href }}">{{ item.title }}</a>
             {% else %}
                 <span class="cfm-menu__label">{{ item.title }}</span>
             {% endif %}

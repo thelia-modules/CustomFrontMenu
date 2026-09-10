@@ -48,6 +48,20 @@ The visitor's locale is used by default. Pass a second argument to force one:
 {{ custom_front_menu(388, 'fr_FR') }}
 ```
 
+Entries whose target is deleted or unpublished are dropped from the rendered menu.
+
+## API
+
+The composed tree is also readable over HTTP, read-only:
+
+```
+GET /api/front/custom-front-menus/{id}
+```
+
+It answers `{id, items}`, each item being `{id, title, href, children}`. It replaces the
+`open_api/custom-front-menu/{id}` endpoint of the 1.x line, which relied on the OpenApi
+module that Thelia 3 no longer ships.
+
 _________________
 
 ## Version française
