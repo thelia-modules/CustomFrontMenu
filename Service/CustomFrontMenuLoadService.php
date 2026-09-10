@@ -8,6 +8,7 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Model\BrandQuery;
@@ -85,7 +86,8 @@ class CustomFrontMenuLoadService
             
             $viewId = $descendant->getViewId();
 
-            if($view && $viewId && Validator::viewIsValid($view)) {
+            // $view is never empty here: it defaults to 'url' just above.
+            if($viewId && Validator::viewIsValid($view)) {
 
                 $formatedView = ucfirst($view);
                 $class = 'Thelia\Model\\' . $formatedView . 'Query';
@@ -95,16 +97,19 @@ class CustomFrontMenuLoadService
                 /** @var CategoryQuery|ProductQuery|FolderQuery|ContentQuery|BrandQuery $objectQuery */
                 $objectQuery = $class::create();
 
+                /** @var ObjectCollection $query */
                 $query = $objectQuery
                     ->filterById($viewId)
                     ->joinWith($formatedView.'I18n')
                     ->find();
 
-                $queryI18n = $query->getColumnValues($formatedView.'I18ns')[0];
-
+                // Emptiness first: reading the translations of a missing row raised an
+                // index error before this check could report the real problem.
                 if ($query->isEmpty()) {
                     throw new Exception("No results found for the specified id $viewId.");
                 }
+
+                $queryI18n = $query->getColumnValues($formatedView.'I18ns')[0];
 
                 $title = null;
                 foreach ($queryI18n as $item) {

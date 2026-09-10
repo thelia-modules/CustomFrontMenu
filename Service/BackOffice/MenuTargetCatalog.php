@@ -50,6 +50,8 @@ final readonly class MenuTargetCatalog
     }
 
     /**
+     * @param BrandQuery|CategoryQuery|ContentQuery|FolderQuery|ProductQuery $query
+     *
      * @return list<array<string, string|int>>
      */
     private function rows(ModelCriteria $query, string $locale, bool $withReference = false): array

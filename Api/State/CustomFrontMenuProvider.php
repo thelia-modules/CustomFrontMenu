@@ -36,7 +36,7 @@ final readonly class CustomFrontMenuProvider implements ProviderInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?CustomFrontMenu
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CustomFrontMenu
     {
         $menuId = (int) ($uriVariables['id'] ?? 0);
 

@@ -32,12 +32,12 @@ class CustomFrontMenu extends BaseModule
      */
     public function preActivation(ConnectionInterface $con = null): bool
     {
-        if (!self::getConfigValue('is_initialized', false)) {
+        if (!self::getConfigValue('is_initialized')) {
             $database = new Database($con);
 
             $database->insertSql(null, [__DIR__.'/Config/TheliaMain.sql']);
 
-            self::setConfigValue('is_initialized', true);
+            self::setConfigValue('is_initialized', '1');
         }
 
         return true;
@@ -61,7 +61,6 @@ class CustomFrontMenu extends BaseModule
 
         $database = new Database($con);
 
-        /** @var \SplFileInfo $file */
         foreach ($finder as $file) {
             if (version_compare($currentVersion, $file->getBasename('.sql'), '<')) {
                 $database->insertSql(null, [$file->getPathname()]);

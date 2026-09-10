@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CustomFrontMenu\Service;
 
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Thelia\Core\HttpFoundation\Session\Session;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
@@ -37,12 +40,15 @@ class CustomFrontMenuService
      */
     public function addMenu(CustomFrontMenuItem $root, string $menuName) : int
     {
+        /** @var Session $session */
+        $session = $this->requestStack->getCurrentRequest()->getSession();
+
         $item = new CustomFrontMenuItem();
         $item->insertAsLastChildOf($root);
         $item->save();
 
         $content = new CustomFrontMenuItemI18n();
-        $content->setTitle(Validator::completeValidation($menuName, $this->requestStack->getCurrentRequest()->getSession()));
+        $content->setTitle(Validator::completeValidation($menuName, $session));
         $content->setId($item->getId());
         $content->setLocale('en_US');
         $content->save();
