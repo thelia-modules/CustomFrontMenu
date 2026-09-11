@@ -211,17 +211,23 @@ class MenuController extends BaseAdminController
         }
 
         $view = strtolower((string) $entry->getView());
-        $menuId = (int) $this->menuOf($entry)?->getId();
+        $menu = $this->menuOf($entry);
+        $menuId = (int) $menu?->getId();
+        $locale = $this->locale();
 
         return $this->render('custom-front-menu/entry', [
             'itemId' => $itemId,
             'menuId' => $menuId,
-            'menuTitle' => $this->presenter->title($this->composer->menu($menuId), $this->locale()),
-            'entryTitle' => $this->presenter->title($entry, $this->locale()),
+            'menuTitle' => $this->presenter->title($this->composer->menu($menuId), $locale),
+            'entryTitle' => $this->presenter->title($entry, $locale),
             'translations' => $this->composer->translations($entry),
             'view' => \in_array($view, self::VIEWS, true) ? $view : ('' === $view ? 'none' : 'url'),
             'viewId' => (int) $entry->getViewId(),
-            'targets' => $this->targetCatalog->targets($this->locale()),
+            'targets' => $this->targetCatalog->targets($locale),
+            // Reparenting from the form, because dropping an entry back on the root zone of
+            // the tree means aiming at a few pixels.
+            'parents' => null === $menu ? [] : $this->parentOptions($menu, $entry, $locale),
+            'parentId' => 2 === $entry->getLevel() ? 0 : (int) $entry->getParent()?->getId(),
         ]);
     }
 
@@ -268,6 +274,18 @@ class MenuController extends BaseAdminController
 
         if (null === $entry) {
             return $this->failure('This menu entry does not exist', $this->configurationUrl());
+        }
+
+        if ($request->request->has('parent_id')) {
+            $menu = $this->menuOf($entry);
+            $parentId = (int) $request->request->get('parent_id', 0);
+            $newParent = $parentId > 0 ? $this->composer->entry($parentId) : $menu;
+
+            if (null === $menu || null === $newParent || $this->menuOf($newParent)?->getId() !== $menu->getId()) {
+                return $this->failure('This menu entry does not exist', $this->entryUrl($itemId));
+            }
+
+            $this->composer->move($entry, $newParent);
         }
 
         $view = strtolower(trim((string) $request->request->get('view', 'none')));
@@ -434,6 +452,28 @@ class MenuController extends BaseAdminController
         }
 
         return $flat;
+    }
+
+    /**
+     * Where one entry may be moved: every entry of its menu, minus itself and its own
+     * descendants, which the nested set cannot absorb.
+     *
+     * @return list<array{id: int, title: string, depth: int}>
+     *
+     * @throws PropelException
+     */
+    private function parentOptions(CustomFrontMenuItem $menu, CustomFrontMenuItem $entry, string $locale): array
+    {
+        $excluded = [(int) $entry->getId()];
+
+        foreach ($entry->getDescendants() as $descendant) {
+            $excluded[] = (int) $descendant->getId();
+        }
+
+        return array_values(array_filter(
+            $this->flatten($this->presenter->tree($menu, $locale)),
+            static fn (array $option): bool => !\in_array($option['id'], $excluded, true),
+        ));
     }
 
     /**
