@@ -41,6 +41,22 @@
             </div>
 
             <div class="card mb-3">
+                <div class="card-header">{{ 'Position'|trans({}, domain) }}</div>
+                <div class="card-body">
+                    <label class="form-label" for="cfm-entry-parent">{{ 'Place it under'|trans({}, domain) }}</label>
+                    <select class="form-select" id="cfm-entry-parent" name="parent_id">
+                        <option value="0"{{ parentId == 0 ? ' selected' : '' }}>{{ 'First level of the menu'|trans({}, domain) }}</option>
+                        {% for option in parents %}
+                            <option value="{{ option.id }}"{{ option.id == parentId ? ' selected' : '' }}>
+                                {% if option.depth > 0 %}{% for i in 1..option.depth %}—{% endfor %} {% endif %}{{ option.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">{{ 'Moving an entry takes its own entries with it.'|trans({}, domain) }}</div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
                 <div class="card-header">{{ 'Target'|trans({}, domain) }}</div>
                 <div class="card-body">
                     <div class="mb-3">
