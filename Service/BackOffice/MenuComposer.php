@@ -103,7 +103,9 @@ final readonly class MenuComposer
     {
         $menu = new CustomFrontMenuItem();
         $menu->insertAsLastChildOf($this->root());
-        $menu->setCode(MenuCode::unique('' === $code ? $title : $code));
+        // A typed code reached here already validated and free; only an empty one is
+        // derived from the name.
+        $menu->setCode('' === $code ? MenuCode::derive($title) : $code);
         $menu->save();
 
         $this->setTranslation($menu, $locale, $title, null);
@@ -122,7 +124,7 @@ final readonly class MenuComposer
     public function renameMenu(CustomFrontMenuItem $menu, string $title, string $code, string $locale): void
     {
         $menu
-            ->setCode(MenuCode::unique('' === $code ? $title : $code, (int) $menu->getId()))
+            ->setCode('' === $code ? MenuCode::derive($title, (int) $menu->getId()) : $code)
             ->save();
 
         $this->setTranslation($menu, $locale, $title, null);

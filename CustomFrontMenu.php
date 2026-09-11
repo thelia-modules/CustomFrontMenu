@@ -96,7 +96,7 @@ class CustomFrontMenu extends BaseModule
                 ?->getTitle();
 
             $menu
-                ->setCode(MenuCode::unique('' === trim($title) ? 'menu-'.$menu->getId() : $title))
+                ->setCode(MenuCode::derive('' === trim($title) ? 'menu-'.$menu->getId() : $title))
                 ->save();
         }
     }
