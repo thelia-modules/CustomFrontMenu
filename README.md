@@ -58,6 +58,10 @@ exact call to copy.
 Each node is `{id, title, href, children}`, nested to any depth. An entry with no target
 has an empty `href`: it is a label, and it is yours to render as one.
 
+`href` is always `http(s)`, site-relative, or empty — filtered on the way out, so an
+address entered before this rule existed cannot reach your template either. `title` is
+plain text that your own template must escape, as Twig does by default.
+
 The visitor's locale is used by default. Pass a second argument to force one:
 
 ```twig
@@ -143,6 +147,10 @@ composition affiche l'appel exact à recopier.
 
 Chaque nœud est `{id, title, href, children}`, imbriqué à toute profondeur. Une entrée sans
 cible a un `href` vide : c'est un libellé, à rendre comme tel.
+
+`href` est toujours `http(s)`, relatif au site, ou vide — filtré à la sortie, donc une
+adresse saisie avant l'existence de cette règle n'atteint pas non plus votre gabarit.
+`title` est du texte brut, que votre gabarit doit échapper, comme Twig le fait par défaut.
 
 La locale du visiteur est utilisée par défaut. Un second argument permet de la forcer :
 

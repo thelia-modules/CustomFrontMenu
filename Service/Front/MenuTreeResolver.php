@@ -17,6 +17,7 @@ namespace CustomFrontMenu\Service\Front;
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Service\MenuLink;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Model\BrandQuery;
 use Thelia\Model\CategoryQuery;
@@ -150,11 +151,15 @@ final readonly class MenuTreeResolver
     }
 
     /**
+     * Filtered again here, not only where it was written: rows saved by the 1.x screen
+     * went through FILTER_SANITIZE_URL, which leaves a `javascript:` URL untouched, and
+     * this value is rendered on every page and served by a public API.
+     *
      * @throws PropelException
      */
     private function freeUrl(CustomFrontMenuItem $item, string $locale): string
     {
-        return $this->i18nValue($item, $locale, 'url');
+        return MenuLink::filter($this->i18nValue($item, $locale, 'url')) ?? '';
     }
 
     /**

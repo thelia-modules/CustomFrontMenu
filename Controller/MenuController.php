@@ -20,6 +20,7 @@ use CustomFrontMenu\Service\BackOffice\MenuComposer;
 use CustomFrontMenu\Service\BackOffice\MenuTargetCatalog;
 use CustomFrontMenu\Service\BackOffice\MenuTreePresenter;
 use CustomFrontMenu\Service\MenuCode;
+use CustomFrontMenu\Service\MenuLink;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -358,7 +359,7 @@ class MenuController extends BaseAdminController
                 $entry,
                 (string) $locale,
                 $this->cleanTitle((string) $title),
-                'url' === $view ? $this->cleanUrl((string) ($urls[$locale] ?? '')) : null,
+                'url' === $view ? MenuLink::filter((string) ($urls[$locale] ?? '')) : null,
             );
         }
 
@@ -578,27 +579,6 @@ class MenuController extends BaseAdminController
         $title = trim(strip_tags(str_replace('`', "'", $title)));
 
         return '' === $title ? null : $title;
-    }
-
-    /**
-     * Only http(s) and site-relative URLs: a menu link is rendered on every page, so a
-     * javascript: or data: URL entered here would be a stored cross-site scripting hole.
-     */
-    private function cleanUrl(string $url): ?string
-    {
-        $url = trim(strip_tags($url));
-
-        if ('' === $url) {
-            return null;
-        }
-
-        if (str_starts_with($url, '/')) {
-            return $url;
-        }
-
-        $scheme = strtolower((string) parse_url($url, \PHP_URL_SCHEME));
-
-        return \in_array($scheme, ['http', 'https'], true) ? $url : null;
     }
 
     private function locale(): string
