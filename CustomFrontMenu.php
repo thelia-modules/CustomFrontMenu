@@ -101,14 +101,6 @@ class CustomFrontMenu extends BaseModule
         }
     }
 
-    /**
-     * Delete the cookie, but preserve the database
-     */
-    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
-    {
-        setcookie('menuId', '', time() - 3600, '/admin/module/CustomFrontMenu');
-    }
-
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
