@@ -19,6 +19,7 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Service\BackOffice\MenuComposer;
 use CustomFrontMenu\Service\BackOffice\MenuTargetCatalog;
 use CustomFrontMenu\Service\BackOffice\MenuTreePresenter;
+use CustomFrontMenu\Service\MenuCode;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,11 +93,13 @@ class MenuController extends BaseAdminController
             return $this->failure('A menu name is required', $this->configurationUrl());
         }
 
-        $menu = $this->composer->createMenu(
-            $title,
-            $this->locale(),
-            trim((string) $request->request->get('code', '')),
-        );
+        $code = trim((string) $request->request->get('code', ''));
+
+        if (null !== $rejected = $this->rejectBadCode($code, null, $this->configurationUrl())) {
+            return $rejected;
+        }
+
+        $menu = $this->composer->createMenu($title, $this->locale(), $code);
 
         $this->success('New menu added successfully');
 
@@ -152,12 +155,13 @@ class MenuController extends BaseAdminController
             return $this->failure('A menu name is required', $this->menuUrl($menuId));
         }
 
-        $this->composer->renameMenu(
-            $menu,
-            $title,
-            trim((string) $request->request->get('code', '')),
-            $this->locale(),
-        );
+        $code = trim((string) $request->request->get('code', ''));
+
+        if (null !== $rejected = $this->rejectBadCode($code, $menuId, $this->menuUrl($menuId))) {
+            return $rejected;
+        }
+
+        $this->composer->renameMenu($menu, $title, $code, $this->locale());
 
         $this->success('This menu has been successfully saved');
 
@@ -477,6 +481,30 @@ class MenuController extends BaseAdminController
 
         if ($request instanceof Request) {
             $this->getTokenProvider()->checkToken((string) $request->request->get('_token', ''));
+        }
+
+        return null;
+    }
+
+    /**
+     * A code is what a theme is written against, so a typed one is kept exactly as typed
+     * or refused — never quietly slugified into something else. An empty code is not an
+     * error: it means "derive it from the name".
+     *
+     * @throws PropelException
+     */
+    private function rejectBadCode(string $code, ?int $exceptId, string $redirectTo): ?RedirectResponse
+    {
+        if ('' === $code) {
+            return null;
+        }
+
+        if (!MenuCode::isValid($code)) {
+            return $this->failure('A code takes lowercase letters, digits and single dashes only', $redirectTo);
+        }
+
+        if (MenuCode::isTaken($code, $exceptId)) {
+            return $this->failure('This code is already used by another menu', $redirectTo);
         }
 
         return null;
