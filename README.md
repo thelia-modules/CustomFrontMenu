@@ -37,17 +37,25 @@ Each menu item is linked to a URL. This can be entered directly or associated wi
 In front-office, each menu is rendered by calling the `custom_front_menu()` Twig function
 in your theme. The module ships markup only: style the `.cfm-menu` classes from your theme.
 
+A menu is addressed by its **code**, not by its id: the id comes from an autoincrement and
+differs from one installation to the next, so a theme built on it breaks on the next shop.
+The code is yours to choose when you create the menu, and the composition screen shows the
+exact call to copy.
+
 ## Example
 
 ```twig
-{{ custom_front_menu(388) }}
+{{ custom_front_menu('header') }}
 ```
 
 The visitor's locale is used by default. Pass a second argument to force one:
 
 ```twig
-{{ custom_front_menu(388, 'fr_FR') }}
+{{ custom_front_menu('header', 'fr_FR') }}
 ```
+
+An unknown code renders nothing rather than raising: a menu deleted in the back-office must
+not take the storefront down.
 
 Entries whose target is deleted or unpublished are dropped from the rendered menu.
 
@@ -56,10 +64,10 @@ Entries whose target is deleted or unpublished are dropped from the rendered men
 The composed tree is also readable over HTTP, read-only:
 
 ```
-GET /api/front/custom-front-menus/{id}
+GET /api/front/custom-front-menus/{code}
 ```
 
-It answers `{id, items}`, each item being `{id, title, href, children}`. It replaces the
+It answers `{code, items}`, each item being `{id, title, href, children}`. It replaces the
 `open_api/custom-front-menu/{id}` endpoint of the 1.x line, which relied on the OpenApi
 module that Thelia 3 no longer ships.
 
@@ -105,14 +113,22 @@ Dans le front-office, chaque menu est rendu en appelant la fonction Twig `custom
 
 Le module ne fournit que le markup : les classes `.cfm-menu` sont à styler depuis votre thème.
 
+Un menu s'appelle par son **code**, pas par son identifiant : l'identifiant vient d'un
+auto-incrément et change d'une installation à l'autre, donc un thème qui s'appuie dessus
+casse sur la boutique suivante. Le code est choisi à la création du menu, et l'écran de
+composition affiche l'appel exact à recopier.
+
 ## Exemple
 
 ```twig
-{{ custom_front_menu(388) }}
+{{ custom_front_menu('header') }}
 ```
 
 La locale du visiteur est utilisée par défaut. Un second argument permet de la forcer :
 
 ```twig
-{{ custom_front_menu(388, 'fr_FR') }}
+{{ custom_front_menu('header', 'fr_FR') }}
 ```
+
+Un code inconnu ne rend rien, sans lever d'exception : un menu supprimé au back-office ne
+doit pas emporter la boutique.

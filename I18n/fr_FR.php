@@ -10,4 +10,5 @@ return array(
     'This entry has been successfully saved' => 'L\'entrée a été enregistrée',
     'This menu does not exist' => 'Ce menu n\'existe pas',
     'This menu entry does not exist' => 'Cette entrée de menu n\'existe pas',
+    'This menu has been successfully saved' => 'Le menu a été enregistré',
 );

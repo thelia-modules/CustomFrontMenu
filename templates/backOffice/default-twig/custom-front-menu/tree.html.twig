@@ -25,6 +25,32 @@
             </a>
         </div>
 
+        <div class="card mb-3">
+            <div class="card-header">{{ 'Name and code'|trans({}, domain) }}</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url('admin.customfrontmenu.menus.rename', { menuId: menuId }) }}" class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label" for="cfm-menu-title">{{ 'Menu name'|trans({}, domain) }}</label>
+                        <input type="text" class="form-control" id="cfm-menu-title" name="title" value="{{ menuTitle }}" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="cfm-menu-code">{{ 'Code'|trans({}, domain) }}</label>
+                        <input type="text" class="form-control" id="cfm-menu-code" name="code" value="{{ menuCode }}">
+                        <div class="form-text">
+                            {{ 'Front-office call'|trans({}, domain) }} :
+                            <code>{{ "{{ custom_front_menu('" ~ menuCode ~ "') }}" }}</code>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="hidden" name="_token" value="{{ assignToken() }}">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check2" aria-hidden="true"></i> {{ 'Save'|trans({}, domain) }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <p class="text-muted small">
             {{ 'Drag an entry onto another to nest it, and every move is saved right away. To move one back up a level, open it and change where it sits.'|trans({}, domain) }}
         </p>

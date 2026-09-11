@@ -36,7 +36,7 @@
                                         <span class="badge bg-light text-muted border">{{ menu.entryCount }}</span>
                                     </td>
                                     <td class="text-end">
-                                        <code class="small">{{ '{{ custom_front_menu(' ~ menu.id ~ ') }}' }}</code>
+                                        <code class="small">{{ "{{ custom_front_menu('" ~ menu.code ~ "') }}" }}</code>
                                     </td>
                                     <td class="text-end">
                                         <a href="{{ url('admin.customfrontmenu.menus.show', { menuId: menu.id }) }}" class="btn btn-sm btn-outline-primary">
@@ -60,6 +60,12 @@
                     <div class="mb-3">
                         <label class="form-label" for="cfm-menu-title">{{ 'Menu name'|trans({}, domain) }}</label>
                         <input type="text" class="form-control" id="cfm-menu-title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="cfm-menu-code">{{ 'Code'|trans({}, domain) }}</label>
+                        <input type="text" class="form-control" id="cfm-menu-code" name="code"
+                               placeholder="header">
+                        <div class="form-text">{{ 'The name a theme calls this menu by. Left empty, it is derived from the menu name.'|trans({}, domain) }}</div>
                     </div>
                     <input type="hidden" name="_token" value="{{ assignToken() }}">
                     <button type="submit" class="btn btn-primary">

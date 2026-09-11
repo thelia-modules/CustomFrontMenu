@@ -18,6 +18,7 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Service\MenuCode;
 use Propel\Runtime\Exception\PropelException;
 
 /**
@@ -36,6 +37,10 @@ final readonly class MenuComposer
      */
     public function root(): CustomFrontMenuItem
     {
+        // The generated findRoot() declares @return ChildCustomFrontMenuItem, but it is a
+        // findOne() underneath: on an empty table it returns null, which is exactly the
+        // case this method exists to handle.
+        /** @var CustomFrontMenuItem|null $root */
         $root = CustomFrontMenuItemQuery::create()->findRoot();
 
         if (null === $root) {
@@ -69,6 +74,19 @@ final readonly class MenuComposer
     }
 
     /**
+     * A menu by the code a theme calls it by. Only a level-1 row carries a code, so this
+     * can never answer with the nested-set root or with an entry.
+     *
+     * @throws PropelException
+     */
+    public function menuByCode(string $code): ?CustomFrontMenuItem
+    {
+        $menu = CustomFrontMenuItemQuery::create()->findOneByCode($code);
+
+        return $menu && 1 === $menu->getLevel() ? $menu : null;
+    }
+
+    /**
      * @throws PropelException
      */
     public function entry(int $itemId): ?CustomFrontMenuItem
@@ -81,15 +99,33 @@ final readonly class MenuComposer
     /**
      * @throws PropelException
      */
-    public function createMenu(string $title, string $locale): CustomFrontMenuItem
+    public function createMenu(string $title, string $locale, string $code = ''): CustomFrontMenuItem
     {
         $menu = new CustomFrontMenuItem();
         $menu->insertAsLastChildOf($this->root());
+        $menu->setCode(MenuCode::unique('' === $code ? $title : $code));
         $menu->save();
 
         $this->setTranslation($menu, $locale, $title, null);
 
         return $menu;
+    }
+
+    /**
+     * Rename a menu, and give it the code a theme will call it by.
+     *
+     * An empty code is derived from the new name: a menu with no code is unreachable from
+     * a theme, which is the one state this column exists to prevent.
+     *
+     * @throws PropelException
+     */
+    public function renameMenu(CustomFrontMenuItem $menu, string $title, string $code, string $locale): void
+    {
+        $menu
+            ->setCode(MenuCode::unique('' === $code ? $title : $code, (int) $menu->getId()))
+            ->save();
+
+        $this->setTranslation($menu, $locale, $title, null);
     }
 
     /**
