@@ -12,12 +12,14 @@ DROP TABLE IF EXISTS `custom_front_menu_item`;
 CREATE TABLE `custom_front_menu_item`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(255),
     `view` VARCHAR(255),
     `view_id` INTEGER,
     `tree_left` INTEGER,
     `tree_right` INTEGER,
     `tree_level` INTEGER,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `custom_front_menu_item_code_unique` (`code`)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
