@@ -5,10 +5,18 @@
 
     <table name="custom_front_menu_item" namespace="CustomFrontMenu\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <!-- Only a menu (tree level 1) carries a code: it is the name a theme calls the
+             menu by, so it must survive a reinstall, which an autoincrement id does not.
+             Entries keep it null; MySQL allows many nulls under a unique index. -->
+        <column name="code" size="255" type="VARCHAR"/>
         <column name="view" size="255" type="VARCHAR"/>
         <column name="view_id" type="INTEGER"/>
         <column name="title" size="255" type="VARCHAR"/>
         <column name="url" size="255" type="VARCHAR"/>
+        <unique name="custom_front_menu_item_code_unique">
+            <unique-column name="code"/>
+        </unique>
+
         <behavior name="nested_set" />
         <behavior name="i18n">
             <parameter name="i18n_columns" value="title, url" />

@@ -10,4 +10,5 @@ return array(
     'This entry has been successfully saved' => 'La voce è stata salvata',
     'This menu does not exist' => 'Questo menu non esiste',
     'This menu entry does not exist' => 'Questa voce di menu non esiste',
+    'This menu has been successfully saved' => 'Il menu è stato salvato',
 );

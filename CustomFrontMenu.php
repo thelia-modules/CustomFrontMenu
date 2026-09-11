@@ -15,6 +15,9 @@ declare(strict_types=1);
 
 namespace CustomFrontMenu;
 
+use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
+use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Service\MenuCode;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
@@ -65,6 +68,36 @@ class CustomFrontMenu extends BaseModule
             if (version_compare($currentVersion, $file->getBasename('.sql'), '<')) {
                 $database->insertSql(null, [$file->getPathname()]);
             }
+        }
+
+        if (version_compare($currentVersion, '2.0.0', '<')) {
+            $this->fillMissingMenuCodes();
+        }
+    }
+
+    /**
+     * Give a code to every menu created before the column existed.
+     *
+     * A menu with no code cannot be rendered by a theme at all, so this runs on the data
+     * rather than leaving the shop owner to discover it menu by menu. Derived from the
+     * menu title, which is what the person would have typed anyway.
+     */
+    private function fillMissingMenuCodes(): void
+    {
+        $menus = CustomFrontMenuItemQuery::create()
+            ->filterByTreeLevel(1)
+            ->filterByCode(null)
+            ->find();
+
+        foreach ($menus as $menu) {
+            $title = (string) CustomFrontMenuItemI18nQuery::create()
+                ->filterById($menu->getId())
+                ->findOne()
+                ?->getTitle();
+
+            $menu
+                ->setCode(MenuCode::unique('' === trim($title) ? 'menu-'.$menu->getId() : $title))
+                ->save();
         }
     }
 

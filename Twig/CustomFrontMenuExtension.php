@@ -25,6 +25,9 @@ use Twig\TwigFunction;
 /**
  * Twig replacement for the Smarty {CustomFrontMenuPlugin menu_id=x} function.
  *
+ * Called as custom_front_menu('header'): a menu is addressed by its code, which the shop
+ * owner chooses and which survives a reinstall, not by its id.
+ *
  * The Environment is passed per call rather than injected: injecting it into an
  * extension it is itself registered on is a circular reference.
  */
@@ -49,9 +52,9 @@ final class CustomFrontMenuExtension extends AbstractExtension
         ];
     }
 
-    public function render(Environment $twig, int $menuId, ?string $locale = null): string
+    public function render(Environment $twig, string $code, ?string $locale = null): string
     {
-        $menuItems = $this->treeResolver->resolve($menuId, $locale ?? $this->locale());
+        $menuItems = $this->treeResolver->resolve($code, $locale ?? $this->locale());
 
         // A theme asking for a menu that no longer exists gets nothing, not an
         // exception: a deleted menu must not take the whole page down.

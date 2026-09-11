@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace CustomFrontMenu\Api\Resource;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use CustomFrontMenu\Api\State\CustomFrontMenuProvider;
@@ -28,7 +29,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/front/custom-front-menus/{id}',
+            uriTemplate: '/front/custom-front-menus/{code}',
+            uriVariables: ['code'],
             normalizationContext: ['groups' => [self::GROUP_FRONT_READ]],
             provider: CustomFrontMenuProvider::class,
         ),
@@ -38,8 +40,15 @@ class CustomFrontMenu
 {
     public const GROUP_FRONT_READ = 'custom_front_menu:front:read';
 
+    /**
+     * The code the shop owner gave the menu, which is also how a theme addresses it.
+     *
+     * The identifier of the resource, so the IRI is stable across installations: the
+     * numeric id of a menu is not, it comes from an autoincrement shared with the entries.
+     */
+    #[ApiProperty(identifier: true)]
     #[Groups([self::GROUP_FRONT_READ])]
-    public int $id = 0;
+    public string $code = '';
 
     /**
      * Nodes of {id, title, href, children}, children nested to any depth.

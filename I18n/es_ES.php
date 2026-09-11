@@ -10,4 +10,5 @@ return array(
     'This entry has been successfully saved' => 'La entrada se ha guardado',
     'This menu does not exist' => 'Este menú no existe',
     'This menu entry does not exist' => 'Esta entrada de menú no existe',
+    'This menu has been successfully saved' => 'El menú se ha guardado',
 );

@@ -38,20 +38,20 @@ final readonly class CustomFrontMenuProvider implements ProviderInterface
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CustomFrontMenu
     {
-        $menuId = (int) ($uriVariables['id'] ?? 0);
+        $code = trim((string) ($uriVariables['code'] ?? ''));
 
-        if ($menuId <= 0) {
+        if ('' === $code) {
             throw new NotFoundHttpException('Menu not found');
         }
 
-        $items = $this->treeResolver->resolve($menuId, $this->langService->getLocale() ?? 'en_US');
+        $items = $this->treeResolver->resolve($code, $this->langService->getLocale() ?? 'en_US');
 
         if (null === $items) {
             throw new NotFoundHttpException('Menu not found');
         }
 
         $menu = new CustomFrontMenu();
-        $menu->id = $menuId;
+        $menu->code = $code;
         $menu->items = $items;
 
         return $menu;

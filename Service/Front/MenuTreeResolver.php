@@ -44,15 +44,27 @@ final readonly class MenuTreeResolver
     ];
 
     /**
+     * A menu is addressed by its code, never by its id: the id comes from an autoincrement
+     * shared with the entries, so it differs from one installation to the next, while a
+     * theme that calls a menu has to keep working after a reinstall.
+     *
+     * The level check is what makes the code safe to trust: only a menu carries one, so
+     * this cannot be pointed at the nested-set root, whose children are the menus
+     * themselves, nor at an entry in the middle of a tree.
+     *
      * @return list<array<string, mixed>>|null null when no such menu exists
      *
      * @throws PropelException
      */
-    public function resolve(int $menuId, string $locale): ?array
+    public function resolve(string $code, string $locale): ?array
     {
-        $menu = CustomFrontMenuItemQuery::create()->findOneById($menuId);
+        if ('' === $code) {
+            return null;
+        }
 
-        if (null === $menu) {
+        $menu = CustomFrontMenuItemQuery::create()->findOneByCode($code);
+
+        if (null === $menu || 1 !== $menu->getLevel()) {
             return null;
         }
 

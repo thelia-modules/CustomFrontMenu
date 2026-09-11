@@ -67,6 +67,7 @@ class MenuController extends BaseAdminController
         foreach ($this->composer->menus() as $menu) {
             $menus[] = [
                 'id' => (int) $menu->getId(),
+                'code' => (string) $menu->getCode(),
                 'title' => $this->presenter->title($menu, $locale),
                 'entryCount' => \count($menu->getDescendants()),
             ];
@@ -91,7 +92,11 @@ class MenuController extends BaseAdminController
             return $this->failure('A menu name is required', $this->configurationUrl());
         }
 
-        $menu = $this->composer->createMenu($title, $this->locale());
+        $menu = $this->composer->createMenu(
+            $title,
+            $this->locale(),
+            trim((string) $request->request->get('code', '')),
+        );
 
         $this->success('New menu added successfully');
 
@@ -121,6 +126,45 @@ class MenuController extends BaseAdminController
     }
 
     /**
+     * Rename a menu and set the code a theme calls it by.
+     *
+     * A code typed once at creation would otherwise be permanent, and it is the part a
+     * theme depends on.
+     *
+     * @throws PropelException
+     */
+    #[Route('/menus/{menuId}/rename', name: '.menus.rename', methods: ['POST'], requirements: ['menuId' => '\d+'])]
+    public function renameMenu(Request $request, int $menuId): Response
+    {
+        if (null !== $denied = $this->denyUnlessAllowed($request)) {
+            return $denied;
+        }
+
+        $menu = $this->composer->menu($menuId);
+
+        if (null === $menu) {
+            return $this->failure('This menu does not exist', $this->configurationUrl());
+        }
+
+        $title = trim((string) $request->request->get('title', ''));
+
+        if ('' === $title) {
+            return $this->failure('A menu name is required', $this->menuUrl($menuId));
+        }
+
+        $this->composer->renameMenu(
+            $menu,
+            $title,
+            trim((string) $request->request->get('code', '')),
+            $this->locale(),
+        );
+
+        $this->success('This menu has been successfully saved');
+
+        return new RedirectResponse($this->menuUrl($menuId));
+    }
+
+    /**
      * The tree of one menu.
      *
      * @throws PropelException
@@ -143,6 +187,7 @@ class MenuController extends BaseAdminController
 
         return $this->render('custom-front-menu/tree', [
             'menuId' => $menuId,
+            'menuCode' => (string) $menu->getCode(),
             'menuTitle' => $this->presenter->title($menu, $locale),
             'tree' => $tree,
             // The "add an entry" form picks its parent from a flat list: a shared modal
