@@ -34,8 +34,9 @@ Menu items can be added, deleted, renamed or moved. Translations can be made dir
 
 Each menu item is linked to a URL. This can be entered directly or associated with a `brand`, `category`, `content`, `folder` or `product`.
 
-In front-office, each menu is rendered by calling the `custom_front_menu()` Twig function
-in your theme. The module ships markup only: style the `.cfm-menu` classes from your theme.
+In front-office, the `custom_front_menu()` Twig function answers the composed tree. It
+returns **data, not markup**: a navigation is where your layout, breakpoints and
+interaction live, so the module hands you the nodes and you write the elements you want.
 
 A menu is addressed by its **code**, not by its id: the id comes from an autoincrement and
 differs from one installation to the next, so a theme built on it breaks on the next shop.
@@ -45,17 +46,26 @@ exact call to copy.
 ## Example
 
 ```twig
-{{ custom_front_menu('header') }}
+{% for item in custom_front_menu('header') %}
+    <a href="{{ item.href }}">{{ item.title }}</a>
+
+    {% for child in item.children %}
+        <a href="{{ child.href }}">{{ child.title }}</a>
+    {% endfor %}
+{% endfor %}
 ```
+
+Each node is `{id, title, href, children}`, nested to any depth. An entry with no target
+has an empty `href`: it is a label, and it is yours to render as one.
 
 The visitor's locale is used by default. Pass a second argument to force one:
 
 ```twig
-{{ custom_front_menu('header', 'fr_FR') }}
+{% for item in custom_front_menu('header', 'fr_FR') %}
 ```
 
-An unknown code renders nothing rather than raising: a menu deleted in the back-office must
-not take the storefront down.
+An unknown code answers an empty list rather than raising: a menu deleted in the
+back-office must not take the storefront down.
 
 Entries whose target is deleted or unpublished are dropped from the rendered menu.
 
@@ -109,9 +119,10 @@ Les éléments du menu peuvent être ajoutés, supprimés, renommés ou déplac�
 
 Chaque élément du menu est lié à une URL. Celle-ci peut être saisie directement ou associée à un `brand`, `category`, `content`, `folder` ou `product`.
 
-Dans le front-office, chaque menu est rendu en appelant la fonction Twig `custom_front_menu()` dans votre thème.
-
-Le module ne fournit que le markup : les classes `.cfm-menu` sont à styler depuis votre thème.
+Dans le front-office, la fonction Twig `custom_front_menu()` rend l'arbre composé. Elle
+rend **des données, pas du markup** : une navigation est l'endroit où vivent la mise en
+page, les points de rupture et les interactions du thème, donc le module donne les nœuds et
+l'intégrateur écrit les éléments qu'il veut.
 
 Un menu s'appelle par son **code**, pas par son identifiant : l'identifiant vient d'un
 auto-incrément et change d'une installation à l'autre, donc un thème qui s'appuie dessus
@@ -121,14 +132,23 @@ composition affiche l'appel exact à recopier.
 ## Exemple
 
 ```twig
-{{ custom_front_menu('header') }}
+{% for item in custom_front_menu('header') %}
+    <a href="{{ item.href }}">{{ item.title }}</a>
+
+    {% for child in item.children %}
+        <a href="{{ child.href }}">{{ child.title }}</a>
+    {% endfor %}
+{% endfor %}
 ```
+
+Chaque nœud est `{id, title, href, children}`, imbriqué à toute profondeur. Une entrée sans
+cible a un `href` vide : c'est un libellé, à rendre comme tel.
 
 La locale du visiteur est utilisée par défaut. Un second argument permet de la forcer :
 
 ```twig
-{{ custom_front_menu('header', 'fr_FR') }}
+{% for item in custom_front_menu('header', 'fr_FR') %}
 ```
 
-Un code inconnu ne rend rien, sans lever d'exception : un menu supprimé au back-office ne
-doit pas emporter la boutique.
+Un code inconnu rend une liste vide, sans lever d'exception : un menu supprimé au
+back-office ne doit pas emporter la boutique.
