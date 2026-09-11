@@ -10,7 +10,6 @@ declare(strict_types=1);
 /*      web : http://www.thelia.net                                                  */
 /*                                                                                   */
 /*      For the full copyright and license information, please view the LICENSE.txt  */
-/*      file that was distributed with this source code.                             */
 /*************************************************************************************/
 
 namespace CustomFrontMenu\Twig;
@@ -18,7 +17,6 @@ namespace CustomFrontMenu\Twig;
 use CustomFrontMenu\Service\Front\MenuTreeResolver;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Session\Session;
-use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -28,13 +26,13 @@ use Twig\TwigFunction;
  * Called as custom_front_menu('header'): a menu is addressed by its code, which the shop
  * owner chooses and which survives a reinstall, not by its id.
  *
- * The Environment is passed per call rather than injected: injecting it into an
- * extension it is itself registered on is a circular reference.
+ * Returns the tree, not markup. A navigation is where a theme's own layout, breakpoints
+ * and interaction live, so the module has no business shipping elements and classes that
+ * the integrator would then have to fight. The module answers data; the theme writes the
+ * markup it wants.
  */
 final class CustomFrontMenuExtension extends AbstractExtension
 {
-    private const TEMPLATE = '@CustomFrontMenuModule/front/menu.html.twig';
-
     public function __construct(
         private readonly MenuTreeResolver $treeResolver,
         private readonly RequestStack $requestStack,
@@ -44,25 +42,21 @@ final class CustomFrontMenuExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction(
-                'custom_front_menu',
-                $this->render(...),
-                ['needs_environment' => true, 'is_safe' => ['html']],
-            ),
+            new TwigFunction('custom_front_menu', $this->menu(...)),
         ];
     }
 
-    public function render(Environment $twig, string $code, ?string $locale = null): string
+    /**
+     * Nodes of {id, title, href, children}, children nested to any depth.
+     *
+     * An unknown code answers an empty list rather than raising: a {% for %} over it
+     * renders nothing, and a menu deleted in the back-office must not take a page down.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function menu(string $code, ?string $locale = null): array
     {
-        $menuItems = $this->treeResolver->resolve($code, $locale ?? $this->locale());
-
-        // A theme asking for a menu that no longer exists gets nothing, not an
-        // exception: a deleted menu must not take the whole page down.
-        if (null === $menuItems) {
-            return '';
-        }
-
-        return $twig->render(self::TEMPLATE, ['menuItems' => $menuItems]);
+        return $this->treeResolver->resolve($code, $locale ?? $this->locale()) ?? [];
     }
 
     private function locale(): string
