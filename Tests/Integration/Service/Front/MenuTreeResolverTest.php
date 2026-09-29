@@ -11,36 +11,27 @@ declare(strict_types=1);
 /*                                                                                   */
 /*      For the full copyright and license information, please view the LICENSE.txt  */
 /*************************************************************************************/
-
 namespace CustomFrontMenu\Tests\Integration\Service\Front;
 
-use CustomFrontMenu\Model\CustomFrontMenuItem;
-use CustomFrontMenu\Service\BackOffice\MenuComposer;
 use CustomFrontMenu\Service\Front\MenuTreeResolver;
+use CustomFrontMenu\Tests\Support\ComposesMenus;
 use PHPUnit\Framework\Attributes\Test;
-use Thelia\Model\Category;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Test\IntegrationTestCase;
 use Thelia\Test\Trait\RecordsSqlQueries;
 
 final class MenuTreeResolverTest extends IntegrationTestCase
 {
+    use ComposesMenus;
     use RecordsSqlQueries;
-
-    private MenuComposer $composer;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->composer = new MenuComposer();
-    }
 
     #[Test]
     public function aMenuResolvesInOrderWithItsHierarchy(): void
     {
-        $category = $this->category('Shoes');
-        $content = $this->createFixtureFactory()->content($this->createFixtureFactory()->folder());
-        $menu = $this->composer->createMenu('Main', 'en_US', 'main');
+        $fixtures = $this->createFixtureFactory();
+        $category = $this->titledCategory($fixtures, 'Shoes');
+        $content = $fixtures->content($fixtures->folder());
+        $menu = $this->menu('main');
 
         $shoes = $this->entry($menu, 'Our shoes', 'category', (int) $category->getId());
         $this->freeEntry($shoes, 'Sale', '/sale');
@@ -58,10 +49,44 @@ final class MenuTreeResolverTest extends IntegrationTestCase
     }
 
     #[Test]
+    public function everyTargetTypeResolvesToThePublicUrlOfItsTarget(): void
+    {
+        $fixtures = $this->createFixtureFactory();
+        $category = $this->titledCategory($fixtures, 'Category');
+        $folder = $fixtures->folder();
+        $content = $fixtures->content($folder);
+        $brand = $fixtures->brand();
+        $product = $fixtures->product($category, $fixtures->taxRule(), $fixtures->currency());
+        $menu = $this->menu('main');
+
+        // The back-office stores the type capitalised: the resolver must not care.
+        $this->entry($menu, 'Brand', 'Brand', (int) $brand->getId());
+        $this->entry($menu, 'Category', 'category', (int) $category->getId());
+        $this->entry($menu, 'Content', 'Content', (int) $content->getId());
+        $this->entry($menu, 'Folder', 'folder', (int) $folder->getId());
+        $this->entry($menu, 'Product', 'Product', (int) $product->getId());
+
+        $tree = (new MenuTreeResolver())->resolve('main', 'en_US');
+
+        self::assertSame(
+            [
+                'Brand' => $brand->getUrl('en_US'),
+                'Category' => $category->getUrl('en_US'),
+                'Content' => $content->getUrl('en_US'),
+                'Folder' => $folder->getUrl('en_US'),
+                'Product' => $product->getUrl('en_US'),
+            ],
+            array_column($tree, 'href', 'title'),
+        );
+    }
+
+    #[Test]
     public function anEntryWhoseTargetIsHiddenIsDroppedWithItsChildren(): void
     {
-        $hidden = $this->category('Hidden', visible: false);
-        $menu = $this->composer->createMenu('Main', 'en_US', 'main');
+        $fixtures = $this->createFixtureFactory();
+        $hidden = $this->titledCategory($fixtures, 'Hidden', visible: false);
+        $hiddenProduct = $fixtures->product($this->titledCategory($fixtures, 'Shelf'), $fixtures->taxRule(), $fixtures->currency(), ['visible' => 0]);
+        $menu = $this->menu('main');
 
         // A rendered sibling comes first: the hidden entry's child must not be taken for
         // one of its children.
@@ -69,6 +94,7 @@ final class MenuTreeResolverTest extends IntegrationTestCase
         $entry = $this->entry($menu, 'Hidden', 'category', (int) $hidden->getId());
         $this->freeEntry($entry, 'Child', '/child');
         $this->entry($menu, 'Gone', 'category', 999999999);
+        $this->entry($menu, 'Hidden product', 'product', (int) $hiddenProduct->getId());
         $this->freeEntry($menu, 'Last', '/last');
 
         $tree = (new MenuTreeResolver())->resolve('main', 'en_US');
@@ -80,19 +106,102 @@ final class MenuTreeResolverTest extends IntegrationTestCase
     #[Test]
     public function aLabelFallsBackToEnglishThenToAnyLanguage(): void
     {
-        $menu = $this->composer->createMenu('Main', 'en_US', 'main');
+        $menu = $this->menu('main');
 
-        $english = $this->composer->createEntry($this->fresh($menu), 'English', 'en_US');
-        $this->composer->setTranslation($english, 'fr_FR', '', null);
+        $english = $this->labelEntry($menu, 'English');
+        $this->composer()->setTranslation($english, 'fr_FR', '', null);
 
-        $this->composer->createEntry($this->fresh($menu), 'Español', 'es_ES');
+        $this->labelEntry($menu, 'Español', 'es_ES');
 
-        $french = $this->composer->createEntry($this->fresh($menu), 'English label', 'en_US');
-        $this->composer->setTranslation($french, 'fr_FR', 'Libellé', null);
+        // English wins over a language read before it: rows come back in locale order.
+        $germanFirst = $this->labelEntry($menu, 'Angebote', 'de_DE');
+        $this->composer()->setTranslation($germanFirst, 'en_US', 'Sale', null);
+
+        $french = $this->labelEntry($menu, 'English label');
+        $this->composer()->setTranslation($french, 'fr_FR', 'Libellé', null);
 
         $tree = (new MenuTreeResolver())->resolve('main', 'fr_FR');
 
-        self::assertSame(['English', 'Español', 'Libellé'], array_column($tree, 'title'));
+        self::assertSame(['English', 'Español', 'Sale', 'Libellé'], array_column($tree, 'title'));
+    }
+
+    #[Test]
+    public function aFreeUrlIsTranslatedLikeItsLabel(): void
+    {
+        $menu = $this->menu('main');
+        $entry = $this->freeEntry($menu, 'Sale', '/sale');
+        $this->composer()->setTranslation($entry, 'fr_FR', 'Soldes', '/soldes');
+
+        self::assertSame('/soldes', (new MenuTreeResolver())->resolve('main', 'fr_FR')[0]['href']);
+        self::assertSame('/sale', (new MenuTreeResolver())->resolve('main', 'en_US')[0]['href']);
+    }
+
+    #[Test]
+    public function aFreeUrlSavedBeforeTheFilterIsNotServed(): void
+    {
+        $menu = $this->menu('main');
+        // What a 1.x row can hold: its screen filtered with FILTER_SANITIZE_URL only.
+        $this->freeEntry($menu, 'Poisoned', 'javascript:alert(1)');
+
+        self::assertSame('', (new MenuTreeResolver())->resolve('main', 'en_US')[0]['href']);
+    }
+
+    #[Test]
+    public function eachMenuIsReadByItsOwnCode(): void
+    {
+        $this->freeEntry($this->menu('main'), 'Main entry', '/main');
+        $this->freeEntry($this->menu('footer'), 'Footer entry', '/footer');
+        $this->menu('empty');
+
+        $resolver = new MenuTreeResolver();
+
+        self::assertSame(['Main entry'], array_column($resolver->resolve('main', 'en_US'), 'title'));
+        self::assertSame(['Footer entry'], array_column($resolver->resolve('footer', 'en_US'), 'title'));
+        self::assertSame([], $resolver->resolve('empty', 'en_US'));
+    }
+
+    #[Test]
+    public function anUnknownCodeIsNotAMenu(): void
+    {
+        $this->menu('main');
+
+        self::assertNull((new MenuTreeResolver())->resolve('unknown', 'en_US'));
+        self::assertNull((new MenuTreeResolver())->resolve('', 'en_US'));
+    }
+
+    #[Test]
+    public function aCodeCarriedByAnEntryDoesNotMakeItAMenu(): void
+    {
+        $entry = $this->freeEntry($this->menu('main'), 'Entry', '/entry');
+        $this->fresh($entry)->setCode('entry-code')->save();
+
+        self::assertNull((new MenuTreeResolver())->resolve('entry-code', 'en_US'));
+    }
+
+    #[Test]
+    public function aMenuResolvesWithoutARequest(): void
+    {
+        $fixtures = $this->createFixtureFactory();
+        $category = $this->titledCategory($fixtures, 'Shoes');
+        $this->entry($this->menu('main'), 'Shoes', 'category', (int) $category->getId());
+
+        // What a console command or a queued job sees.
+        $requestStack = self::getContainer()->get('request_stack');
+        \assert($requestStack instanceof RequestStack);
+        $popped = [];
+        while (null !== $request = $requestStack->pop()) {
+            $popped[] = $request;
+        }
+
+        try {
+            $tree = (new MenuTreeResolver())->resolve('main', 'en_US');
+        } finally {
+            foreach (array_reverse($popped) as $request) {
+                $requestStack->push($request);
+            }
+        }
+
+        self::assertSame([['id' => $tree[0]['id'], 'title' => 'Shoes', 'href' => $category->getUrl('en_US'), 'children' => []]], $tree);
     }
 
     #[Test]
@@ -100,10 +209,10 @@ final class MenuTreeResolverTest extends IntegrationTestCase
     {
         $fixtures = $this->createFixtureFactory();
         $folder = $fixtures->folder();
-        $menu = $this->composer->createMenu('Main', 'en_US', 'main');
+        $menu = $this->menu('main');
 
         for ($branch = 0; $branch < 10; ++$branch) {
-            $parent = $this->entry($menu, 'Branch '.$branch, 'category', (int) $this->category('Category '.$branch)->getId());
+            $parent = $this->entry($menu, 'Branch '.$branch, 'category', (int) $this->titledCategory($fixtures, 'Category '.$branch)->getId());
 
             for ($leaf = 0; $leaf < 9; ++$leaf) {
                 match ($leaf % 4) {
@@ -123,41 +232,5 @@ final class MenuTreeResolverTest extends IntegrationTestCase
         self::assertCount(10, $tree);
         self::assertSame(90, array_sum(array_map(static fn (array $node): int => \count($node['children']), $tree)));
         self::assertLessThan(20, \count($statements), 'Queries for 100 entries: '.\count($statements));
-    }
-
-    private function category(string $title, bool $visible = true): Category
-    {
-        $category = $this->createFixtureFactory()->category(['visible' => $visible ? 1 : 0]);
-        $category->setLocale('en_US')->setTitle($title)->save();
-
-        return $category;
-    }
-
-    private function entry(CustomFrontMenuItem $parent, string $title, string $view, int $viewId): CustomFrontMenuItem
-    {
-        $entry = $this->composer->createEntry($this->fresh($parent), $title, 'en_US');
-        $this->composer->setTarget($entry, $view, $viewId);
-
-        return $entry;
-    }
-
-    private function freeEntry(CustomFrontMenuItem $parent, string $title, string $url): CustomFrontMenuItem
-    {
-        $entry = $this->composer->createEntry($this->fresh($parent), $title, 'en_US');
-        $this->composer->setTranslation($entry, 'en_US', $title, $url);
-
-        return $entry;
-    }
-
-    /**
-     * IntegrationTestCase turns Propel's instance pool off, so the nested set can no
-     * longer shift the bounds of a parent held in memory: without a reload, every new
-     * child would be inserted at the parent's stale right bound, in reverse order.
-     */
-    private function fresh(CustomFrontMenuItem $parent): CustomFrontMenuItem
-    {
-        $parent->reload();
-
-        return $parent;
     }
 }

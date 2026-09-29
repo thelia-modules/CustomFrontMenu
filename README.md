@@ -85,6 +85,25 @@ It answers `{code, items}`, each item being `{id, title, href, children}`. It re
 `open_api/custom-front-menu/{id}` endpoint of the 1.x line, which relied on the OpenApi
 module that Thelia 3 no longer ships.
 
+## Tests
+
+The tests build on the Thelia test cases (`Thelia\Test\IntegrationTestCase`, `ApiTestCase`,
+`WebIntegrationTestCase`), so they run from the root of a Thelia 3 project whose test database
+is prepared, with the module active:
+
+```
+php bin/test-prepare
+APP_ENV=test vendor/bin/phpunit -c phpunit.xml.dist local/modules/CustomFrontMenu/Tests
+```
+
+Adjust the path when the module is installed under `vendor/thelia/modules/`. An environment
+that exports `DATABASE_*` variables to the shell (DDEV does) overrides `.env.test`: unset them
+first, or the tests run against the development database.
+
+`Unit/` needs no database. `Integration/` covers the services (composition, tree resolution,
+back-office presentation, Twig function), `Api/` the front endpoint, `Http/BackOffice/` the
+composition screens with their permission and CSRF checks.
+
 _________________
 
 ## Version française
@@ -160,3 +179,23 @@ La locale du visiteur est utilisée par défaut. Un second argument permet de la
 
 Un code inconnu rend une liste vide, sans lever d'exception : un menu supprimé au
 back-office ne doit pas emporter la boutique.
+
+## Tests
+
+Les tests s'appuient sur les classes de test de Thelia (`Thelia\Test\IntegrationTestCase`,
+`ApiTestCase`, `WebIntegrationTestCase`) : ils se lancent depuis la racine d'un projet Thelia 3
+dont la base de test est préparée, module actif :
+
+```
+php bin/test-prepare
+APP_ENV=test vendor/bin/phpunit -c phpunit.xml.dist local/modules/CustomFrontMenu/Tests
+```
+
+Adapter le chemin quand le module est installé sous `vendor/thelia/modules/`. Un
+environnement qui exporte des variables `DATABASE_*` dans le shell (c'est le cas de DDEV)
+prend le pas sur `.env.test` : les retirer d'abord, sinon les tests tournent sur la base de
+développement.
+
+`Unit/` se passe de base de données. `Integration/` couvre les services (composition,
+résolution de l'arbre, présentation au back-office, fonction Twig), `Api/` le point d'accès
+front, `Http/BackOffice/` les écrans de composition avec leurs contrôles de droits et de jeton.
