@@ -14,7 +14,10 @@ declare(strict_types=1);
 namespace CustomFrontMenu\Tests\Integration\Service\Front;
 
 use CustomFrontMenu\Service\Front\MenuTreeResolver;
+use CustomFrontMenu\Service\MenuTargetTypes;
 use CustomFrontMenu\Tests\Support\ComposesMenus;
+use Page\Model\Page;
+use Page\Model\PageQuery;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Test\IntegrationTestCase;
@@ -44,7 +47,7 @@ final class MenuTreeResolverTest extends IntegrationTestCase
         self::assertSame($category->getUrl('en_US'), $tree[0]['href']);
         self::assertSame($content->getUrl('en_US'), $tree[1]['href']);
         self::assertSame('https://blog.example.com', $tree[2]['href']);
-        self::assertSame([['id' => $tree[0]['children'][0]['id'], 'title' => 'Sale', 'href' => '/sale', 'children' => []]], $tree[0]['children']);
+        self::assertSame([['id' => $tree[0]['children'][0]['id'], 'title' => 'Sale', 'href' => '/sale', 'newTab' => false, 'children' => []]], $tree[0]['children']);
         self::assertSame([], $tree[1]['children']);
     }
 
@@ -78,6 +81,69 @@ final class MenuTreeResolverTest extends IntegrationTestCase
             ],
             array_column($tree, 'href', 'title'),
         );
+    }
+
+    #[Test]
+    public function anEntryToAPageResolvesToThePublicUrlOfThePage(): void
+    {
+        $page = $this->page('About us');
+        $hidden = $this->page('Draft', visible: false);
+        $menu = $this->menu('main');
+
+        $this->entry($menu, 'About', 'page', (int) $page->getId());
+        $this->entry($menu, 'Draft', 'page', (int) $hidden->getId());
+
+        $tree = (new MenuTreeResolver())->resolve('main', 'en_US');
+
+        self::assertSame(['About' => $page->getUrl('en_US')], array_column($tree, 'href', 'title'));
+    }
+
+    #[Test]
+    public function anEntryWithoutALabelTakesTheTitleOfItsTarget(): void
+    {
+        $fixtures = $this->createFixtureFactory();
+        $category = $this->titledCategory($fixtures, 'Shoes');
+        $category->setLocale('fr_FR')->setTitle('Chaussures')->save();
+        $menu = $this->menu('main');
+
+        $automatic = $this->entry($menu, 'temp', 'category', (int) $category->getId());
+        $this->composer()->setTranslation($automatic, 'en_US', null, null);
+        $this->entry($menu, 'Our shoes', 'category', (int) $category->getId());
+
+        $resolver = new MenuTreeResolver();
+
+        self::assertSame(['Shoes', 'Our shoes'], array_column($resolver->resolve('main', 'en_US'), 'title'));
+        // A label typed in English only does not hide the French title of the target.
+        self::assertSame(['Chaussures', 'Chaussures'], array_column($resolver->resolve('main', 'fr_FR'), 'title'));
+
+        // Read at display time: renaming the target renames the entry.
+        $category->setLocale('en_US')->setTitle('Footwear')->save();
+        self::assertSame('Footwear', $resolver->resolve('main', 'en_US')[0]['title']);
+    }
+
+    #[Test]
+    public function aTargetWithNoTitleInTheLanguageFallsBackToTheLabelOfAnotherLanguage(): void
+    {
+        $category = $this->titledCategory($this->createFixtureFactory(), 'Shoes');
+        $this->entry($this->menu('main'), 'Our shoes', 'category', (int) $category->getId());
+
+        self::assertSame('Our shoes', (new MenuTreeResolver())->resolve('main', 'de_DE')[0]['title']);
+    }
+
+    #[Test]
+    public function anEntryOpensInANewTabOnlyWhenItHasALinkToOpen(): void
+    {
+        $category = $this->titledCategory($this->createFixtureFactory(), 'Shoes');
+        $menu = $this->menu('main');
+
+        $this->composer()->setNewTab($this->entry($menu, 'Shoes', 'category', (int) $category->getId()), true);
+        $this->composer()->setNewTab($this->freeEntry($menu, 'Blog', 'https://blog.example.com'), true);
+        $this->composer()->setNewTab($this->labelEntry($menu, 'Heading'), true);
+        $this->freeEntry($menu, 'Sale', '/sale');
+
+        $tree = (new MenuTreeResolver())->resolve('main', 'en_US');
+
+        self::assertSame(['Shoes' => true, 'Blog' => true, 'Heading' => false, 'Sale' => false], array_column($tree, 'newTab', 'title'));
     }
 
     #[Test]
@@ -201,7 +267,29 @@ final class MenuTreeResolverTest extends IntegrationTestCase
             }
         }
 
-        self::assertSame([['id' => $tree[0]['id'], 'title' => 'Shoes', 'href' => $category->getUrl('en_US'), 'children' => []]], $tree);
+        self::assertSame([['id' => $tree[0]['id'], 'title' => 'Shoes', 'href' => $category->getUrl('en_US'), 'newTab' => false, 'children' => []]], $tree);
+    }
+
+    #[Test]
+    public function aHundredEntriesTitledByTargetsWithoutATranslationDoNotCostOneQueryEach(): void
+    {
+        $fixtures = $this->createFixtureFactory();
+        $menu = $this->menu('main');
+
+        for ($i = 0; $i < 100; ++$i) {
+            $entry = $this->entry($menu, 'temp', 'category', (int) $this->titledCategory($fixtures, 'Category '.$i)->getId());
+            $this->composer()->setTranslation($entry, 'en_US', null, null);
+        }
+
+        $tree = null;
+        // No category has a German title: reading it through the model would fetch the
+        // missing translation once per target.
+        $statements = $this->recordSqlQueries(static function () use (&$tree): void {
+            $tree = (new MenuTreeResolver())->resolve('main', 'de_DE');
+        });
+
+        self::assertCount(100, $tree);
+        self::assertLessThan(20, \count($statements), 'Queries for 100 entries: '.\count($statements));
     }
 
     #[Test]
@@ -232,5 +320,27 @@ final class MenuTreeResolverTest extends IntegrationTestCase
         self::assertCount(10, $tree);
         self::assertSame(90, array_sum(array_map(static fn (array $node): int => \count($node['children']), $tree)));
         self::assertLessThan(20, \count($statements), 'Queries for 100 entries: '.\count($statements));
+    }
+
+    private function page(string $title, bool $visible = true): Page
+    {
+        if (!\in_array('page', MenuTargetTypes::kinds(), true)) {
+            self::markTestSkipped('The Page module is not active.');
+        }
+
+        /** @var Page|null $root */
+        $root = PageQuery::create()->findRoot();
+
+        if (null === $root) {
+            $root = new Page();
+            $root->safeMakeRoot('en_US')->save();
+        }
+
+        $page = new Page();
+        $page->setLocale('en_US')->setTitle($title)->setVisible($visible ? 1 : 0);
+        $page->insertAsLastChildOf($root);
+        $page->save();
+
+        return $page;
     }
 }

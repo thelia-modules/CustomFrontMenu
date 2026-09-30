@@ -11,6 +11,7 @@
         <column name="code" size="255" type="VARCHAR"/>
         <column name="view" size="255" type="VARCHAR"/>
         <column name="view_id" type="INTEGER"/>
+        <column name="new_tab" type="BOOLEAN" defaultValue="false" required="true"/>
         <column name="title" size="255" type="VARCHAR"/>
         <column name="url" size="255" type="VARCHAR"/>
         <unique name="custom_front_menu_item_code_unique">

@@ -38,9 +38,9 @@ final class MenuTreePresenterTest extends IntegrationTestCase
 
         self::assertSame('Our shoes', $tree[0]['title']);
         self::assertSame(0, $tree[0]['depth']);
-        self::assertSame(['kind' => 'category', 'label' => 'Shoes', 'ok' => true], $tree[0]['target']);
+        self::assertSame(['kind' => 'category', 'label' => 'Shoes', 'title' => 'Shoes', 'ok' => true], $tree[0]['target']);
         self::assertSame(1, $tree[0]['children'][0]['depth']);
-        self::assertSame(['kind' => 'url', 'label' => '/sale', 'ok' => true], $tree[0]['children'][0]['target']);
+        self::assertSame(['kind' => 'url', 'label' => '/sale', 'title' => '', 'ok' => true], $tree[0]['children'][0]['target']);
         self::assertSame('none', $tree[1]['target']['kind']);
         self::assertTrue($tree[1]['target']['ok']);
     }
@@ -73,6 +73,18 @@ final class MenuTreePresenterTest extends IntegrationTestCase
 
         self::assertFalse($target['ok']);
         self::assertStringContainsString('Shoes', $target['label']);
+    }
+
+    #[Test]
+    public function anEntryWithoutALabelShowsTheTitleOfItsTarget(): void
+    {
+        $category = $this->titledCategory($this->createFixtureFactory(), 'Shoes');
+        $menu = $this->menu('main');
+        $entry = $this->entry($menu, 'temp', 'Category', (int) $category->getId());
+        $this->composer()->setTranslation($entry, 'en_US', null, null);
+
+        self::assertSame('Shoes', $this->presenter()->tree($this->fresh($menu), 'en_US')[0]['title']);
+        self::assertSame('Shoes', $this->presenter()->targetTitle($this->fresh($entry), 'en_US'));
     }
 
     #[Test]

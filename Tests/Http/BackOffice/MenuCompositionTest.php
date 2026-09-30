@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace CustomFrontMenu\Tests\Http\BackOffice;
 
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use Thelia\Model\AdminLogQuery;
 use CustomFrontMenu\Tests\Support\AdminSessionInjector;
 use CustomFrontMenu\Tests\Support\ComposesMenus;
 use PHPUnit\Framework\Attributes\Test;
@@ -149,6 +150,73 @@ final class MenuCompositionTest extends WebIntegrationTestCase
         ]);
 
         self::assertNull($this->composer()->translations($entry)['en_US']['url']);
+    }
+
+    #[Test]
+    public function anEntryIsSetToOpenInANewTabAndBackAgain(): void
+    {
+        $this->loginAsAdministrator();
+        $entry = $this->freeEntry($this->menu('main'), 'Blog', 'https://blog.example.com');
+        $save = function (array $fields) use ($entry): void {
+            $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+            $this->submit($page->filter('form[action$="/entries/'.$entry->getId().'"]'), [
+                'view' => 'url',
+                'title' => ['en_US' => 'Blog'],
+                'url' => ['en_US' => 'https://blog.example.com'],
+                ...$fields,
+            ]);
+        };
+
+        $save(['new_tab' => '1']);
+        self::assertTrue($this->fresh($entry)->getNewTab());
+        self::assertCount(1, $this->client->request('GET', self::BASE.'/entries/'.$entry->getId())->filter('input[name="new_tab"][checked]'));
+
+        // An unticked box is not posted at all.
+        $save([]);
+        self::assertFalse($this->fresh($entry)->getNewTab());
+    }
+
+    #[Test]
+    public function everyCompositionWriteLeavesATraceInTheAdminLog(): void
+    {
+        $this->loginAsAdministrator();
+        $logged = static fn (): int => AdminLogQuery::create()->filterByMessage('CustomFrontMenu: %', \Propel\Runtime\ActiveQuery\Criteria::LIKE)->count();
+        $before = $logged();
+
+        $this->submit($this->client->request('GET', self::BASE)->filter('form[action$="/CustomFrontMenu/menus"]'), ['title' => 'Main menu', 'code' => 'main']);
+        $menu = $this->composer()->menuByCode('main');
+        self::assertNotNull($menu);
+
+        $tree = $this->client->request('GET', self::BASE.'/menus/'.$menu->getId());
+        $this->submit($tree->filter('form[action$="/menus/'.$menu->getId().'/entries"]'), ['title' => 'Sale']);
+        $entry = $this->fresh($menu)->getFirstChild();
+        self::assertNotNull($entry);
+
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+        $this->submit($page->filter('form[action$="/entries/'.$entry->getId().'"]'), ['view' => 'url', 'title' => ['en_US' => 'Sale'], 'url' => ['en_US' => '/sale']]);
+
+        // Created menu, created entry, saved entry.
+        self::assertSame($before + 3, $logged());
+        self::assertSame((int) $entry->getId(), AdminLogQuery::create()->orderById(\Propel\Runtime\ActiveQuery\Criteria::DESC)->findOne()?->getResourceId());
+    }
+
+    #[Test]
+    public function aFreeUrlEntryReopensAsAnAddressAndKeepsItOnSave(): void
+    {
+        $this->loginAsAdministrator();
+        $entry = $this->freeEntry($this->menu('main'), 'Sale', '/sale');
+
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+        self::assertSame('url', $page->filter('select[name="view"] option[selected]')->attr('value'));
+
+        // Renamed only, from the form as it opened.
+        $this->submit($page->filter('form[action$="/entries/'.$entry->getId().'"]'), [
+            'view' => (string) $page->filter('select[name="view"] option[selected]')->attr('value'),
+            'title' => ['en_US' => 'Sales'],
+            'url' => ['en_US' => (string) $page->filter('input[name="url[en_US]"]')->attr('value')],
+        ]);
+
+        self::assertSame(['title' => 'Sales', 'url' => '/sale'], $this->composer()->translations($entry)['en_US']);
     }
 
     #[Test]

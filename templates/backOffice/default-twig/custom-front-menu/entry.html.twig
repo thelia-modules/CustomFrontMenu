@@ -33,9 +33,10 @@
                             </span>
                             <input type="text" class="form-control" name="title[{{ lang.locale }}]"
                                    value="{{ translations[lang.locale].title|default('') }}"
-                                   placeholder="{{ lang.title }}">
+                                   placeholder="{{ targetTitle ?: lang.title }}">
                         </div>
                     {% endfor %}
+                    <div class="form-text">{{ 'An entry pointing at an object takes its title when its label is left empty, in each language. Empty the label to go back to that title.'|trans({}, domain) }}</div>
                     <div class="form-text">{{ 'A language left empty falls back to another one on the front.'|trans({}, domain) }}</div>
                 </div>
             </div>
@@ -69,13 +70,18 @@
                                 hx-include="this">
                             <option value="none"{{ view == 'none' ? ' selected' : '' }}>{{ 'No target'|trans({}, domain) }}</option>
                             <option value="url"{{ view == 'url' ? ' selected' : '' }}>{{ 'Address'|trans({}, domain) }}</option>
-                            {% for kind in ['brand', 'category', 'content', 'folder', 'product'] %}
+                            {% for kind in kinds %}
                                 <option value="{{ kind }}"{{ view == kind ? ' selected' : '' }}>{{ kind|trans({}, domain) }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     {% include '@CustomFrontMenuModule/backOffice/default-twig/custom-front-menu/_target_field.html.twig' %}
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="cfm-new-tab" name="new_tab" value="1"{{ newTab ? ' checked' : '' }}>
+                        <label class="form-check-label" for="cfm-new-tab">{{ 'Open in a new tab'|trans({}, domain) }}</label>
+                    </div>
                 </div>
             </div>
 

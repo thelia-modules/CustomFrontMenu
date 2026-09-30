@@ -15,6 +15,7 @@ CREATE TABLE `custom_front_menu_item`
     `code` VARCHAR(255),
     `view` VARCHAR(255),
     `view_id` INTEGER,
+    `new_tab` TINYINT(1) DEFAULT 0 NOT NULL,
     `tree_left` INTEGER,
     `tree_right` INTEGER,
     `tree_level` INTEGER,

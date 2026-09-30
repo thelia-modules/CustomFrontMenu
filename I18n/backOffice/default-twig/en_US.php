@@ -5,5 +5,6 @@ return array(
     'category' => 'Category',
     'content' => 'Content',
     'folder' => 'Folder',
+    'page' => 'Page',
     'product' => 'Product',
 );

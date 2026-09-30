@@ -21,6 +21,7 @@ use CustomFrontMenu\Service\BackOffice\MenuTargetCatalog;
 use CustomFrontMenu\Service\BackOffice\MenuTreePresenter;
 use CustomFrontMenu\Service\MenuCode;
 use CustomFrontMenu\Service\MenuLink;
+use CustomFrontMenu\Service\MenuTargetTypes;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,7 +44,6 @@ use Thelia\Tools\URL;
 class MenuController extends BaseAdminController
 {
     private const DOMAIN = CustomFrontMenu::DOMAIN_NAME;
-    private const VIEWS = ['brand', 'category', 'content', 'folder', 'product'];
 
     public function __construct(
         private readonly MenuComposer $composer,
@@ -102,6 +102,7 @@ class MenuController extends BaseAdminController
 
         $menu = $this->composer->createMenu($title, $this->locale(), $code);
 
+        $this->log(AccessManager::CREATE, \sprintf('Menu "%s" (code %s) created', $title, $menu->getCode()), $menu);
         $this->success('New menu added successfully');
 
         return new RedirectResponse($this->menuUrl((int) $menu->getId()));
@@ -123,6 +124,7 @@ class MenuController extends BaseAdminController
             return $this->failure('This menu does not exist', $this->configurationUrl());
         }
 
+        $this->log(AccessManager::DELETE, \sprintf('Menu "%s" (code %s) deleted', $this->presenter->title($menu, $this->locale()), $menu->getCode()), $menu);
         $this->composer->delete($menu);
         $this->success('Current menu deleted successfully');
 
@@ -163,6 +165,7 @@ class MenuController extends BaseAdminController
         }
 
         $this->composer->renameMenu($menu, $title, $code, $this->locale());
+        $this->log(AccessManager::UPDATE, \sprintf('Menu "%s" (code %s) saved', $title, $menu->getCode()), $menu);
 
         $this->success('This menu has been successfully saved');
 
@@ -240,6 +243,7 @@ class MenuController extends BaseAdminController
         }
 
         $entry = $this->composer->createEntry($parent, $title, $this->locale());
+        $this->log(AccessManager::CREATE, \sprintf('Entry "%s" created in menu %s', $title, $menu->getCode()), $entry);
 
         return new RedirectResponse($this->entryUrl((int) $entry->getId()));
     }
@@ -260,19 +264,22 @@ class MenuController extends BaseAdminController
             return new RedirectResponse($this->configurationUrl());
         }
 
-        $view = strtolower((string) $entry->getView());
         $menu = $this->menuOf($entry);
         $menuId = (int) $menu?->getId();
         $locale = $this->locale();
+        $translations = $this->composer->translations($entry);
 
         return $this->render('custom-front-menu/entry', [
             'itemId' => $itemId,
             'menuId' => $menuId,
             'menuTitle' => $this->presenter->title($this->composer->menu($menuId), $locale),
             'entryTitle' => $this->presenter->title($entry, $locale),
-            'translations' => $this->composer->translations($entry),
-            'view' => \in_array($view, self::VIEWS, true) ? $view : ('' === $view ? 'none' : 'url'),
+            'targetTitle' => $this->presenter->targetTitle($entry, $locale),
+            'translations' => $translations,
+            'view' => $this->kindOf($entry, $translations),
             'viewId' => (int) $entry->getViewId(),
+            'newTab' => (bool) $entry->getNewTab(),
+            'kinds' => MenuTargetTypes::kinds(),
             'targets' => $this->targetCatalog->targets($locale),
             // Reparenting from the form, because dropping an entry back on the root zone of
             // the tree means aiming at a few pixels.
@@ -301,9 +308,11 @@ class MenuController extends BaseAdminController
         }
 
         $view = strtolower((string) $request->query->get('view', 'none'));
+        $kinds = MenuTargetTypes::kinds();
 
         return $this->render('custom-front-menu/_target_field', [
-            'view' => \in_array($view, [...self::VIEWS, 'url'], true) ? $view : 'none',
+            'view' => \in_array($view, [...$kinds, 'url'], true) ? $view : 'none',
+            'kinds' => $kinds,
             'viewId' => (int) $entry->getViewId(),
             'translations' => $this->composer->translations($entry),
             'targets' => $this->targetCatalog->targets($this->locale()),
@@ -342,7 +351,7 @@ class MenuController extends BaseAdminController
         $titles = (array) $request->request->all('title');
         $urls = (array) $request->request->all('url');
 
-        if (\in_array($view, self::VIEWS, true)) {
+        if (\in_array($view, MenuTargetTypes::kinds(), true)) {
             $viewId = (int) $request->request->get('view_id', 0);
 
             if ($viewId <= 0) {
@@ -362,6 +371,9 @@ class MenuController extends BaseAdminController
                 'url' === $view ? MenuLink::filter((string) ($urls[$locale] ?? '')) : null,
             );
         }
+
+        $this->composer->setNewTab($entry, $request->request->getBoolean('new_tab'));
+        $this->log(AccessManager::UPDATE, \sprintf('Entry "%s" saved', $this->presenter->title($entry, $this->locale())), $entry);
 
         $this->success('This entry has been successfully saved');
 
@@ -385,6 +397,7 @@ class MenuController extends BaseAdminController
         }
 
         $menuId = (int) $this->menuOf($entry)?->getId();
+        $this->log(AccessManager::DELETE, \sprintf('Entry "%s" deleted, with its own entries', $this->presenter->title($entry, $this->locale())), $entry);
         $this->composer->delete($entry);
 
         $this->success('This entry has been deleted');
@@ -426,6 +439,7 @@ class MenuController extends BaseAdminController
         }
 
         $this->composer->move($entry, $newParent);
+        $this->log(AccessManager::UPDATE, \sprintf('Entry "%s" moved', $this->presenter->title($entry, $this->locale())), $entry);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -464,6 +478,7 @@ class MenuController extends BaseAdminController
         }
 
         $up ? $this->composer->moveUp($entry) : $this->composer->moveDown($entry);
+        $this->log(AccessManager::UPDATE, \sprintf('Entry "%s" moved %s', $this->presenter->title($entry, $this->locale()), $up ? 'up' : 'down'), $entry);
 
         return new RedirectResponse($this->menuUrl((int) $this->menuOf($entry)?->getId()));
     }
@@ -509,6 +524,30 @@ class MenuController extends BaseAdminController
         }
 
         return null;
+    }
+
+    /**
+     * The kind the edit form opens on. A free address is stored with no kind at all, only
+     * its URL, so it has to be recognised from its translations: opening it as "no target"
+     * would erase the address on the next save.
+     *
+     * @param array<string, array{title: ?string, url: ?string}> $translations
+     */
+    private function kindOf(CustomFrontMenuItem $entry, array $translations): string
+    {
+        $view = strtolower((string) $entry->getView());
+
+        if (\in_array($view, MenuTargetTypes::kinds(), true)) {
+            return $view;
+        }
+
+        foreach ($translations as $translation) {
+            if ('' !== trim((string) $translation['url'])) {
+                return 'url';
+            }
+        }
+
+        return 'none';
     }
 
     /**
@@ -579,6 +618,15 @@ class MenuController extends BaseAdminController
         $title = trim(strip_tags(str_replace('`', "'", $title)));
 
         return '' === $title ? null : $title;
+    }
+
+    /**
+     * Composing a menu is an administration operation, so it leaves the same trace in the
+     * admin log as any other back-office write.
+     */
+    private function log(string $action, string $message, CustomFrontMenuItem $item): void
+    {
+        $this->adminLogAppend(AdminResources::MODULE, $action, 'CustomFrontMenu: '.$message, (int) $item->getId());
     }
 
     private function locale(): string

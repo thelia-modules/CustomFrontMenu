@@ -113,6 +113,7 @@ class CustomFrontMenu extends BaseModule
         $con ??= Propel::getWriteConnection('TheliaMain');
 
         $this->addCodeColumn($con);
+        $this->addNewTabColumn($con);
         $this->fillMissingMenuCodes();
         $this->dropUnsafeUrls();
     }
@@ -129,6 +130,17 @@ class CustomFrontMenu extends BaseModule
 
         if (!$this->exists($con, 'SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND INDEX_NAME = :name', 'custom_front_menu_item_code_unique')) {
             $con->exec('CREATE UNIQUE INDEX `custom_front_menu_item_code_unique` ON `custom_front_menu_item` (`code`)');
+        }
+    }
+
+    /**
+     * Whether an entry opens in a new tab. Every 1.x entry opened in the same one, which is
+     * what the default keeps.
+     */
+    private function addNewTabColumn(ConnectionInterface $con): void
+    {
+        if (!$this->exists($con, 'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :name', 'new_tab')) {
+            $con->exec('ALTER TABLE `custom_front_menu_item` ADD COLUMN `new_tab` TINYINT(1) NOT NULL DEFAULT 0 AFTER `view_id`');
         }
     }
 
