@@ -50,6 +50,25 @@ final class CustomFrontMenuApiTest extends ApiTestCase
     }
 
     #[Test]
+    public function aHeadlessClientPicksTheLanguageOfTheMenu(): void
+    {
+        $entry = $this->freeEntry($this->menu('main'), 'Sale', '/sale');
+        $this->composer()->setTranslation($entry, 'fr_FR', 'Soldes', '/soldes');
+
+        $read = function (string $query): array {
+            $response = $this->jsonRequest('GET', '/api/front/custom-front-menus/main'.$query, format: 'json');
+
+            return json_decode((string) $response->getContent(), true, flags: \JSON_THROW_ON_ERROR)['items'][0];
+        };
+
+        // Same parameter as the core front API: a stateless client has no session to carry it.
+        self::assertSame(['Soldes', '/soldes'], [$read('?locale=fr_FR')['title'], $read('?locale=fr_FR')['href']]);
+        // Not an active language: the shop's language, not an error.
+        self::assertSame('Sale', $read('?locale=xx_XX')['title']);
+        self::assertSame('Sale', $read('')['title']);
+    }
+
+    #[Test]
     public function anUnpublishedTargetIsNeverServedEvenToAnAdministrator(): void
     {
         $hidden = $this->titledCategory($this->createFixtureFactory(), 'Hidden', visible: false);
