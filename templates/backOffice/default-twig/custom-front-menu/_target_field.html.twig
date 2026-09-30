@@ -18,7 +18,7 @@
         {% endfor %}
         <div class="form-text">{{ 'Only http, https and site-relative addresses are kept.'|trans({}, domain) }}</div>
 
-    {% elseif view in ['brand', 'category', 'content', 'folder', 'product'] %}
+    {% elseif view in kinds %}
         <select class="form-select" name="view_id" required>
             <option value="">{{ 'Pick one'|trans({}, domain) }}</option>
             {% for row in targets[view] %}

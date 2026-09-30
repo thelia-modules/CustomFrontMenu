@@ -2,6 +2,7 @@
 
 return array(
     'A language left empty falls back to another one on the front.' => 'Una lingua lasciata vuota riprende un\'altra lingua sul negozio.',
+    'An entry pointing at an object takes its title when its label is left empty, in each language. Empty the label to go back to that title.' => 'Una voce che punta a un oggetto riprende il suo titolo quando la sua etichetta è lasciata vuota, lingua per lingua. Svuotare l\'etichetta per tornare a quel titolo.',
     'Add' => 'Aggiungi',
     'Add a new menu' => 'Aggiungi un menu',
     'Add a sub-entry' => 'Aggiungi una voce sotto',
@@ -35,6 +36,7 @@ return array(
     'No menu yet. Create one to get started.' => 'Nessun menu per ora. Creane uno per iniziare.',
     'No target' => 'Nessuna destinazione',
     'Only http, https and site-relative addresses are kept.' => 'Vengono conservati solo gli indirizzi http, https e relativi al sito.',
+    'Open in a new tab' => 'Apri in una nuova scheda',
     'Pick one' => 'Scegli',
     'Place it under' => 'Posiziona sotto',
     'Position' => 'Posizione',
@@ -50,5 +52,6 @@ return array(
     'category' => 'Categoria',
     'content' => 'Contenuto',
     'folder' => 'Cartella',
+    'page' => 'Pagina',
     'product' => 'Prodotto',
 );

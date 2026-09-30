@@ -32,7 +32,7 @@ final class CustomFrontMenuExtensionTest extends IntegrationTestCase
 
         $extension = new CustomFrontMenuExtension(new MenuTreeResolver(), new RequestStack());
 
-        self::assertSame([['id' => (int) $entry->getId(), 'title' => 'Sale', 'href' => '/sale', 'children' => []]], $extension->menu('main'));
+        self::assertSame([['id' => (int) $entry->getId(), 'title' => 'Sale', 'href' => '/sale', 'newTab' => false, 'children' => []]], $extension->menu('main'));
         self::assertSame('Soldes', $extension->menu('main', 'fr_FR')[0]['title']);
     }
 

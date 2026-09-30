@@ -212,6 +212,14 @@ final readonly class MenuComposer
     /**
      * @throws PropelException
      */
+    public function setNewTab(CustomFrontMenuItem $item, bool $newTab): void
+    {
+        $item->setNewTab($newTab)->save();
+    }
+
+    /**
+     * @throws PropelException
+     */
     public function setTranslation(CustomFrontMenuItem $item, string $locale, ?string $title, ?string $url): void
     {
         $translation = CustomFrontMenuItemI18nQuery::create()

@@ -19,36 +19,33 @@ use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
 use CustomFrontMenu\Service\MenuLink;
+use CustomFrontMenu\Service\MenuTargetTypes;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
-use Thelia\Model\BrandQuery;
-use Thelia\Model\CategoryQuery;
-use Thelia\Model\ContentQuery;
-use Thelia\Model\FolderQuery;
-use Thelia\Model\ProductQuery;
 use Thelia\Tools\URL;
 
 /**
- * Resolves one menu into the normalised tree the front consumes: {id, title, href, children}.
+ * Resolves one menu into the normalised tree the front consumes: {id, title, href, newTab,
+ * children}.
  *
- * Same shape as the theme's own NavigationTree, so a menu can stand in for a catalogue
- * derived navigation without the templates knowing which one they are rendering.
+ * Same shape as the theme's own NavigationTree, plus `newTab`, so a menu can stand in for a
+ * catalogue derived navigation without the templates knowing which one they are rendering: a
+ * template that ignores the extra key still renders the menu.
  *
  * Entries whose target is gone or unpublished are dropped rather than rendered: this tree
  * is served publicly, and a menu must never be the thing that reveals a hidden product.
  *
+ * An entry without a label of its own in the visitor's language takes the title of its
+ * target, read here rather than copied at composition time: renaming a category renames
+ * every menu entry that points at it.
+ *
  * The menu is rendered on every page, so its cost must not grow with its size: the
- * entries, their translations, the targets of each type and their URLs are each read in
- * one batch, then the tree is assembled in memory.
+ * entries, their translations, the targets of each type with their titles, and their
+ * URLs are each read in one batch, then the tree is assembled in memory.
  */
 final readonly class MenuTreeResolver
 {
-    private const TARGET_QUERIES = [
-        'brand' => BrandQuery::class,
-        'category' => CategoryQuery::class,
-        'content' => ContentQuery::class,
-        'folder' => FolderQuery::class,
-        'product' => ProductQuery::class,
-    ];
+    private const TARGET_TITLE = 'menu_target_title';
 
     /**
      * A menu is addressed by its code, never by its id: the id comes from an autoincrement
@@ -87,22 +84,22 @@ final readonly class MenuTreeResolver
         }
 
         $translations = $this->translationsByEntry($entries);
-        $targetUrls = $this->publishedTargetUrls($entries, $locale);
+        $targets = $this->publishedTargets($entries, $locale);
 
-        return $this->assemble($entries, (int) $menu->getLevel(), $translations, $targetUrls, $locale);
+        return $this->assemble($entries, (int) $menu->getLevel(), $translations, $targets, $locale);
     }
 
     /**
      * Entries come in branch order, so a node always follows its parent and precedes its
      * siblings' subtrees: a stack of open branches is enough to rebuild the nesting.
      *
-     * @param list<CustomFrontMenuItem>                 $entries
-     * @param array<int, list<CustomFrontMenuItemI18n>> $translations
-     * @param array<string, array<int, string>>         $targetUrls
+     * @param list<CustomFrontMenuItem>                                   $entries
+     * @param array<int, list<CustomFrontMenuItemI18n>>                   $translations
+     * @param array<string, array<int, array{href: string, title: string}>> $targets
      *
      * @return list<array<string, mixed>>
      */
-    private function assemble(array $entries, int $menuLevel, array $translations, array $targetUrls, string $locale): array
+    private function assemble(array $entries, int $menuLevel, array $translations, array $targets, string $locale): array
     {
         $tree = [];
         // One slot per depth below the menu: the children list the next entry at that
@@ -121,7 +118,7 @@ final readonly class MenuTreeResolver
                 unset($open[$closed]);
             }
 
-            $node = $this->node($entry, $translations[(int) $entry->getId()] ?? [], $targetUrls, $locale);
+            $node = $this->node($entry, $translations[(int) $entry->getId()] ?? [], $targets, $locale);
 
             if (null === $node) {
                 continue;
@@ -136,37 +133,47 @@ final readonly class MenuTreeResolver
     }
 
     /**
-     * @param list<CustomFrontMenuItemI18n>     $translations
-     * @param array<string, array<int, string>> $targetUrls
+     * @param list<CustomFrontMenuItemI18n>                                   $translations
+     * @param array<string, array<int, array{href: string, title: string}>> $targets
      *
      * @return array<string, mixed>|null null when the entry must not be rendered
      */
-    private function node(CustomFrontMenuItem $entry, array $translations, array $targetUrls, string $locale): ?array
+    private function node(CustomFrontMenuItem $entry, array $translations, array $targets, string $locale): ?array
     {
         $view = strtolower((string) $entry->getView());
         $viewId = (int) $entry->getViewId();
-        $title = $this->i18nValue($translations, $locale, 'title');
 
         // A typed entry stands or falls with its target; a free URL or an untargeted
-        // label has nothing to check.
-        if (isset(self::TARGET_QUERIES[$view]) && $viewId > 0) {
-            $href = $targetUrls[$view][$viewId] ?? null;
+        // label has nothing to check. A kind no longer offered (the Page module was
+        // removed) is a typed entry whose target is gone, not a label.
+        if ('' !== $view && $viewId > 0) {
+            $target = $targets[$view][$viewId] ?? null;
 
-            if (null === $href) {
+            if (null === $target) {
                 return null;
             }
 
+            // Own label in this language, then the target's title in this language, then
+            // the label in another language: a label typed in English only must not hide
+            // the French title of the category it points at.
+            $title = $this->i18nValue($translations, $locale, 'title', exactLocaleOnly: true);
+
             return [
                 'id' => (int) $entry->getId(),
-                'title' => $title,
-                'href' => $href,
+                'title' => '' !== $title ? $title : ('' !== $target['title'] ? $target['title'] : $this->i18nValue($translations, $locale, 'title')),
+                'href' => $target['href'],
+                'newTab' => (bool) $entry->getNewTab(),
             ];
         }
 
+        $href = $this->freeUrl($translations, $locale);
+
         return [
             'id' => (int) $entry->getId(),
-            'title' => $title,
-            'href' => $this->freeUrl($translations, $locale),
+            'title' => $this->i18nValue($translations, $locale, 'title'),
+            'href' => $href,
+            // A label with no link has no tab to open.
+            'newTab' => '' !== $href && (bool) $entry->getNewTab(),
         ];
     }
 
@@ -196,33 +203,40 @@ final readonly class MenuTreeResolver
      * One query per target type actually used, whatever the number of entries, plus one
      * to warm the rewritten URLs of that type.
      *
+     * The title is selected as a column of the same query rather than read through the
+     * model: a target with no translation in this locale would otherwise fetch it on its
+     * own, one query per entry.
+     *
      * @param list<CustomFrontMenuItem> $entries
      *
-     * @return array<string, array<int, string>> URL of each published target, by type then id
+     * @return array<string, array<int, array{href: string, title: string}>> each published target, by type then id
      *
      * @throws PropelException
      */
-    private function publishedTargetUrls(array $entries, string $locale): array
+    private function publishedTargets(array $entries, string $locale): array
     {
+        $queries = MenuTargetTypes::queries();
         $idsByView = [];
 
         foreach ($entries as $entry) {
             $view = strtolower((string) $entry->getView());
             $viewId = (int) $entry->getViewId();
 
-            if (isset(self::TARGET_QUERIES[$view]) && $viewId > 0) {
+            if (isset($queries[$view]) && $viewId > 0) {
                 $idsByView[$view][$viewId] = $viewId;
             }
         }
 
-        $urls = [];
+        $published = [];
 
         foreach ($idsByView as $view => $ids) {
-            $queryClass = self::TARGET_QUERIES[$view];
+            $i18nRelation = ucfirst($view).'I18n';
 
-            $targets = $queryClass::create()
+            $targets = $queries[$view]::create()
                 ->filterById(array_values($ids))
                 ->filterByVisible(1)
+                ->joinI18n($locale, null, Criteria::LEFT_JOIN)
+                ->withColumn($i18nRelation.'.Title', self::TARGET_TITLE)
                 ->find();
 
             if (0 === \count($targets)) {
@@ -236,11 +250,14 @@ final readonly class MenuTreeResolver
             );
 
             foreach ($targets as $target) {
-                $urls[$view][(int) $target->getId()] = $target->getUrl($locale);
+                $published[$view][(int) $target->getId()] = [
+                    'href' => $target->getUrl($locale),
+                    'title' => trim((string) $target->getVirtualColumn(self::TARGET_TITLE)),
+                ];
             }
         }
 
-        return $urls;
+        return $published;
     }
 
     /**
@@ -265,7 +282,7 @@ final readonly class MenuTreeResolver
      *
      * @param list<CustomFrontMenuItemI18n> $translations
      */
-    private function i18nValue(array $translations, string $locale, string $column): string
+    private function i18nValue(array $translations, string $locale, string $column, bool $exactLocaleOnly = false): string
     {
         $english = '';
         $any = '';
@@ -279,6 +296,10 @@ final readonly class MenuTreeResolver
 
             if ($translation->getLocale() === $locale) {
                 return $value;
+            }
+
+            if ($exactLocaleOnly) {
+                continue;
             }
 
             if ('en_US' === $translation->getLocale()) {

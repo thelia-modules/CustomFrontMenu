@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace CustomFrontMenu\Service\BackOffice;
 
+use CustomFrontMenu\Service\MenuTargetTypes;
+use Page\Model\PageQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Thelia\Model\BrandQuery;
@@ -26,7 +28,7 @@ use Thelia\Model\ProductQuery;
  * The pickable targets of a menu entry, for the composition screen.
  *
  * The Smarty screen ran five {loop} and emitted one <script> tag per row, so a shop with
- * ten thousand products shipped ten thousand script tags. This runs the same five queries
+ * ten thousand products shipped ten thousand script tags. This runs one query per kind
  * once and hands the screen a single payload to put in a data- attribute.
  */
 final readonly class MenuTargetCatalog
@@ -40,17 +42,24 @@ final readonly class MenuTargetCatalog
     {
         $locale ??= self::FALLBACK_LOCALE;
 
-        return [
-            'brand' => $this->rows(BrandQuery::create(), $locale),
-            'category' => $this->rows(CategoryQuery::create(), $locale),
-            'content' => $this->rows(ContentQuery::create(), $locale),
-            'folder' => $this->rows(FolderQuery::create(), $locale),
-            'product' => $this->rows(ProductQuery::create(), $locale, withReference: true),
-        ];
+        $targets = [];
+
+        foreach (MenuTargetTypes::queries() as $kind => $queryClass) {
+            $query = $queryClass::create();
+
+            // The Page module keeps its tree under a technical root node, which is no page.
+            if ($query instanceof PageQuery) {
+                $query->filterByTreeLevel(0, Criteria::GREATER_THAN);
+            }
+
+            $targets[$kind] = $this->rows($query, $locale, withReference: 'product' === $kind);
+        }
+
+        return $targets;
     }
 
     /**
-     * @param BrandQuery|CategoryQuery|ContentQuery|FolderQuery|ProductQuery $query
+     * @param BrandQuery|CategoryQuery|ContentQuery|FolderQuery|ProductQuery|PageQuery $query
      *
      * @return list<array<string, string|int>>
      */

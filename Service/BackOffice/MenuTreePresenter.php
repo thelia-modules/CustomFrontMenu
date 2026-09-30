@@ -16,13 +16,9 @@ namespace CustomFrontMenu\Service\BackOffice;
 
 use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
+use CustomFrontMenu\Service\MenuTargetTypes;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Thelia\Model\BrandQuery;
-use Thelia\Model\CategoryQuery;
-use Thelia\Model\ContentQuery;
-use Thelia\Model\FolderQuery;
-use Thelia\Model\ProductQuery;
 
 /**
  * Shapes one menu into what the composition screen displays: a title, what the entry
@@ -33,13 +29,7 @@ use Thelia\Model\ProductQuery;
  */
 final readonly class MenuTreePresenter
 {
-    private const TARGET_QUERIES = [
-        'brand' => BrandQuery::class,
-        'category' => CategoryQuery::class,
-        'content' => ContentQuery::class,
-        'folder' => FolderQuery::class,
-        'product' => ProductQuery::class,
-    ];
+    private const DOMAIN = 'customfrontmenu.bo.default-twig';
 
     public function __construct(
         private TranslatorInterface $translator,
@@ -56,11 +46,15 @@ final readonly class MenuTreePresenter
         $nodes = [];
 
         foreach ($parent->getChildren() as $child) {
+            $target = $this->target($child, $locale);
+            $ownTitle = $this->ownTitle($child, $locale);
+
             $nodes[] = [
                 'id' => (int) $child->getId(),
-                'title' => $this->title($child, $locale),
+                // Same default as the front: no label of its own means the target's title.
+                'title' => '' !== $ownTitle ? $ownTitle : $this->untitledUnless($target['title']),
                 'depth' => $depth,
-                'target' => $this->target($child, $locale),
+                'target' => $target,
                 'children' => $child->hasChildren() ? $this->tree($child, $locale, $depth + 1) : [],
             ];
         }
@@ -72,6 +66,25 @@ final readonly class MenuTreePresenter
      * @throws PropelException
      */
     public function title(CustomFrontMenuItem $item, string $locale): string
+    {
+        return $this->untitledUnless($this->ownTitle($item, $locale));
+    }
+
+    /**
+     * The title an entry shows when it has no label of its own: that of its target, if the
+     * target still resolves. Empty otherwise.
+     *
+     * @throws PropelException
+     */
+    public function targetTitle(CustomFrontMenuItem $item, string $locale): string
+    {
+        return $this->target($item, $locale)['title'];
+    }
+
+    /**
+     * @throws PropelException
+     */
+    private function ownTitle(CustomFrontMenuItem $item, string $locale): string
     {
         $translations = CustomFrontMenuItemI18nQuery::create()->findById($item->getId());
         $fallback = '';
@@ -88,45 +101,54 @@ final readonly class MenuTreePresenter
             }
         }
 
-        return '' !== $fallback
-            ? $fallback
-            : $this->translator->trans('Untitled', [], 'customfrontmenu.bo.default-twig');
+        return $fallback;
+    }
+
+    private function untitledUnless(string $title): string
+    {
+        return '' !== $title ? $title : $this->translator->trans('Untitled', [], self::DOMAIN);
     }
 
     /**
      * What the entry points at, and whether the front will render it.
      *
-     * @return array{kind: string, label: string, ok: bool}
+     * `title` is what the front falls back to when the entry has no label of its own:
+     * the target's title while the target resolves, nothing otherwise.
+     *
+     * @return array{kind: string, label: string, title: string, ok: bool}
      *
      * @throws PropelException
      */
     private function target(CustomFrontMenuItem $item, string $locale): array
     {
-        $domain = 'customfrontmenu.bo.default-twig';
         $view = strtolower((string) $item->getView());
         $viewId = (int) $item->getViewId();
 
-        if (!isset(self::TARGET_QUERIES[$view]) || $viewId <= 0) {
+        if ('' === $view || $viewId <= 0) {
             $url = $this->url($item, $locale);
 
             if ('' !== $url) {
-                return ['kind' => 'url', 'label' => $url, 'ok' => true];
+                return ['kind' => 'url', 'label' => $url, 'title' => '', 'ok' => true];
             }
 
             return [
                 'kind' => 'none',
-                'label' => $this->translator->trans('No target', [], $domain),
+                'label' => $this->translator->trans('No target', [], self::DOMAIN),
+                'title' => '',
                 'ok' => true,
             ];
         }
 
-        $queryClass = self::TARGET_QUERIES[$view];
-        $target = $queryClass::create()->findPk($viewId);
+        $queryClass = MenuTargetTypes::queries()[$view] ?? null;
+        // A kind no longer offered (the Page module was removed) leaves the target as
+        // unreachable as a deleted one, and the front drops the entry the same way.
+        $target = null === $queryClass ? null : $queryClass::create()->findPk($viewId);
 
         if (null === $target) {
             return [
                 'kind' => $view,
-                'label' => $this->translator->trans('Deleted target (#%id%)', ['%id%' => $viewId], $domain),
+                'label' => $this->translator->trans('Deleted target (#%id%)', ['%id%' => $viewId], self::DOMAIN),
+                'title' => '',
                 'ok' => false,
             ];
         }
@@ -138,12 +160,13 @@ final readonly class MenuTreePresenter
         if (!$target->getVisible()) {
             return [
                 'kind' => $view,
-                'label' => $this->translator->trans('%title% (offline)', ['%title%' => $label], $domain),
+                'label' => $this->translator->trans('%title% (offline)', ['%title%' => $label], self::DOMAIN),
+                'title' => '',
                 'ok' => false,
             ];
         }
 
-        return ['kind' => $view, 'label' => $label, 'ok' => true];
+        return ['kind' => $view, 'label' => $label, 'title' => $label, 'ok' => true];
     }
 
     /**
