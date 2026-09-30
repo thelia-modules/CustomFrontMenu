@@ -18,8 +18,10 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use CustomFrontMenu\Api\Resource\CustomFrontMenu;
 use CustomFrontMenu\Service\Front\MenuTreeResolver;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Model\LangQuery;
 
 /**
  * @implements ProviderInterface<CustomFrontMenu>
@@ -44,7 +46,7 @@ final readonly class CustomFrontMenuProvider implements ProviderInterface
             throw new NotFoundHttpException('Menu not found');
         }
 
-        $items = $this->treeResolver->resolve($code, $this->langService->getLocale() ?? 'en_US');
+        $items = $this->treeResolver->resolve($code, $this->locale($context));
 
         if (null === $items) {
             throw new NotFoundHttpException('Menu not found');
@@ -55,5 +57,24 @@ final readonly class CustomFrontMenuProvider implements ProviderInterface
         $menu->items = $items;
 
         return $menu;
+    }
+
+    /**
+     * `?locale=` first, as the core front API reads it: a headless client is stateless, so
+     * the session language it would otherwise fall back to is always the shop's default.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function locale(array $context): string
+    {
+        $request = $context['request'] ?? null;
+        $requested = $request instanceof Request ? $request->query->get('locale') : null;
+
+        if (\is_string($requested) && '' !== $requested
+            && null !== LangQuery::create()->filterByActive(true)->findOneByLocale($requested)) {
+            return $requested;
+        }
+
+        return $this->langService->getLocale() ?? 'en_US';
     }
 }
