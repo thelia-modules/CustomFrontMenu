@@ -32,7 +32,9 @@ final readonly class MenuLink
     {
         $url = trim(strip_tags($url));
 
-        if ('' === $url) {
+        // Browsers drop tabs and line breaks from a URL before parsing it, so `/<tab>/evil.com`
+        // reaches them as `//evil.com`. No legitimate link carries a control character.
+        if ('' === $url || 1 === preg_match('/[\x00-\x1F\x7F]/', $url)) {
             return null;
         }
 

@@ -32,6 +32,7 @@ final class MenuLinkTest extends TestCase
         yield 'https, any case' => ['HTTPS://example.com/a', 'HTTPS://example.com/a'];
         yield 'surrounding spaces' => ['  /sale  ', '/sale'];
         yield 'markup stripped' => ['<b>/sale</b>', '/sale'];
+        yield 'null byte stripped with the markup' => ["/sa\0le", '/sale'];
     }
 
     /**
@@ -48,6 +49,12 @@ final class MenuLinkTest extends TestCase
         yield 'protocol-relative' => ['//evil.com'];
         yield 'backslash normalised to protocol-relative' => ['/\\evil.com'];
         yield 'relative without a leading slash' => ['sale'];
+        // Browsers strip these before parsing: each one becomes `//evil.com`.
+        yield 'tab hiding a protocol-relative link' => ["/\t/evil.com"];
+        yield 'line feed hiding a protocol-relative link' => ["/\n/evil.com"];
+        yield 'carriage return hiding a protocol-relative link' => ["/\r/evil.com"];
+        yield 'tab hiding a backslash' => ["/\t\\evil.com"];
+        yield 'tab inside a scheme' => ["java\tscript:alert(1)"];
     }
 
     #[Test]
