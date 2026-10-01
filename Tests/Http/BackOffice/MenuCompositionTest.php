@@ -169,6 +169,27 @@ final class MenuCompositionTest extends WebIntegrationTestCase
     }
 
     #[Test]
+    public function aRefusedSaveLeavesTheEntryWhereItWas(): void
+    {
+        $this->loginAsAdministrator();
+        $menu = $this->menu('main');
+        $first = $this->labelEntry($menu, 'First');
+        $second = $this->labelEntry($menu, 'Second');
+
+        // Moved under "First" and typed as a category, but with no category picked.
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$second->getId());
+        $this->submit($page->filter('form[action$="/entries/'.$second->getId().'"]'), [
+            'parent_id' => (string) $first->getId(),
+            'view' => 'category',
+            'view_id' => '',
+            'title' => ['en_US' => 'Second'],
+        ]);
+
+        self::assertStringEndsWith('/entries/'.$second->getId(), (string) $this->client->getResponse()->headers->get('Location'));
+        self::assertSame((int) $menu->getId(), (int) $this->fresh($second)->getParent()?->getId(), 'The move was not written.');
+    }
+
+    #[Test]
     public function theAddressFieldLetsTheBrowserSubmitASiteRelativeAddress(): void
     {
         $this->loginAsAdministrator();
