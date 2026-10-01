@@ -171,6 +171,11 @@ final readonly class MenuComposer
             return;
         }
 
+        // The entry form posts the parent on every save: keep the entry's place when it is unchanged.
+        if ((int) $item->getParent()?->getId() === (int) $newParent->getId()) {
+            return;
+        }
+
         $item->moveToLastChildOf($newParent);
     }
 
