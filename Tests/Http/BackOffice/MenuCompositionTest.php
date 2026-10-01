@@ -151,6 +151,24 @@ final class MenuCompositionTest extends WebIntegrationTestCase
     }
 
     #[Test]
+    public function savingAnEntryWithoutMovingItKeepsItsPlace(): void
+    {
+        $this->loginAsAdministrator();
+        $menu = $this->menu('main');
+        $first = $this->labelEntry($menu, 'First');
+        $this->labelEntry($menu, 'Second');
+
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$first->getId());
+        $this->submit($page->filter('form[action$="/entries/'.$first->getId().'"]'), [
+            'parent_id' => '0',
+            'view' => 'none',
+            'title' => ['en_US' => 'First'],
+        ]);
+
+        self::assertSame((int) $first->getId(), (int) $this->fresh($menu)->getFirstChild()?->getId());
+    }
+
+    #[Test]
     public function aFreeUrlLeavingTheShopIsNotSaved(): void
     {
         $this->loginAsAdministrator();
