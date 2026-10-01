@@ -35,6 +35,8 @@ final class MenuCodeTest extends TestCase
         yield 'space' => ['main menu', false];
         yield 'underscore' => ['main_menu', false];
         yield 'empty' => ['', false];
+        yield 'as long as the column' => [str_repeat('a', 255), true];
+        yield 'longer than the column' => [str_repeat('a', 256), false];
     }
 
     #[Test]
@@ -48,6 +50,13 @@ final class MenuCodeTest extends TestCase
     public function aNameIsSluggedIntoACode(): void
     {
         self::assertSame('menu-principal-ete', MenuCode::slug('Menu principal (été)'));
+    }
+
+    #[Test]
+    public function aLongNameIsSluggedIntoACodeThatFitsTheColumn(): void
+    {
+        // Cut at 255, the slug would end on the dash before "bcd".
+        self::assertSame(str_repeat('a', 254), MenuCode::slug(str_repeat('a', 254).' bcd'));
     }
 
     #[Test]

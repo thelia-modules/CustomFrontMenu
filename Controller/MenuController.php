@@ -516,7 +516,7 @@ class MenuController extends BaseAdminController
         }
 
         if (!MenuCode::isValid($code)) {
-            return $this->failure('A code takes lowercase letters, digits and single dashes only', $redirectTo);
+            return $this->failure('A code takes up to 255 lowercase letters, digits and single dashes', $redirectTo);
         }
 
         if (MenuCode::isTaken($code, $exceptId)) {
