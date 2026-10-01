@@ -11,7 +11,7 @@
                 <span class="input-group-text">
                     <img src="{{ asset('backoffice/img/svgFlags/' ~ lang.code ~ '.svg') }}" alt="{{ lang.title }}" width="22" height="14">
                 </span>
-                <input type="url" class="form-control" name="url[{{ lang.locale }}]"
+                <input type="text" inputmode="url" class="form-control" name="url[{{ lang.locale }}]"
                        value="{{ translations[lang.locale].url|default('') }}"
                        placeholder="https://example.com/page">
             </div>
