@@ -229,7 +229,7 @@ class MenuController extends BaseAdminController
         if ($parentId > 0) {
             $candidate = $this->composer->entry($parentId);
 
-            if (null === $candidate) {
+            if (null === $candidate || $this->menuOf($candidate)?->getId() !== $menu->getId()) {
                 return $this->failure('This menu entry does not exist', $this->menuUrl($menuId));
             }
 
