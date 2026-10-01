@@ -169,6 +169,20 @@ final class MenuCompositionTest extends WebIntegrationTestCase
     }
 
     #[Test]
+    public function theAddressFieldLetsTheBrowserSubmitASiteRelativeAddress(): void
+    {
+        $this->loginAsAdministrator();
+        $entry = $this->freeEntry($this->menu('main'), 'Contact', '/contact-us');
+
+        // A type="url" field makes the browser refuse "/contact-us" before the form is sent.
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+        self::assertSame('text', $page->filter('input[name="url[en_US]"]')->attr('type'));
+
+        $field = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId().'/target-field', ['view' => 'url']);
+        self::assertSame('text', $field->filter('input[name="url[en_US]"]')->attr('type'));
+    }
+
+    #[Test]
     public function aFreeUrlLeavingTheShopIsNotSaved(): void
     {
         $this->loginAsAdministrator();
