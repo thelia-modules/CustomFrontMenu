@@ -2,8 +2,10 @@
 
 return array(
     'A code takes up to 255 lowercase letters, digits and single dashes' => 'Un code accepte jusqu\'à 255 minuscules, chiffres et tirets simples',
+    'A name takes 255 characters at most' => 'Un nom ne dépasse pas 255 caractères',
     'A menu name is required' => 'Le nom du menu est obligatoire',
     'An entry name is required' => 'Le nom de l\'entrée est obligatoire',
+    'An address takes 255 characters at most' => 'Une adresse ne dépasse pas 255 caractères',
     'Current menu deleted successfully' => 'Le menu a été supprimé avec succès',
     'New menu added successfully' => 'Nouveau menu ajouté avec succès',
     'Pick a target for this entry' => 'Choisissez une cible pour cette entrée',

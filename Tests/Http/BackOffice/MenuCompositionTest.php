@@ -183,6 +183,66 @@ final class MenuCompositionTest extends WebIntegrationTestCase
     }
 
     #[Test]
+    public function aMenuNameLongerThanItsColumnIsRefused(): void
+    {
+        $this->loginAsAdministrator();
+        $tooLong = str_repeat('é', 256);
+
+        $this->submit($this->client->request('GET', self::BASE)->filter('form[action$="/CustomFrontMenu/menus"]'), ['title' => $tooLong]);
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+        self::assertCount(0, $this->composer()->menus(), 'No menu was created.');
+
+        $menu = $this->menu('main', 'Main');
+        $tree = $this->client->request('GET', self::BASE.'/menus/'.$menu->getId());
+        $this->submit($tree->filter('form[action$="/menus/'.$menu->getId().'/rename"]'), ['title' => $tooLong, 'code' => 'main']);
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+        self::assertSame('Main', $this->composer()->translations($menu)['en_US']['title']);
+    }
+
+    #[Test]
+    public function anEntryNameLongerThanItsColumnIsRefused(): void
+    {
+        $this->loginAsAdministrator();
+        $menu = $this->menu('main');
+
+        $tree = $this->client->request('GET', self::BASE.'/menus/'.$menu->getId());
+        $this->submit($tree->filter('form[action$="/menus/'.$menu->getId().'/entries"]'), ['title' => str_repeat('é', 256)]);
+
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+        self::assertNull($this->fresh($menu)->getFirstChild());
+    }
+
+    #[Test]
+    public function anEntryLabelLongerThanItsColumnIsRefused(): void
+    {
+        $this->loginAsAdministrator();
+        $entry = $this->labelEntry($this->menu('main'), 'Sale');
+
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+        $this->submit($page->filter('form[action$="/entries/'.$entry->getId().'"]'), ['view' => 'none', 'title' => ['en_US' => str_repeat('é', 256)]]);
+
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+        self::assertSame('Sale', $this->composer()->translations($entry)['en_US']['title']);
+    }
+
+    #[Test]
+    public function anAddressLongerThanItsColumnIsRefused(): void
+    {
+        $this->loginAsAdministrator();
+        $entry = $this->freeEntry($this->menu('main'), 'Sale', '/sale');
+
+        $page = $this->client->request('GET', self::BASE.'/entries/'.$entry->getId());
+        $this->submit($page->filter('form[action$="/entries/'.$entry->getId().'"]'), [
+            'view' => 'url',
+            'title' => ['en_US' => 'Sale'],
+            'url' => ['en_US' => '/'.str_repeat('a', 255)],
+        ]);
+
+        self::assertSame(302, $this->client->getResponse()->getStatusCode());
+        self::assertSame('/sale', $this->composer()->translations($entry)['en_US']['url'], 'The address is not cut short either.');
+    }
+
+    #[Test]
     public function aFreeUrlLeavingTheShopIsNotSaved(): void
     {
         $this->loginAsAdministrator();

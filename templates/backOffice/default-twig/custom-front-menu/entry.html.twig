@@ -31,7 +31,7 @@
                             <span class="input-group-text">
                                 <img src="{{ asset('backoffice/img/svgFlags/' ~ lang.code ~ '.svg') }}" alt="{{ lang.title }}" width="22" height="14">
                             </span>
-                            <input type="text" class="form-control" name="title[{{ lang.locale }}]"
+                            <input type="text" class="form-control" name="title[{{ lang.locale }}]" maxlength="255"
                                    value="{{ translations[lang.locale].title|default('') }}"
                                    placeholder="{{ targetTitle ?: lang.title }}">
                         </div>

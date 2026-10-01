@@ -59,7 +59,7 @@
                 <form method="POST" action="{{ url('admin.customfrontmenu.menus.create') }}">
                     <div class="mb-3">
                         <label class="form-label" for="cfm-menu-title">{{ 'Menu name'|trans({}, domain) }}</label>
-                        <input type="text" class="form-control" id="cfm-menu-title" name="title" required>
+                        <input type="text" class="form-control" id="cfm-menu-title" name="title" maxlength="255" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="cfm-menu-code">{{ 'Code'|trans({}, domain) }}</label>
