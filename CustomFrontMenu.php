@@ -33,17 +33,19 @@ class CustomFrontMenu extends BaseModule
     const DOMAIN_NAME = 'customfrontmenu';
 
     /**
-     * Create the database when the module is activated.
-     * @return bool true to continue module activation, false to prevent it
+     * Create the tables on a fresh install.
+     *
+     * The install script starts with DROP TABLE, so it only runs when the table is missing.
+     * The database is asked rather than an "installed" flag in the module configuration: a
+     * shop whose tables were created another way, or whose configuration was lost, would
+     * otherwise have every menu wiped by a mere reactivation.
      */
     public function preActivation(?ConnectionInterface $con = null): bool
     {
-        if (!self::getConfigValue('is_initialized')) {
-            $database = new Database($con);
+        $con ??= Propel::getWriteConnection('TheliaMain');
 
-            $database->insertSql(null, [__DIR__.'/Config/TheliaMain.sql']);
-
-            self::setConfigValue('is_initialized', '1');
+        if (!$this->hasMenuTable($con)) {
+            (new Database($con))->insertSql(null, [__DIR__.'/Config/TheliaMain.sql']);
         }
 
         return true;
@@ -142,6 +144,14 @@ class CustomFrontMenu extends BaseModule
         if (!$this->exists($con, 'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :name', 'new_tab')) {
             $con->exec('ALTER TABLE `custom_front_menu_item` ADD COLUMN `new_tab` TINYINT(1) NOT NULL DEFAULT 0 AFTER `view_id`');
         }
+    }
+
+    private function hasMenuTable(ConnectionInterface $con): bool
+    {
+        $statement = $con->prepare('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table');
+        $statement->execute(['table' => 'custom_front_menu_item']);
+
+        return (int) $statement->fetchColumn() > 0;
     }
 
     private function exists(ConnectionInterface $con, string $sql, string $name): bool
