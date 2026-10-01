@@ -22,7 +22,8 @@ use Thelia\Test\IntegrationTestCase;
 
 /**
  * The update of a 1.2.0 installation: the tables as 1.2.0 created them, rows as its screen
- * wrote them (one root, menus on the first level, entries below), then update().
+ * wrote them (one root, menus on the first level, entries below; a typed entry's kind
+ * capitalised, an entry with no target typed "Empty"), then update().
  *
  * The update runs DDL, which commits implicitly: no transaction to roll back, so the test
  * restores the schema and empties the tables itself.
@@ -48,13 +49,14 @@ final class UpdateFromOneTwoTest extends IntegrationTestCase
 
         $this->con->exec(<<<'SQL'
             INSERT INTO `custom_front_menu_item` (`id`, `view`, `view_id`, `tree_left`, `tree_right`, `tree_level`) VALUES
-                (1, NULL, NULL, 1, 14, 0),
+                (1, NULL, NULL, 1, 16, 0),
                 (2, NULL, NULL, 2, 7, 1),
-                (3, 'category', 1, 3, 4, 2),
+                (3, 'Category', 1, 3, 4, 2),
                 (4, NULL, NULL, 5, 6, 2),
                 (5, NULL, NULL, 8, 11, 1),
                 (6, NULL, NULL, 9, 10, 2),
-                (7, NULL, NULL, 12, 13, 1)
+                (7, NULL, NULL, 12, 15, 1),
+                (8, 'Empty', 0, 13, 14, 2)
             SQL);
         $this->con->exec(<<<'SQL'
             INSERT INTO `custom_front_menu_item_i18n` (`id`, `locale`, `title`, `url`) VALUES
@@ -64,7 +66,8 @@ final class UpdateFromOneTwoTest extends IntegrationTestCase
                 (4, 'fr_FR', 'Piège', 'JavaScript:alert(1)'),
                 (6, 'en_US', 'Contact', '/contact-us'),
                 (6, 'fr_FR', 'Contact', 'https://example.com/contact'),
-                (7, 'en_US', 'Main menu', NULL)
+                (7, 'en_US', 'Main menu', NULL),
+                (8, 'en_US', 'Just a label', NULL)
             SQL);
     }
 
@@ -92,16 +95,17 @@ final class UpdateFromOneTwoTest extends IntegrationTestCase
 
         // Every row kept, in its place in the tree.
         self::assertSame(
-            [[1, 1, 14, 0], [2, 2, 7, 1], [3, 3, 4, 2], [4, 5, 6, 2], [5, 8, 11, 1], [6, 9, 10, 2], [7, 12, 13, 1]],
+            [[1, 1, 16, 0], [2, 2, 7, 1], [3, 3, 4, 2], [4, 5, 6, 2], [5, 8, 11, 1], [6, 9, 10, 2], [7, 12, 15, 1], [8, 13, 14, 2]],
             array_map(static fn (array $row): array => [$row['id'], $row['tree_left'], $row['tree_right'], $row['tree_level']], $afterFirstRun['items']),
         );
-        self::assertSame(['category', 1], [$afterFirstRun['items'][2]['view'], $afterFirstRun['items'][2]['view_id']]);
-        self::assertSame(7, \count($afterFirstRun['translations']), 'No label is lost.');
+        self::assertSame(['Category', 1], [$afterFirstRun['items'][2]['view'], $afterFirstRun['items'][2]['view_id']]);
+        self::assertSame(['Empty', 0], [$afterFirstRun['items'][7]['view'], $afterFirstRun['items'][7]['view_id']]);
+        self::assertSame(8, \count($afterFirstRun['translations']), 'No label is lost.');
 
         // A code for every menu, and only for menus: from the title, numbered when two titles
         // meet, generic when there is no title at all.
         self::assertSame(
-            [1 => null, 2 => 'main-menu', 3 => null, 4 => null, 5 => 'menu-5', 6 => null, 7 => 'main-menu-2'],
+            [1 => null, 2 => 'main-menu', 3 => null, 4 => null, 5 => 'menu-5', 6 => null, 7 => 'main-menu-2', 8 => null],
             array_column($afterFirstRun['items'], 'code', 'id'),
         );
         self::assertSame([0], array_values(array_unique(array_column($afterFirstRun['items'], 'new_tab'))), 'Every 1.x entry opened in the same tab.');
