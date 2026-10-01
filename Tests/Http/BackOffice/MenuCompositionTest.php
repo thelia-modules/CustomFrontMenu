@@ -137,6 +137,20 @@ final class MenuCompositionTest extends WebIntegrationTestCase
     }
 
     #[Test]
+    public function anEntryIsNotCreatedUnderAParentFromAnotherMenu(): void
+    {
+        $this->loginAsAdministrator();
+        $menu = $this->menu('main');
+        $elsewhere = $this->labelEntry($this->menu('footer'), 'Elsewhere');
+
+        $tree = $this->client->request('GET', self::BASE.'/menus/'.$menu->getId());
+        $this->submit($tree->filter('form[action$="/menus/'.$menu->getId().'/entries"]'), ['title' => 'Intruder', 'parent_id' => (string) $elsewhere->getId()]);
+
+        self::assertNull($this->fresh($elsewhere)->getFirstChild(), 'No entry landed in the other menu.');
+        self::assertNull($this->fresh($menu)->getFirstChild(), 'No entry was created at all.');
+    }
+
+    #[Test]
     public function aFreeUrlLeavingTheShopIsNotSaved(): void
     {
         $this->loginAsAdministrator();
