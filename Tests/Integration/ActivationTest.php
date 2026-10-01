@@ -89,7 +89,8 @@ final class ActivationTest extends IntegrationTestCase
         self::assertTrue((new CustomFrontMenu())->preActivation($this->con));
 
         self::assertTrue($this->hasTable());
-        self::assertNotNull($this->menu('main'));
+        $this->menu('main');
+        self::assertNotNull($this->composer()->menuByCode('main'), 'The new tables take a menu.');
     }
 
     private function forgetInstallFlag(): void
