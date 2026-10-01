@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'A code takes lowercase letters, digits and single dashes only' => 'Un code n\'accepte que des minuscules, des chiffres et des tirets simples',
+    'A code takes up to 255 lowercase letters, digits and single dashes' => 'Un code accepte jusqu\'à 255 minuscules, chiffres et tirets simples',
     'A menu name is required' => 'Le nom du menu est obligatoire',
     'An entry name is required' => 'Le nom de l\'entrée est obligatoire',
     'Current menu deleted successfully' => 'Le menu a été supprimé avec succès',

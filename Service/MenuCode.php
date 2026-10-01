@@ -39,9 +39,12 @@ final readonly class MenuCode
 
     private const FALLBACK = 'menu';
 
+    /** The size of the code column. */
+    public const MAX_LENGTH = 255;
+
     public static function isValid(string $code): bool
     {
-        return 1 === preg_match(self::PATTERN, $code);
+        return \strlen($code) <= self::MAX_LENGTH && 1 === preg_match(self::PATTERN, $code);
     }
 
     /**
@@ -60,7 +63,7 @@ final readonly class MenuCode
 
     public static function slug(string $source): string
     {
-        $slug = (new AsciiSlugger())->slug($source)->lower()->toString();
+        $slug = self::fit((new AsciiSlugger())->slug($source)->lower()->toString(), self::MAX_LENGTH);
 
         // A name written entirely in a script the slugger cannot transliterate leaves
         // nothing behind, and a menu with no code is unreachable from a theme.
@@ -83,9 +86,18 @@ final readonly class MenuCode
         $suffix = 1;
 
         while (self::isTaken($candidate, $exceptId)) {
-            $candidate = $base.'-'.++$suffix;
+            $number = '-'.++$suffix;
+            $candidate = self::fit($base, self::MAX_LENGTH - \strlen($number)).$number;
         }
 
         return $candidate;
+    }
+
+    /**
+     * Cut a slug to a length without leaving a dash at its end, which the pattern refuses.
+     */
+    private static function fit(string $slug, int $length): string
+    {
+        return rtrim(substr($slug, 0, $length), '-');
     }
 }

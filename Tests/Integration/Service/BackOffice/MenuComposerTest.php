@@ -51,6 +51,16 @@ final class MenuComposerTest extends IntegrationTestCase
     }
 
     #[Test]
+    public function aCodeDerivedFromAVeryLongNameFitsTheColumnEvenWhenNumbered(): void
+    {
+        $name = str_repeat('a', 255);
+        $this->composer()->createMenu($name, 'en_US');
+        $second = $this->composer()->createMenu($name, 'en_US');
+
+        self::assertSame(str_repeat('a', 253).'-2', $second->getCode());
+    }
+
+    #[Test]
     public function renamingAMenuKeepsItsOwnCodeFree(): void
     {
         $menu = $this->menu('main-menu', 'Main menu');

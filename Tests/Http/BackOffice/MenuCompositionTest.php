@@ -94,7 +94,7 @@ final class MenuCompositionTest extends WebIntegrationTestCase
         $this->menu('main');
         $form = $this->client->request('GET', self::BASE)->filter('form[action$="/CustomFrontMenu/menus"]');
 
-        foreach (['Not A Code', 'main'] as $code) {
+        foreach (['Not A Code', 'main', str_repeat('a', 256)] as $code) {
             $this->submit($form, ['title' => 'Refused', 'code' => $code]);
 
             // Sent back to the form with a message, not left to the unique index.
