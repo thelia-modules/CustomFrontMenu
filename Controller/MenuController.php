@@ -94,6 +94,10 @@ class MenuController extends BaseAdminController
             return $this->failure('A menu name is required', $this->configurationUrl());
         }
 
+        if ($this->tooLong($title)) {
+            return $this->failure('A name takes 255 characters at most', $this->configurationUrl());
+        }
+
         $code = trim((string) $request->request->get('code', ''));
 
         if (null !== $rejected = $this->rejectBadCode($code, null, $this->configurationUrl())) {
@@ -156,6 +160,10 @@ class MenuController extends BaseAdminController
 
         if ('' === $title) {
             return $this->failure('A menu name is required', $this->menuUrl($menuId));
+        }
+
+        if ($this->tooLong($title)) {
+            return $this->failure('A name takes 255 characters at most', $this->menuUrl($menuId));
         }
 
         $code = trim((string) $request->request->get('code', ''));
@@ -240,6 +248,10 @@ class MenuController extends BaseAdminController
 
         if ('' === $title) {
             return $this->failure('An entry name is required', $this->menuUrl($menuId));
+        }
+
+        if ($this->tooLong($title)) {
+            return $this->failure('A name takes 255 characters at most', $this->menuUrl($menuId));
         }
 
         $entry = $this->composer->createEntry($parent, $title, $this->locale());
@@ -333,6 +345,18 @@ class MenuController extends BaseAdminController
 
         if (null === $entry) {
             return $this->failure('This menu entry does not exist', $this->configurationUrl());
+        }
+
+        foreach ((array) $request->request->all('title') as $title) {
+            if ($this->tooLong((string) $this->cleanTitle((string) $title))) {
+                return $this->failure('A name takes 255 characters at most', $this->entryUrl($itemId));
+            }
+        }
+
+        foreach ((array) $request->request->all('url') as $url) {
+            if ($this->tooLong(trim((string) $url))) {
+                return $this->failure('An address takes 255 characters at most', $this->entryUrl($itemId));
+            }
         }
 
         if ($request->request->has('parent_id')) {
@@ -613,6 +637,15 @@ class MenuController extends BaseAdminController
      * A menu label is shown on every front page: no markup, and no back quote, which the
      * 1.x screen used as its own delimiter.
      */
+    /**
+     * Titles and addresses are stored in VARCHAR(255) columns: longer, the insert fails, or
+     * the database cuts them silently when it is not in strict mode.
+     */
+    private function tooLong(string $text): bool
+    {
+        return mb_strlen($text) > 255;
+    }
+
     private function cleanTitle(string $title): ?string
     {
         $title = trim(strip_tags(str_replace('`', "'", $title)));
