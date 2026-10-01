@@ -18,8 +18,10 @@ use CustomFrontMenu\Model\CustomFrontMenuItem;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18n;
 use CustomFrontMenu\Model\CustomFrontMenuItemI18nQuery;
 use CustomFrontMenu\Model\CustomFrontMenuItemQuery;
+use CustomFrontMenu\Model\Map\CustomFrontMenuItemTableMap;
 use CustomFrontMenu\Service\MenuCode;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Propel;
 
 /**
  * Every write the composition screen performs, one operation at a time.
@@ -242,6 +244,33 @@ final readonly class MenuComposer
             ->setTitle($title)
             ->setUrl($url)
             ->save();
+    }
+
+    /**
+     * Everything the entry form saves, all or nothing: a failure on the last label must not
+     * leave the entry moved and retargeted under its old name.
+     *
+     * @param array<string, array{title: ?string, url: ?string}> $translations by locale
+     *
+     * @throws PropelException
+     */
+    public function saveEntry(CustomFrontMenuItem $item, ?CustomFrontMenuItem $newParent, ?string $view, ?int $viewId, array $translations, bool $newTab): void
+    {
+        Propel::getWriteConnection(CustomFrontMenuItemTableMap::DATABASE_NAME)->transaction(function () use ($item, $newParent, $view, $viewId, $translations, $newTab): void {
+            if (null !== $newParent) {
+                $this->move($item, $newParent);
+            }
+
+            $item
+                ->setView($view)
+                ->setViewId($viewId)
+                ->setNewTab($newTab)
+                ->save();
+
+            foreach ($translations as $locale => $translation) {
+                $this->setTranslation($item, $locale, $translation['title'], $translation['url']);
+            }
+        });
     }
 
     /**

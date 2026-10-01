@@ -347,6 +347,7 @@ class MenuController extends BaseAdminController
             return $this->failure('This menu entry does not exist', $this->configurationUrl());
         }
 
+        // Everything is checked before anything is written: a refused save changes nothing.
         foreach ((array) $request->request->all('title') as $title) {
             if ($this->tooLong((string) $this->cleanTitle((string) $title))) {
                 return $this->failure('A name takes 255 characters at most', $this->entryUrl($itemId));
@@ -359,6 +360,8 @@ class MenuController extends BaseAdminController
             }
         }
 
+        $newParent = null;
+
         if ($request->request->has('parent_id')) {
             $menu = $this->menuOf($entry);
             $parentId = (int) $request->request->get('parent_id', 0);
@@ -367,13 +370,10 @@ class MenuController extends BaseAdminController
             if (null === $menu || null === $newParent || $this->menuOf($newParent)?->getId() !== $menu->getId()) {
                 return $this->failure('This menu entry does not exist', $this->entryUrl($itemId));
             }
-
-            $this->composer->move($entry, $newParent);
         }
 
         $view = strtolower(trim((string) $request->request->get('view', 'none')));
-        $titles = (array) $request->request->all('title');
-        $urls = (array) $request->request->all('url');
+        $target = [null, null];
 
         if (\in_array($view, MenuTargetTypes::kinds(), true)) {
             $viewId = (int) $request->request->get('view_id', 0);
@@ -382,21 +382,20 @@ class MenuController extends BaseAdminController
                 return $this->failure('Pick a target for this entry', $this->entryUrl($itemId));
             }
 
-            $this->composer->setTarget($entry, ucfirst($view), $viewId);
-        } else {
-            $this->composer->setTarget($entry, null, null);
+            $target = [ucfirst($view), $viewId];
         }
 
-        foreach ($titles as $locale => $title) {
-            $this->composer->setTranslation(
-                $entry,
-                (string) $locale,
-                $this->cleanTitle((string) $title),
-                'url' === $view ? MenuLink::filter((string) ($urls[$locale] ?? '')) : null,
-            );
+        $urls = (array) $request->request->all('url');
+        $translations = [];
+
+        foreach ((array) $request->request->all('title') as $locale => $title) {
+            $translations[(string) $locale] = [
+                'title' => $this->cleanTitle((string) $title),
+                'url' => 'url' === $view ? MenuLink::filter((string) ($urls[$locale] ?? '')) : null,
+            ];
         }
 
-        $this->composer->setNewTab($entry, $request->request->getBoolean('new_tab'));
+        $this->composer->saveEntry($entry, $newParent, $target[0], $target[1], $translations, $request->request->getBoolean('new_tab'));
         $this->log(AccessManager::UPDATE, \sprintf('Entry "%s" saved', $this->presenter->title($entry, $this->locale())), $entry);
 
         $this->success('This entry has been successfully saved');
